@@ -12,14 +12,13 @@ export interface OnboardingSlide {
 }
 
 export interface Profile {
-  id: string;
-  user_id: string;
+  id: string;                  // primary key, matches auth.users.id
   name: string;
-  avatar_url?: string;
-  water_goal_ml: number;       // default 2000
+  avatar_url?: string | null;
+  water_goal_ml: number;       // default 2500
   sleep_goal_hrs: number;      // default 8
   goals: string[];
-  memory_notes?: string;
+  memory_notes?: string | null;
   onboarding_done: boolean;
   created_at: string;
   updated_at: string;
@@ -36,9 +35,9 @@ export interface SleepLog {
   id: string;
   user_id: string;
   hours: number;
-  quality?: 1 | 2 | 3 | 4 | 5;
-  logged_at: string;
-  note?: string;
+  quality?: 'poor' | 'fair' | 'good' | 'great' | null;
+  sleep_date: string;          // Format: YYYY-MM-DD
+  created_at: string;
 }
 
 export interface Habit {
@@ -46,15 +45,17 @@ export interface Habit {
   user_id: string;
   name: string;
   frequency: 'daily' | 'weekly';
-  streak: number;
+  is_active: boolean;
   created_at: string;
+  streak?: number;             // Client-side helper calculated from completions
 }
 
 export interface HabitCompletion {
   id: string;
   habit_id: string;
   user_id: string;
-  completed_at: string;
+  completed_date: string;      // Format: YYYY-MM-DD
+  created_at: string;
 }
 
 export interface HealthSummary {

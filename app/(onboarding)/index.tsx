@@ -57,7 +57,7 @@ interface Slide {
   title: string;
   titleAccent: string; // highlighted word(s) in title
   description: string;
-  image: ReturnType<typeof require>;
+  image: any;
 }
 
 const SLIDES: Slide[] = [
@@ -67,7 +67,7 @@ const SLIDES: Slide[] = [
     title: 'Your Personal',
     titleAccent: 'Health Coach',
     description:
-      'Aurora learns your habits, celebrates your wins, and guides you toward the healthiest version of yourself — through natural conversation.',
+      'Aurora learns your habits, celebrates your wins, and guides you toward the healthiest version of yourself through natural conversation.',
     image: images.onboardingHero,
   },
   {
@@ -76,7 +76,7 @@ const SLIDES: Slide[] = [
     title: 'Track',
     titleAccent: 'Everything',
     description:
-      'Log hydration, sleep, and daily habits in seconds. Beautiful charts reveal your weekly patterns and progress — no manual entry needed.',
+      'Log hydration, sleep, and daily habits in seconds. Beautiful charts reveal your weekly patterns and progress no manual entry needed.',
     image: images.onboardingTracking,
   },
   {
