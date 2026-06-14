@@ -18,7 +18,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withTiming,
+  withSequence,
+} from 'react-native-reanimated';
 import { colors } from '@/constants/colors';
 import { gradients } from '@/constants/gradients';
 import { radius } from '@/constants/radius';
@@ -27,6 +34,64 @@ import { useAuthStore } from '@/stores/authStore';
 
 // Simple SVG-free icons using Unicode / Expo vector icons approach
 import { Ionicons } from '@expo/vector-icons';
+
+// Custom math easing worklet — avoids closure capture crashes on web
+const easeInOut = (t: number) => {
+  'worklet';
+  return (1 - Math.cos(t * Math.PI)) / 2;
+};
+
+function FloatingElement({
+  size,
+  color,
+  top,
+  left,
+  right,
+  bottom,
+  delay = 0,
+  duration = 4000,
+  translateY = 15,
+}: any) {
+  const offset = useSharedValue(0);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      offset.value = withRepeat(
+        withSequence(
+          withTiming(translateY, { duration, easing: easeInOut }),
+          withTiming(0, { duration, easing: easeInOut })
+        ),
+        -1,
+        true
+      );
+    }, delay);
+    return () => clearTimeout(timer);
+  }, [duration, translateY, delay]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: offset.value }],
+  }));
+
+  return (
+    <Animated.View
+      style={[
+        {
+          position: 'absolute',
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          backgroundColor: color,
+          top,
+          left,
+          right,
+          bottom,
+          opacity: 0.6,
+        },
+        animatedStyle,
+      ]}
+    />
+  );
+}
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -57,10 +122,37 @@ export default function LoginScreen() {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.kav}
         >
-          {/* ── Top 55%: fitness illustration ── */}
+          {/* ── Top 55%: fitness illustration + skip link ── */}
           <View style={styles.illustrationWrapper}>
+            {/* Skip link — top-right corner */}
+            <TouchableOpacity
+              style={styles.skipBtn}
+              onPress={() => router.replace('/(tabs)' as any)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.skipText}>Skip</Text>
+            </TouchableOpacity>
+
+            <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}>
+              {/* Central glowing orb behind mascot */}
+              <View style={{
+                position: 'absolute',
+                width: 250,
+                height: 250,
+                borderRadius: 125,
+                backgroundColor: 'rgba(196, 181, 253, 0.25)',
+                transform: [{ scale: 1.2 }],
+              }} />
+              
+              <FloatingElement size={40} color={colors.accentPurple} top="20%" left="15%" duration={3500} translateY={12} delay={0} />
+              <FloatingElement size={24} color={colors.accentPink} top="65%" left="10%" duration={4200} translateY={-15} delay={500} />
+              <FloatingElement size={70} color="rgba(196, 181, 253, 0.4)" top="18%" right="8%" duration={5000} translateY={18} delay={200} />
+              <FloatingElement size={18} color={colors.accentPurple} top="75%" right="15%" duration={3000} translateY={-10} delay={800} />
+              <FloatingElement size={32} color={colors.accentPink} top="45%" left="78%" duration={4800} translateY={15} delay={100} />
+            </View>
+
             <Image
-              source={images.fitnessHero}
+              source={images.auroraMascot}
               style={styles.illustration}
               resizeMode="contain"
             />
@@ -292,6 +384,22 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     fontSize: 13,
     color: colors.textSecondary,
+  },
+  // Skip link — sits top-right inside the illustration area
+  skipBtn: {
+    position: 'absolute',
+    top: 16,
+    right: 24,
+    zIndex: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: radius.pill,
+    backgroundColor: 'rgba(124, 58, 237, 0.08)',
+  },
+  skipText: {
+    color: colors.accentPurple,
+    fontSize: 14,
+    fontFamily: 'Inter-SemiBold',
   },
   ctaRow: {
     flexDirection: 'row',

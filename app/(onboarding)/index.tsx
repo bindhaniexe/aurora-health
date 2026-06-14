@@ -17,6 +17,7 @@
  */
 
 import React, { useRef, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   View,
   Text,
@@ -240,18 +241,24 @@ export default function OnboardingScreen() {
     setActiveIndex(index);
   };
 
+  const finishOnboarding = async () => {
+    await AsyncStorage.setItem('aurora_onboarding_done', 'true');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    router.replace('/(auth)' as any);
+  };
+
   const handleNext = () => {
     if (activeIndex < SLIDES.length - 1) {
       const nextIndex = activeIndex + 1;
       scrollRef.current?.scrollTo({ x: nextIndex * SCREEN_WIDTH, animated: true });
       setActiveIndex(nextIndex);
     } else {
-      router.replace('/(auth)/login');
+      finishOnboarding();
     }
   };
 
   const handleSkip = () => {
-    router.replace('/(auth)/login');
+    finishOnboarding();
   };
 
   // Skip fades out on last slide
