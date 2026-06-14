@@ -275,8 +275,8 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.bgCard,
     borderRadius: radius.xl,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
+    marginHorizontal: 16,
+    marginBottom: 16,
     padding: 24,
     ...Platform.select({
       ios: {

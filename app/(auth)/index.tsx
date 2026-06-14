@@ -311,9 +311,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bgCard,
     borderRadius: radius.xl,         // 24px per spec
     padding: 24,
-    marginHorizontal: 0,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
+    marginHorizontal: 16,
+    marginBottom: 16,
     ...Platform.select({
       ios: {
         shadowColor: '#9499A7',
