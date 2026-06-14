@@ -1,578 +1,682 @@
 ---
-version: alpha
-name: Figma-design-analysis
-description: "A confident black-and-white editorial frame interrupted by oversized, hand-cut pastel color blocks. The marketing canvas is rigorously monochrome — figmaSans variable type, pure white surfaces, pure black ink, pill-shaped CTAs — while each story section drops the page into a saturated lime, lavender, cream, mint, or pink panel that reads like a sticky note placed on a clean desk. The result is a design system that feels both technical and joyful — a tool for serious work, made by people who like color."
+version: 1.0
+name: Aurora-Fitness-Design-System
+description: "A light, energetic mobile health UI built on white card surfaces and a single purple-to-pink gradient signature. The base canvas is clean white with a barely-there lavender wash on auth screens. Every active state — selected tab, CTA button, progress ring, chart bar, active date chip — fires the same deep-violet-to-hot-pink gradient. Cards lift off the background through soft shadows alone (no borders). Poppins Bold anchors the display numerics; Inter carries the labels. The result feels like a modern consumer fitness app: vibrant, personal, and motivating without being loud."
+
+# ─── COLOR TOKENS ────────────────────────────────────────────────────────────
 
 colors:
-  primary: "#000000"
-  on-primary: "#ffffff"
-  ink: "#000000"
-  canvas: "#ffffff"
-  inverse-canvas: "#000000"
-  inverse-ink: "#ffffff"
-  on-inverse-soft: "#ffffff"
-  hairline: "#e6e6e6"
-  hairline-soft: "#f1f1f1"
-  surface-soft: "#f7f7f5"
-  block-lime: "#dceeb1"
-  block-lilac: "#c5b0f4"
-  block-cream: "#f4ecd6"
-  block-pink: "#efd4d4"
-  block-mint: "#c8e6cd"
-  block-coral: "#f3c9b6"
-  block-navy: "#1f1d3d"
-  accent-magenta: "#ff3d8b"
-  semantic-success: "#1ea64a"
-  overlay-scrim: "#000000"
+  # Backgrounds
+  bg-primary:       "#FFFFFF"   # Dashboard, session, feature screens
+  bg-auth:          "#F7F5FF"   # Auth & onboarding — soft lavender tint
+  bg-card:          "#FFFFFF"   # Card surfaces (depth via shadow, not color)
+  bg-input:         "#F5F5F8"   # Search bars, text input fields
+  bg-chip:          "#F0EEF8"   # Unselected date / filter chips
+
+  # Brand gradient anchors
+  # These are not used directly as flat fills — use them inside gradient arrays.
+  gradient-start:   "#6D28D9"   # Deep violet
+  gradient-mid:     "#A855F7"   # Mid purple-pink
+  gradient-end:     "#EC4899"   # Hot pink
+
+  # Module accents (flat fill fallbacks only — prefer gradients for active states)
+  accent-purple:    "#7C3AED"   # Progress rings (flat), icon tints, date chip selected bg
+  accent-pink:      "#EC4899"   # Calories ring, secondary pink moments
+  accent-green:     "#10B981"   # Habit completion, streaks, success
+  accent-amber:     "#F59E0B"   # Warnings, nutrition module
+
+  # Sleep card (uses its own separate gradient — darker than primary gradient)
+  sleep-card-start: "#3B0764"
+  sleep-card-end:   "#9333EA"
+
+  # Text
+  text-primary:     "#1E1B2E"   # Headings, data values — charcoal-navy
+  text-secondary:   "#6B7280"   # Subtitles, labels, secondary info
+  text-muted:       "#9CA3AF"   # Placeholders, disabled
+  text-on-gradient: "#FFFFFF"   # Text on any gradient surface
+
+  # Borders (hairlines only — no card borders)
+  border-hairline:  "#E5E7EB"   # List separators, input underlines
+
+  # Semantic
+  error:            "#EF4444"
+  success:          "#10B981"
+  overlay-scrim:    "#000000"   # At 40% opacity for modals
+
+# ─── GRADIENT ARRAYS ─────────────────────────────────────────────────────────
+# Use as the `colors` prop of <LinearGradient> from expo-linear-gradient.
+# Never inline gradient color arrays in components — always reference these tokens.
+
+gradients:
+  # Primary brand gradient — CTA buttons, active tab pill, chart bars
+  primary:
+    colors: ["#6D28D9", "#A855F7", "#EC4899"]
+    direction: left-to-right
+
+  # Auth screen circular CTA button
+  cta-button:
+    colors: ["#7C3AED", "#EC4899"]
+    direction: top-left-to-bottom-right
+
+  # Sleep module card background
+  sleep-card:
+    colors: ["#3B0764", "#6D28D9", "#9333EA"]
+    direction: top-left-to-bottom-right
+
+  # Progress bar fill
+  progress-bar:
+    colors: ["#7C3AED", "#C026D3", "#EC4899"]
+    direction: left-to-right
+
+  # Heart rate bar chart bars
+  heart-bars:
+    colors: ["#EC4899", "#A855F7"]
+    direction: bottom-to-top
+
+  # Calories ring stroke
+  calories-ring:
+    colors: ["#EC4899", "#F472B6"]
+    direction: top-to-bottom
+
+  # Steps ring stroke
+  steps-ring:
+    colors: ["#6D28D9", "#7C3AED", "#A855F7"]
+    direction: top-to-bottom
+
+  # Auth & onboarding background wash
+  auth-bg:
+    colors: ["#F7F5FF", "#EDE9FE", "#DDD6FE"]
+    direction: top-to-bottom
+
+# ─── TYPOGRAPHY ──────────────────────────────────────────────────────────────
 
 typography:
+  # Poppins Bold — all display sizes, large data values, screen titles
   display-xl:
-    fontFamily: figmaSans
-    fontSize: 86px
-    fontWeight: 340
-    lineHeight: 1.00
-    letterSpacing: -1.72px
-    fontFeature: kern
-  display-lg:
-    fontFamily: figmaSans
-    fontSize: 64px
-    fontWeight: 340
-    lineHeight: 1.10
-    letterSpacing: -0.96px
-    fontFeature: kern
-  headline:
-    fontFamily: figmaSans
-    fontSize: 26px
-    fontWeight: 540
-    lineHeight: 1.35
-    letterSpacing: -0.26px
-    fontFeature: kern
-  subhead:
-    fontFamily: figmaSans
-    fontSize: 26px
-    fontWeight: 340
-    lineHeight: 1.35
-    letterSpacing: -0.26px
-    fontFeature: kern
-  card-title:
-    fontFamily: figmaSans
-    fontSize: 24px
+    fontFamily: Poppins_700Bold
+    fontSize: 40px
     fontWeight: 700
-    lineHeight: 1.45
-    letterSpacing: 0
-    fontFeature: kern
-  body-lg:
-    fontFamily: figmaSans
-    fontSize: 20px
-    fontWeight: 330
-    lineHeight: 1.40
-    letterSpacing: -0.14px
-    fontFeature: kern
-  body:
-    fontFamily: figmaSans
-    fontSize: 18px
-    fontWeight: 320
-    lineHeight: 1.45
-    letterSpacing: -0.26px
-    fontFeature: kern
-  body-sm:
-    fontFamily: figmaSans
-    fontSize: 16px
-    fontWeight: 330
-    lineHeight: 1.45
-    letterSpacing: -0.14px
-    fontFeature: kern
-  link:
-    fontFamily: figmaSans
-    fontSize: 20px
-    fontWeight: 480
-    lineHeight: 1.40
-    letterSpacing: -0.10px
-    fontFeature: kern
-  button:
-    fontFamily: figmaSans
-    fontSize: 20px
-    fontWeight: 480
-    lineHeight: 1.40
-    letterSpacing: -0.10px
-    fontFeature: kern
-  eyebrow:
-    fontFamily: figmaMono
-    fontSize: 18px
-    fontWeight: 400
+    lineHeight: 1.10
+    letterSpacing: -0.5px
+    use: "Auth hero heading (Fitness You Wanna Have)"
+
+  display-lg:
+    fontFamily: Poppins_700Bold
+    fontSize: 32px
+    fontWeight: 700
+    lineHeight: 1.15
+    letterSpacing: -0.3px
+    use: "Session time value (40 min), module section openers"
+
+  screen-title:
+    fontFamily: Poppins_700Bold
+    fontSize: 22px
+    fontWeight: 700
     lineHeight: 1.30
-    letterSpacing: 0.54px
-    fontFeature: kern
-  caption:
-    fontFamily: figmaMono
+    letterSpacing: 0
+    use: "Screen headings (My Activities)"
+
+  card-title:
+    fontFamily: Poppins_600SemiBold
+    fontSize: 16px
+    fontWeight: 600
+    lineHeight: 1.40
+    letterSpacing: 0
+    use: "Card labels (Steps, Sleep, Heart, Calories)"
+
+  # Data values — large numerics inside progress rings and session screen
+  data-value:
+    fontFamily: Poppins_700Bold
+    fontSize: 28px
+    fontWeight: 700
+    lineHeight: 1.00
+    letterSpacing: -0.5px
+    use: "2285, 8:00, 357 — the big number inside every card"
+
+  data-unit:
+    fontFamily: Inter_400Regular
     fontSize: 12px
     fontWeight: 400
-    lineHeight: 1.00
-    letterSpacing: 0.60px
-    fontFeature: kern
+    lineHeight: 1.30
+    letterSpacing: 0
+    use: "Steps, Hours, kcal, bpm — small unit label below data value"
+
+  # Inter — body, labels, metadata
+  body-lg:
+    fontFamily: Inter_400Regular
+    fontSize: 16px
+    fontWeight: 400
+    lineHeight: 1.50
+    letterSpacing: -0.1px
+    use: "Lead body copy, input placeholders"
+
+  body:
+    fontFamily: Inter_400Regular
+    fontSize: 14px
+    fontWeight: 400
+    lineHeight: 1.50
+    letterSpacing: 0
+    use: "Default body text, list item labels"
+
+  body-sm:
+    fontFamily: Inter_400Regular
+    fontSize: 12px
+    fontWeight: 400
+    lineHeight: 1.45
+    letterSpacing: 0
+    use: "Card secondary text, timestamps, eyebrows"
+
+  button:
+    fontFamily: Inter_600SemiBold
+    fontSize: 15px
+    fontWeight: 600
+    lineHeight: 1.40
+    letterSpacing: 0
+    use: "Pill button labels, tab selector text"
+
+  caption:
+    fontFamily: Inter_400Regular
+    fontSize: 11px
+    fontWeight: 400
+    lineHeight: 1.30
+    letterSpacing: 0.2px
+    use: "Current Session label, intensity subtitle, date chip month"
+
+# ─── BORDER RADIUS ───────────────────────────────────────────────────────────
 
 rounded:
-  xs: 2px
-  sm: 6px
-  md: 8px
-  lg: 24px
-  xl: 32px
-  pill: 50px
-  full: 9999px
+  xs:   4px    # Tiny badges, notification dots
+  sm:   8px    # Date chips, schedule day pills, image frames
+  md:   12px   # Input fields, small chips
+  lg:   20px   # Standard cards (Steps, Heart, Calories)
+  xl:   24px   # Auth bottom card, modals, large panels
+  pill: 50px   # Search bars, ALL pill buttons, tab selectors
+  full: 9999px # Circular CTA button, mic button, avatar, progress thumb
+
+# ─── SPACING ─────────────────────────────────────────────────────────────────
 
 spacing:
-  hair: 1px
-  xxs: 4px
-  xs: 8px
-  sm: 12px
-  md: 16px
-  lg: 24px
-  xl: 32px
-  xxl: 48px
-  section: 96px
+  xxs:  4px
+  xs:   8px
+  sm:   12px
+  md:   16px
+  lg:   20px
+  xl:   24px
+  xxl:  32px
+  xxxl: 48px
+
+# ─── ELEVATION / SHADOW ──────────────────────────────────────────────────────
+# Cards and panels use shadow exclusively for depth — no borders on white cards.
+
+elevation:
+  card:
+    ios:
+      shadowColor:   "#9499A7"
+      shadowOpacity: 0.15
+      shadowOffset:  "{ width: 0, height: 4 }"
+      shadowRadius:  20
+    android:
+      elevation: 6
+    use: "Standard white card (Steps, Heart, Calories, session schedule chips)"
+
+  card-subtle:
+    ios:
+      shadowColor:   "#9499A7"
+      shadowOpacity: 0.08
+      shadowOffset:  "{ width: 0, height: 2 }"
+      shadowRadius:  10
+    android:
+      elevation: 3
+    use: "Date chips (unselected), search bar"
+
+  modal:
+    ios:
+      shadowColor:   "#000000"
+      shadowOpacity: 0.20
+      shadowOffset:  "{ width: 0, height: 8 }"
+      shadowRadius:  32
+    android:
+      elevation: 12
+    use: "Bottom sheets, modals, popovers"
+
+# ─── COMPONENTS ──────────────────────────────────────────────────────────────
 
 components:
-  button-primary:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.on-primary}"
-    typography: "{typography.button}"
-    rounded: "{rounded.pill}"
-    padding: 10px 20px
-  button-primary-pressed:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.on-primary}"
-    typography: "{typography.button}"
-    rounded: "{rounded.pill}"
-  button-secondary:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.button}"
-    rounded: "{rounded.pill}"
-    padding: 8px 18px 10px
-  button-tertiary-text:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.link}"
+
+  # ── Buttons ────────────────────────────────────────────────────────────────
+
+  button-cta-circle:
+    description: "Circular gradient CTA on auth screen — primary action"
+    shape: circle
+    size: 56px
+    gradient: "{gradients.cta-button}"
+    gradient-direction: top-left-to-bottom-right
+    icon: arrow-right (white, 22px)
     rounded: "{rounded.full}"
-    padding: 8px 12px
-  button-icon-circular:
-    backgroundColor: "{colors.surface-soft}"
-    textColor: "{colors.ink}"
+    shadow: "{elevation.card}"
+
+  button-primary-pill:
+    description: "Gradient pill button — used for primary actions on white surfaces"
+    gradient: "{gradients.primary}"
+    gradient-direction: left-to-right
+    textColor: "{colors.text-on-gradient}"
     typography: "{typography.button}"
+    rounded: "{rounded.pill}"
+    padding: "12px 28px"
+    minHeight: 48px
+
+  button-secondary-pill:
+    description: "White pill with purple text — secondary actions"
+    backgroundColor: "{colors.bg-card}"
+    textColor: "{colors.accent-purple}"
+    typography: "{typography.button}"
+    rounded: "{rounded.pill}"
+    padding: "12px 28px"
+    border: "1.5px solid {colors.accent-purple}"
+    minHeight: 48px
+
+  button-text-link:
+    description: "Plain text link — Forget Details, Create account"
+    backgroundColor: transparent
+    textColor: "{colors.text-secondary}"
+    typography: "{typography.body-sm}"
     rounded: "{rounded.full}"
-    size: 40px
-  button-icon-circular-inverse:
-    backgroundColor: "{colors.on-inverse-soft}"
-    textColor: "{colors.inverse-ink}"
-    typography: "{typography.button}"
-    rounded: "{rounded.full}"
-    size: 40px
-  button-magenta-promo:
-    backgroundColor: "{colors.accent-magenta}"
-    textColor: "{colors.on-primary}"
-    typography: "{typography.button}"
-    rounded: "{rounded.pill}"
-    padding: 10px 18px
-  pricing-tab-default:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
+    padding: "4px 8px"
+
+  # ── Tab Selector ──────────────────────────────────────────────────────────
+
+  tab-selected:
+    description: "Active time period pill — Daily, Weekly, Monthly, Yearly"
+    gradient: "{gradients.primary}"
+    gradient-direction: left-to-right
+    textColor: "{colors.text-on-gradient}"
     typography: "{typography.button}"
     rounded: "{rounded.pill}"
-    padding: 8px 18px
-  pricing-tab-selected:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.on-primary}"
+    padding: "8px 20px"
+
+  tab-default:
+    description: "Inactive tab — no background, gray text"
+    backgroundColor: transparent
+    textColor: "{colors.text-secondary}"
     typography: "{typography.button}"
     rounded: "{rounded.pill}"
-    padding: 8px 18px
-  text-input:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
+    padding: "8px 20px"
+
+  # ── Input Fields ──────────────────────────────────────────────────────────
+
+  search-bar:
+    description: "Pill-shaped search bar on dashboard"
+    backgroundColor: "{colors.bg-input}"
+    textColor: "{colors.text-primary}"
+    placeholderColor: "{colors.text-muted}"
     typography: "{typography.body}"
-    rounded: "{rounded.md}"
-    padding: 12px 14px
-  text-input-focused:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body}"
-    rounded: "{rounded.md}"
-    padding: 12px 14px
-  pricing-card:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body}"
+    rounded: "{rounded.pill}"
+    padding: "12px 16px"
+    iconLeft: search (gray, 18px)
+    shadow: "{elevation.card-subtle}"
+
+  text-input-underline:
+    description: "Auth screen form field — icon + text + underline only"
+    backgroundColor: transparent
+    textColor: "{colors.text-primary}"
+    placeholderColor: "{colors.text-muted}"
+    typography: "{typography.body-lg}"
+    border-bottom: "1px solid {colors.border-hairline}"
+    iconLeft: 18px (email icon, lock icon) in "{colors.text-muted}"
+    padding: "14px 0px"
+
+  # ── Cards ─────────────────────────────────────────────────────────────────
+
+  metric-card:
+    description: "White metric card — Steps, Heart, Calories"
+    backgroundColor: "{colors.bg-card}"
     rounded: "{rounded.lg}"
-    padding: 24px
-  pricing-card-feature-row:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-sm}"
-    rounded: "{rounded.xs}"
-  color-block-section:
-    backgroundColor: "{colors.block-lime}"
-    textColor: "{colors.ink}"
-    typography: "{typography.subhead}"
-    rounded: "{rounded.lg}"
-    padding: 48px
-  color-block-section-lilac:
-    backgroundColor: "{colors.block-lilac}"
-    textColor: "{colors.ink}"
-    typography: "{typography.subhead}"
-    rounded: "{rounded.lg}"
-    padding: 48px
-  color-block-section-navy:
-    backgroundColor: "{colors.block-navy}"
-    textColor: "{colors.inverse-ink}"
-    typography: "{typography.subhead}"
-    rounded: "{rounded.lg}"
-    padding: 48px
-  promo-banner-lilac:
-    backgroundColor: "{colors.block-lilac}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-sm}"
-    rounded: "{rounded.md}"
-    padding: 16px 24px
-  template-card:
-    backgroundColor: "{colors.surface-soft}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-sm}"
-    rounded: "{rounded.md}"
     padding: 16px
-  feature-illustration-tile:
-    backgroundColor: "{colors.surface-soft}"
-    textColor: "{colors.ink}"
-    typography: "{typography.eyebrow}"
-    rounded: "{rounded.md}"
-    padding: 24px
-  top-nav:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
+    shadow: "{elevation.card}"
+    border: none
+    layout: "Icon action top-right, data-value + data-unit center or bottom-left"
+
+  sleep-card:
+    description: "Gradient sleep metric card"
+    gradient: "{gradients.sleep-card}"
+    gradient-direction: top-left-to-bottom-right
+    rounded: "{rounded.lg}"
+    padding: 16px
+    textColor: "{colors.text-on-gradient}"
+    icon: moon (white, 20px, top-right)
+    shadow: "{elevation.card}"
+
+  auth-bottom-card:
+    description: "White card that rises from bottom of auth screen"
+    backgroundColor: "{colors.bg-card}"
+    rounded: "{rounded.xl}"
+    padding: 28px
+    shadow: "{elevation.modal}"
+    border: none
+    layout: "Title top, inputs stacked, links row, CTA circle bottom-right"
+
+  session-card:
+    description: "Session info area — no card chrome, just content on white bg"
+    backgroundColor: transparent
+    padding: "0 24px"
+
+  # ── Date Chips (Schedule Strip) ───────────────────────────────────────────
+
+  date-chip-default:
+    description: "Unselected day in schedule strip"
+    backgroundColor: "{colors.bg-card}"
+    textColor: "{colors.text-secondary}"
     typography: "{typography.body-sm}"
-    rounded: "{rounded.xs}"
+    rounded: "{rounded.sm}"
+    padding: "10px 14px"
+    shadow: "{elevation.card-subtle}"
+    minWidth: 44px
+
+  date-chip-selected:
+    description: "Selected day — filled deep purple"
+    backgroundColor: "{colors.gradient-start}"
+    textColor: "{colors.text-on-gradient}"
+    typography: "{typography.body-sm}"
+    rounded: "{rounded.sm}"
+    padding: "10px 14px"
+    minWidth: 44px
+    badge: "bell icon below chip in white"
+
+  # ── Progress Elements ─────────────────────────────────────────────────────
+
+  progress-ring:
+    description: "Circular SVG ring inside metric cards"
+    trackColor: "{colors.bg-input}"
+    strokeWidth: 8px
+    strokeLinecap: round
+    size: "96px (dashboard cards) / 120px (detail screens)"
+    gradient: "SVG <linearGradient> defs — steps use {gradients.steps-ring}, calories use {gradients.calories-ring}"
+
+  progress-bar:
+    description: "Horizontal gradient bar — session progress"
+    track:
+      backgroundColor: "{colors.bg-input}"
+      height: 6px
+      rounded: "{rounded.full}"
+    fill:
+      gradient: "{gradients.progress-bar}"
+      height: 6px
+      rounded: "{rounded.full}"
+    thumb:
+      size: 20px
+      backgroundColor: "{colors.bg-card}"
+      rounded: "{rounded.full}"
+      shadow: "{elevation.card}"
+      border: "2px solid {colors.accent-purple}"
+
+  heart-chart:
+    description: "Bar chart inside Heart card — gradient bars bottom-to-top"
+    bar-gradient: "{gradients.heart-bars}"
+    bar-width: 6px
+    bar-rounded: "{rounded.xs}"
+    bar-spacing: 4px
+    bar-count: 7
+    label: "110 bmp — body-sm below chart"
+
+  # ── Navigation ────────────────────────────────────────────────────────────
+
+  top-bar:
+    description: "Screen top bar — icon left + avatar right"
+    backgroundColor: transparent
     height: 56px
-  marquee-strip:
-    backgroundColor: "{colors.inverse-canvas}"
-    textColor: "{colors.inverse-ink}"
-    typography: "{typography.body-sm}"
-    rounded: "{rounded.xs}"
-    height: 36px
-  comparison-checkmark:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.semantic-success}"
-    typography: "{typography.body-sm}"
+    left: "Grid/menu icon — {colors.text-secondary} — 24px"
+    right: "User avatar — 36px circle — {rounded.full}"
+
+  bottom-tab-bar:
+    description: "Main tab navigation"
+    backgroundColor: "{colors.bg-card}"
+    shadow: "{elevation.modal}"
+    height: 64px
+    rounded: "top corners only — {rounded.xl}"
+    active-icon-color: "{colors.accent-purple}"
+    inactive-icon-color: "{colors.text-muted}"
+
+  list-row:
+    description: "Expandable info rows (Daily Meals, Other Information)"
+    backgroundColor: "{colors.bg-card}"
+    textColor: "{colors.text-primary}"
+    typography: "{typography.body}"
+    padding: "16px 20px"
+    separator: "1px {colors.border-hairline}"
+    icon-right: "chevron or info icon — {colors.text-muted} — 20px"
+    shadow: "{elevation.card}"
+    rounded: "{rounded.lg}"
+
+  # ── Voice Companion ───────────────────────────────────────────────────────
+
+  mic-button-idle:
+    description: "Mic CTA — same gradient circle language as auth CTA"
+    gradient: "{gradients.cta-button}"
+    size: 72px
     rounded: "{rounded.full}"
-    size: 16px
-  footer:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.caption}"
-    rounded: "{rounded.xs}"
-    padding: 64px 32px
+    icon: microphone (white, 28px)
+    glow: "rgba(124, 58, 237, 0.25) — 0 0 24px"
+
+  mic-button-listening:
+    gradient: "{gradients.primary}"
+    size: 72px
+    rounded: "{rounded.full}"
+    pulse-ring: "animated ring expanding from 72px → 96px, opacity 0 → 0.3, gradient stroke"
+
 ---
 
 ## Overview
 
-Figma's marketing canvas is, at the system level, an editor-clean black-and-white frame. The chrome — top nav, body type, footer, primary CTA — is monochrome. Headlines are oversized `{typography.display-xl}` set in `figmaSans` with aggressive negative tracking, body copy hovers around weight 320–340 of the same variable family, and small mono `{typography.eyebrow}` and `{typography.caption}` labels (figmaMono, all-caps, positive tracking) act as section markers. Every CTA is a pill — `{rounded.pill}` — and the primary action across the entire site is the same black `{components.button-primary}` paired with the same white `{components.button-secondary}`.
+Aurora's visual identity is built on a single tension: pure white surfaces interrupted by a deep-violet-to-hot-pink gradient that fires on every active state. The canvas never competes with the data — white cards on a near-white background let numbers breathe. The gradient does the work of communicating energy, progress, and selection without decorating every surface.
 
-What makes the design unique is what happens **between** those monochrome bookends: the page repeatedly drops into oversized pastel **color-block sections** — lime, lavender, cream, mint, pink, coral, and a deep navy — that span the full content width with `{rounded.lg}` corners and `{spacing.xxl}` interior padding. These blocks are where the storytelling lives. They aren't accents tucked into a card; they take over a whole viewport's worth of vertical space, like a designer arranging giant sticky notes on a clean wall. FigJam is the most pastel-saturated, the home page rotates through the full set, and the pricing page ends with a lime FAQ panel — same vocabulary, different rhythm per route.
+**Three visual layers:**
 
-This is a system built on contrast: the monochrome chrome makes the color blocks feel intentional rather than decorative, and the color blocks make the monochrome chrome feel like editorial paper rather than enterprise SaaS. Density is generous, line-heights are tight on display sizes, and the interface never reaches for shadows or gradients to do the work that color blocks and confident typography already do.
+1. **White canvas** — `{colors.bg-primary}` on dashboard and feature screens. Clean, clinical-free, modern consumer.
+2. **Lavender-wash canvas** — `{colors.bg-auth}` (or `{gradients.auth-bg}`) on auth and onboarding only. Signals "you're not in the app yet" and creates warmth for the illustrated fitness characters.
+3. **Gradient surface** — `{gradients.primary}`, `{gradients.sleep-card}`, `{gradients.cta-button}` — appears only on active / featured elements. Never decorative.
 
-**Key Characteristics:**
-- Monochrome system core: `{colors.primary}` (black) and `{colors.canvas}` (white) carry every CTA, every body line, every footer link.
-- Oversized pastel **color-block sections** (`{colors.block-lime}`, `{colors.block-lilac}`, `{colors.block-cream}`, `{colors.block-mint}`, `{colors.block-pink}`, `{colors.block-coral}`, `{colors.block-navy}`) define the narrative rhythm of every long-form page.
-- Pill is the only button shape — `{rounded.pill}` for text CTAs, `{rounded.full}` for icon buttons. No square buttons anywhere.
-- `figmaSans` variable typeface used at unusually fine weight increments (320, 330, 340, 450, 480, 540) — the type system reads as a single voice that flexes rather than a multi-weight family.
-- Tight negative letter-spacing on display sizes (-1.72px at 86px, -0.96px at 64px) creates a confident editorial cadence.
-- `figmaMono` reserved for category labels, eyebrows, and captions — always uppercase, positive tracking — to flag taxonomy without competing with display type.
-- Color-block page rhythm (home): white hero → marquee strip → white feature → lime systems block → navy ship-products block → coral developer block → white template grid → white footer.
+---
 
-## Colors
+## Key Characteristics
 
-> Source pages: figma.com (home), /design/, /figjam/brainstorming-tool/, /pricing/, /contact/.
+- **White cards, shadow depth.** Cards lift off the background through `{elevation.card}` shadow only. No borders on cards. The shadow is the only edge signal.
+- **One gradient, many uses.** The deep-violet-to-hot-pink gradient fires consistently across: CTA circles, active tab pills, progress ring strokes, chart bars, and progress bar fill. Seeing purple-pink anywhere in the UI means "active, selected, progressing."
+- **Poppins Bold owns the numbers.** Every large data value (2285, 8:00, 357, 40 min) is Poppins Bold. Inter carries labels and body copy. The distinction is immediate — numerics jump out, text settles back.
+- **Progress rings are the hero components.** Steps, Calories, and future hydration all use gradient SVG rings. The ring + number combination is the core data presentation unit.
+- **Sleep card is the exception.** It uses `{gradients.sleep-card}` (deep purple) as its surface — the only metric card that is not white. This makes sleep visually distinct from the rest and signals rest/night visually.
+- **Illustrations add warmth.** Fitness character illustrations on auth (yoga pose) and session screens (treadmill runner) prevent the UI from reading as clinical. They always appear in the same purple/pink gradient palette.
 
-### Brand & Accent
-- **Black** ({colors.primary}): The system primary. Every primary CTA, every headline, every body line, the marquee strip, the inverse canvas of dark sections.
-- **White** ({colors.on-primary}): Inverse text on black surfaces; also the canvas color used as the foreground of secondary pill buttons (`{components.button-secondary}`).
-- **Magenta Promo** ({colors.accent-magenta}): A single saturated CTA pink reserved for promotional inline buttons — appears, for example, on the lilac "Save your spot" Release Notes banner. Use scarcely; it is not a section color.
+---
 
-### Surface
-- **Canvas** ({colors.canvas}): Default page background and the body of every white card.
-- **Inverse Canvas** ({colors.inverse-canvas}): Footer, marquee strip, and a subset of "ship products"-style story sections.
-- **Surface Soft** ({colors.surface-soft}): Off-white tile background used for icon buttons, template cards, and feature illustration tiles when they sit on the white canvas.
-- **Hairline** ({colors.hairline}): 1px borders on form inputs, pricing cards, and table dividers.
-- **Hairline Soft** ({colors.hairline-soft}): Even subtler dividers — comparison-table row separators and footer column rules.
-- **Block Lime** ({colors.block-lime}): The signature **systems / FAQ / contact-form** color block. Recurs across home, pricing, contact.
-- **Block Lilac** ({colors.block-lilac}): Hero block on `/design/`; also the inline Release Notes promo banner.
-- **Block Cream** ({colors.block-cream}): Soft warm background — FigJam hero strip, template-grid section.
-- **Block Mint** ({colors.block-mint}): FigJam pastel section.
-- **Block Pink** ({colors.block-pink}): FigJam pastel section.
-- **Block Coral** ({colors.block-coral}): "Ship products" coral story block on home.
-- **Block Navy** ({colors.block-navy}): Deep indigo story block — only place dark surfaces appear above the footer.
-
-### Text
-- **Ink** ({colors.ink}): All headline, body, and caption type on light surfaces. There is no softer mid-gray text role on marketing — body copy is always black at weight 320–340, and weight (not opacity) carries the hierarchy.
-- **Inverse Ink** ({colors.inverse-ink}): Type on inverse-canvas surfaces (footer, marquee strip, navy color block).
-- **On-Inverse Soft** ({colors.on-inverse-soft}): White used at ~16% opacity for circular icon-button surfaces against dark sections (token captures the base color; the translucency is applied at render time).
-
-### Semantic
-- **Success Green** ({colors.semantic-success}): Comparison-table checkmarks on pricing. Used as a glyph fill, not a surface.
-- **Overlay Scrim** ({colors.overlay-scrim}): Black used at ~60% opacity behind modal / video-overlay surfaces (token captures the base; opacity applied at render time).
-
-## Typography
-
-### Font Family
-
-- **figmaSans** — Figma's proprietary variable typeface; fallback stack `figmaSans Fallback, SF Pro Display, system-ui, helvetica`. Variable weight axis is exercised at unusually fine increments (320, 330, 340, 450, 480, 540, 700) — the design system reads as a single voice modulating rather than a stepped weight family.
-- **figmaMono** — Proprietary monospace; fallback `figmaMono Fallback, SF Mono, menlo`. Used exclusively for eyebrow labels and captions, always uppercase with positive letter-spacing.
-
-OpenType `kern` is enabled across every role.
-
-### Hierarchy
-
-| Token | Size | Weight | Line Height | Letter Spacing | Use |
-|---|---|---|---|---|---|
-| `{typography.display-xl}` | 86px | 340 | 1.00 | -1.72px | Hero headlines (home, FigJam) |
-| `{typography.display-lg}` | 64px | 340 | 1.10 | -0.96px | Section opener headlines |
-| `{typography.headline}` | 26px | 540 | 1.35 | -0.26px | Story-block titles inside color blocks |
-| `{typography.subhead}` | 26px | 340 | 1.35 | -0.26px | Long-form intro paragraphs that sit at near-headline scale |
-| `{typography.card-title}` | 24px | 700 | 1.45 | 0 | Pricing-tier titles, feature card titles |
-| `{typography.body-lg}` | 20px | 330 | 1.40 | -0.14px | Lead body copy on hero, contact form labels |
-| `{typography.body}` | 18px | 320 | 1.45 | -0.26px | Default body |
-| `{typography.body-sm}` | 16px | 330 | 1.45 | -0.14px | Card body, footer link list |
-| `{typography.link}` | 20px | 480 | 1.40 | -0.10px | Inline link emphasis |
-| `{typography.button}` | 20px | 480 | 1.40 | -0.10px | All pill buttons, primary and secondary |
-| `{typography.eyebrow}` | 18px | 400 | 1.30 | 0.54px | figmaMono uppercase section eyebrows |
-| `{typography.caption}` | 12px | 400 | 1.00 | 0.60px | figmaMono uppercase captions, footer column heads |
-
-### Principles
-
-- **Weight, not size, carries hierarchy on body copy.** A 20px paragraph at weight 330 sits next to a 20px link at weight 480 — the eye reads emphasis without scale change.
-- **Negative letter-spacing scales with size.** Display-xl pulls -1.72px; subhead pulls only -0.26px. Body copy stays near-zero. The result is editorial-feeling display type without sacrificing readability at body size.
-- **Mono is taxonomy, not body.** figmaMono is reserved for eyebrows and captions — never used to set a paragraph.
-- **Tight line-heights on display, generous on body.** Display sizes run 1.00–1.10; body runs 1.40–1.45. The contrast reinforces that headlines are graphics and body copy is for reading.
-
-### Note on Font Substitutes
-
-If implementing without access to figmaSans / figmaMono, suitable open-source substitutes are **Inter** (or **Geist**) for the sans, and **JetBrains Mono** (or **Geist Mono**) for the mono. Inter at variable weights closely matches the fine-grained weight axis figmaSans uses; expect to manually adjust line-heights down by ~0.02 to compensate for Inter's slightly taller x-height.
-
-## Layout
-
-### Spacing System
-
-- **Base unit**: 8px.
-- **Tokens (front matter)**: `{spacing.hair}` 1px · `{spacing.xxs}` 4px · `{spacing.xs}` 8px · `{spacing.sm}` 12px · `{spacing.md}` 16px · `{spacing.lg}` 24px · `{spacing.xl}` 32px · `{spacing.xxl}` 48px · `{spacing.section}` 96px.
-- Section interior padding: `{spacing.xxl}` (48px) on color-block sections.
-- Card interior padding: `{spacing.lg}` (24px) on pricing cards and template tiles.
-- Form input padding: `{spacing.sm}` 12px vertical · 14px horizontal.
-- Button padding: `{spacing.xs}` 8px vertical · `{spacing.lg}` 24px horizontal for pill buttons (the asymmetric `8px 18px 10px` extracted on `button-secondary` nudges the type optically inside the pill).
-- Universal rhythm constant: `{spacing.section}` (96px) — the vertical gap between major content sections holds across home, pricing, and FigJam pages.
-
-### Grid & Container
-
-- Max content width sits around 1280px (one of the explicit breakpoints), with side gutters that scale from `{spacing.xxl}` on desktop down to `{spacing.lg}` on mobile.
-- Three- and four-column grids on the desktop pricing comparison and FigJam template galleries.
-- Color-block sections break the column grid — they span content width with full bleed inside the rounded `{rounded.lg}` corners, then place a single editorial column of headline + body inside.
-
-### Whitespace Philosophy
-
-White space is used to make the color blocks feel deliberate. Between every colored panel and the next, the page returns to white canvas with `{spacing.section}` of breathing room. Inside a color block, the type itself is given generous side margins (often more than 1/4 of the block's width on each side) so the panel reads as a poster, not a wall of copy.
-
-## Elevation & Depth
-
-| Level | Treatment | Use |
-|---|---|---|
-| 0 (flat) | No shadow, no border | Default for color-block sections, inverse-canvas footer, hero |
-| 1 (hairline) | 1px `{colors.hairline}` border on `{colors.canvas}` | Pricing cards, form inputs, comparison table cells |
-| 2 (soft elevation) | Subtle drop shadow approx 0 4px 16px rgba(0,0,0,0.06) | Floating template tiles, dropdown menus |
-| 3 (modal) | Stronger shadow + `{colors.overlay-scrim}` behind | Video / image lightbox overlays |
-
-Figma's marketing system is shadow-light by design — the color blocks substitute for traditional elevation. Where most SaaS sites use a shadowed white card to draw attention, Figma uses a saturated background panel. This makes the rare actual shadow (e.g., a floating template card hovering over a cream section) feel like an exception worth noticing.
-
-### Decorative Depth
-
-- **Color-block sections** are the primary depth device. The change from white canvas to lime / lavender / cream is the section break.
-- **Sticky-note style component thumbnails** in FigJam — slightly off-axis pastel rectangles arranged like notes on a board — read as collage, not card-stack.
-- **Embedded product UI mocks** (Figma Design panels, FigJam canvas snippets) appear as flat compositions on color blocks; their internal shadows are subtle and stay within the mock.
-
-## Shapes
-
-### Border Radius Scale
-
-| Token | Value | Use |
-|---|---|---|
-| `{rounded.xs}` | 2px | Anchor / link decoration corners |
-| `{rounded.sm}` | 6px | Small chips, sub-nav tabs |
-| `{rounded.md}` | 8px | Form inputs, list items, image frames |
-| `{rounded.lg}` | 24px | Pricing cards, color-block sections, large image containers |
-| `{rounded.xl}` | 32px | Hero feature panels, oversized callouts |
-| `{rounded.pill}` | 50px | All text CTAs (primary, secondary, tab toggles) |
-| `{rounded.full}` | 9999px | Circular icon buttons, comparison-table checkmark glyphs |
-
-### Photography & Illustration Geometry
-
-- Image frames use `{rounded.md}` (8px) — generous enough to feel friendly, conservative enough to read as editorial.
-- Template thumbnails on the home grid sit in `{rounded.md}` tiles with `{spacing.md}` interior padding around the embedded preview.
-- FigJam pastel sticky-note component thumbnails preserve a small `{rounded.sm}` corner that mimics actual sticky paper.
-- No avatar circles appear in marketing surfaces — Figma's marketing avoids personification.
-
-## Components
-
-### Buttons
-
-**`button-primary`** — The black "Get started for free" pill that appears in the top nav, every hero, and every closing CTA.
-- Background `{colors.primary}`, text `{colors.on-primary}`, type `{typography.button}`, padding 10px 20px, rounded `{rounded.pill}`.
-- Pressed state lives in `button-primary-pressed` (same surface; the live site relies on micro-scale rather than a darkened fill).
-
-**`button-secondary`** — White pill with black text. Used for tertiary navigation actions ("Contact sales") and as the visual counterpart to the primary pill.
-- Background `{colors.canvas}`, text `{colors.ink}`, type `{typography.button}`, padding 8px 18px 10px (asymmetric vertical to optically center the type), rounded `{rounded.pill}`. No border.
-
-**`button-tertiary-text`** — Plain text link styled as a button hit target inside top nav and footer.
-- Background `{colors.canvas}`, text `{colors.ink}`, type `{typography.link}`, rounded `{rounded.full}` (hit target only), padding `{spacing.xs}` `{spacing.sm}`.
-
-**`button-icon-circular`** — 40px circular icon button used for carousel controls, social links, and inline actions on light surfaces.
-- Background `{colors.surface-soft}`, text `{colors.ink}`, rounded `{rounded.full}`, size 40px.
-
-**`button-icon-circular-inverse`** — Same shape, used on inverse-canvas / dark color blocks.
-- Background `{colors.on-inverse-soft}` (translucent white), text `{colors.inverse-ink}`, rounded `{rounded.full}`, size 40px.
-
-**`button-magenta-promo`** — Saturated pink pill used only inside promotional surfaces such as the lilac "Save your spot" Release Notes banner. Reserved for moments where Figma's product team wants the CTA to pop against an already-colored panel.
-- Background `{colors.accent-magenta}`, text `{colors.on-primary}`, type `{typography.button}`, rounded `{rounded.pill}`, padding 10px 18px.
-
-### Pricing Tabs
-
-**`pricing-tab-default`** + **`pricing-tab-selected`** — The pill-toggle that switches between Starter / Professional / Organization / Enterprise on `/pricing/`.
-- Default: `{colors.canvas}` background, `{colors.ink}` text, rounded `{rounded.pill}`.
-- Selected: `{colors.primary}` background, `{colors.on-primary}` text — exactly the same surface as `button-primary`, which makes the selected tab feel like an active CTA, not a passive state.
-
-### Inputs & Forms
-
-**`text-input`** + **`text-input-focused`** — Form fields on `/contact/` and pricing seat-count steppers.
-- Background `{colors.canvas}`, text `{colors.ink}`, type `{typography.body}`, rounded `{rounded.md}`, padding 12px 14px.
-- Focused state retains the same surface — focus is communicated via ring, not via fill change.
-
-### Cards & Containers
-
-**`pricing-card`** — Each tier on `/pricing/`.
-- Background `{colors.canvas}`, text `{colors.ink}`, type `{typography.body}`, rounded `{rounded.lg}`, padding `{spacing.lg}`. Stroked with `{colors.hairline}` rather than shadowed.
-
-**`pricing-card-feature-row`** — Single row inside the comparison table.
-- Background `{colors.canvas}`, text `{colors.ink}`, type `{typography.body-sm}`. Row separator is `{colors.hairline-soft}`.
-
-**`template-card`** — Thumbnail tile in the home "Explore what people are making" grid and the FigJam template gallery.
-- Background `{colors.surface-soft}`, text `{colors.ink}`, type `{typography.body-sm}`, rounded `{rounded.md}`, padding `{spacing.md}`.
-
-**`feature-illustration-tile`** — Larger composition tile that holds a product UI mock or pastel illustration.
-- Background `{colors.surface-soft}`, text `{colors.ink}`, type `{typography.eyebrow}`, rounded `{rounded.md}`, padding `{spacing.lg}`.
-
-### Color-Block Sections (signature)
-
-The defining surface of Figma's marketing. Each is a full-content-width panel with `{rounded.lg}` corners and `{spacing.xxl}` interior padding. Variants:
-
-**`color-block-section`** — lime ground for "systems" stories (home), pricing FAQ, and the contact form.
-- Background `{colors.block-lime}`, text `{colors.ink}`, type `{typography.subhead}`, rounded `{rounded.lg}`, padding `{spacing.xxl}`.
-
-**`color-block-section-lilac`** — lavender ground for `/design/` hero and FigJam highlight sections.
-- Background `{colors.block-lilac}`, otherwise identical structure.
-
-**`color-block-section-navy`** — deep indigo ground for the home "Ship products" story block. The only inverse color-block surface above the footer.
-- Background `{colors.block-navy}`, text `{colors.inverse-ink}`, otherwise identical structure.
-
-(Cream, mint, pink, and coral block variants follow the same shape with their respective `{colors.block-*}` surface.)
-
-### Promo Banner
-
-**`promo-banner-lilac`** — The Release Notes / "Save your spot" inline banner that floats above the contact form.
-- Background `{colors.block-lilac}`, text `{colors.ink}`, type `{typography.body-sm}`, rounded `{rounded.md}`, padding `{spacing.md}` `{spacing.lg}`. Carries a `button-magenta-promo` on the right edge.
-
-### Navigation
-
-**`top-nav`** — Sticky white bar with logo, primary nav links, sign-in link, and the right-anchored `button-secondary` ("Contact sales") + `button-primary` ("Get started for free") pair.
-- Background `{colors.canvas}`, text `{colors.ink}`, type `{typography.body-sm}`, height 56px.
-- Mobile: collapses primary links into a hamburger that opens a full-canvas overlay; the two pill CTAs remain visible on the bar.
-
-**`marquee-strip`** — Thin black ribbon directly under the nav that scrolls through customer logos in white.
-- Background `{colors.inverse-canvas}`, text `{colors.inverse-ink}`, type `{typography.body-sm}`, height 36px.
-
-### Comparison Glyphs
-
-**`comparison-checkmark`** — Green check used in the pricing comparison matrix.
-- Background `{colors.canvas}`, glyph color `{colors.semantic-success}`, rounded `{rounded.full}`, size 16px.
-
-### Footer
-
-**`footer`** — Dense link grid on white canvas with the wordmark "Figma" set in display weight at the top-left.
-- Background `{colors.canvas}`, text `{colors.ink}`, type `{typography.caption}` for column headings and small links, padding `{spacing.section}` top/bottom · `{spacing.xl}` sides.
-
-## Do's and Don'ts
+## Color Usage Rules
 
 ### Do
-
-- Reserve `{colors.primary}` for genuine primary CTAs and selected states (e.g., `pricing-tab-selected`). Don't use it as a decorative accent.
-- When introducing a story section, choose **one** color block from the `{colors.block-*}` family and let it span full content width with `{rounded.lg}` corners and `{spacing.xxl}` interior padding.
-- Keep type in `figmaSans` at variable weights — pick from 320, 330, 340, 480, 540, 700 to express hierarchy. Avoid intermediate weights outside this set.
-- Use `figmaMono` only for eyebrows and captions, always uppercase, with the documented positive letter-spacing.
-- Compose every CTA as a pill (`{rounded.pill}`) and every icon button as a circle (`{rounded.full}`).
-- Allow the page to **return to white canvas** between every two color blocks so each block reads as deliberate.
-- Pair `button-primary` and `button-secondary` whenever a section needs both a primary action and a sales / secondary action — the black-and-white pair is the brand signature.
+- Use `{gradients.primary}` for every active, selected, or in-progress state.
+- Use `{colors.bg-primary}` (#FFFFFF) as the background of all dashboard and feature screens.
+- Use `{colors.bg-auth}` or `{gradients.auth-bg}` only on auth and onboarding screens.
+- Keep card backgrounds white — let shadow do the elevation work.
+- Use `{colors.accent-green}` for habit completion checkmarks and streak counters.
+- Use `{colors.text-primary}` (#1E1B2E) for all heading and value text.
+- Use `{colors.text-secondary}` (#6B7280) for subtitles, labels, and unselected tab text.
 
 ### Don't
+- Don't use dark backgrounds (`#0A0E1A`, `#131929`) anywhere — those are the old Aurora dark theme and must not appear.
+- Don't add borders to white cards on white backgrounds.
+- Don't use flat purple (`{colors.accent-purple}`) for primary CTAs — always use the gradient.
+- Don't apply the gradient to text — only to surfaces and SVG strokes.
+- Don't show more than one gradient CTA button per screen — the gradient should feel special.
+- Don't mix the sleep card gradient with any other card surface.
+- Don't use `{colors.accent-amber}` as a background surface — it is a warning signal only.
 
-- Don't introduce mid-gray text. Body hierarchy comes from `figmaSans` weight, not from opacity.
-- Don't add drop shadows to color-block sections — the color is the depth device.
-- Don't introduce new accent colors outside the documented `{colors.block-*}` palette and `{colors.accent-magenta}`. Adding, e.g., a saturated brand orange would break the system.
-- Don't combine more than one color block visible inside a single viewport — Figma's pacing always lets the white canvas separate them.
-- Don't square off CTAs. Square buttons read as a different brand.
-- Don't put `figmaMono` in body copy — it's a taxonomy tool, not a reading typeface.
-- Don't replace the `pricing-tab-selected` black fill with a colored tab; the brand pattern is "selected = primary surface".
+---
 
-## Responsive Behavior
+## Typography Rules
 
-### Breakpoints
+- Weight carries hierarchy on body copy, not size — `Inter_600SemiBold` label vs `Inter_400Regular` description, same 14px.
+- Poppins is reserved for display sizes and large numerics. Never use Poppins at 12px or below.
+- Negative letter-spacing at display sizes only (`-0.5px` at 40px, `-0.3px` at 32px).
+- All data values inside rings use `{typography.data-value}` (Poppins Bold 28px). The unit below uses `{typography.data-unit}` (Inter Regular 12px). Never the same font.
 
-| Name | Width | Key Changes |
-|---|---|---|
-| 4k | 1920px | Max content width holds at 1280px; gutters expand |
-| Desktop-XL | 1440px | Default desktop layout |
-| Desktop | 1400px | Comparison table column widths normalize |
-| Desktop-S | 1280px | Pricing 4-up tier grid maintained |
-| Tablet | 960px | Pricing collapses 4-up → 2-up; nav becomes hamburger |
-| Mobile-L | 768px | Color-block sections become full-bleed (no rounded corners on edges) |
-| Mobile | 560px | Display-xl reduces from 86px to ~48px; pill CTAs go full-width |
-| Mobile-XS | 559px | Two-column footer collapses to single column |
+---
 
-### Touch Targets
+## Elevation Rules
 
-- Pill buttons (`button-primary`, `button-secondary`) maintain a minimum 44px tap height across all viewports — achieved by combining `{typography.button}` 20px line-height with the documented vertical padding.
-- Circular icon buttons (`button-icon-circular`) are 40px on desktop and grow to 44px on touch viewports.
-- Form input minimum tap target on `/contact/` is 48px high.
+- Level 0: Gradient surfaces (sleep card, CTA button) — no shadow added, the color is the depth signal.
+- Level 1 `{elevation.card}`: White metric cards (Steps, Calories, Heart), auth bottom card, list rows.
+- Level 2 `{elevation.card-subtle}`: Search bar, unselected date chips, secondary surfaces.
+- Level 3 `{elevation.modal}`: Bottom sheets, modals, mic button overlay panels.
 
-### Collapsing Strategy
+---
 
-- **Nav**: desktop horizontal nav with two right-anchored pills collapses to a hamburger overlay below 960px. The two pills (`Contact sales`, `Get started for free`) stay visible on the bar above 560px and stack in the overlay below.
-- **Pricing tier grid**: 4-up → 2-up at 960px → 1-up below 768px. The pill toggle stays horizontal and scrolls horizontally if needed below 560px.
-- **Color-block sections**: above 768px the section keeps `{spacing.xxl}` of canvas around it so the rounded corners read; below 768px the corners are removed and the block bleeds to viewport edge for a poster effect.
-- **Comparison table**: below 960px the matrix collapses into per-tier accordions to avoid horizontal scroll.
+## Layout & Spacing
 
-### Image Behavior
+- Screen horizontal padding: `{spacing.xl}` (24px) on all screens.
+- Dashboard card grid: 2 columns, `{spacing.md}` (16px) gap between cards.
+- Section gap between "My Activities" title and search bar: `{spacing.sm}` (12px).
+- Section gap between search bar and tabs: `{spacing.md}` (16px).
+- Card internal padding: `{spacing.md}` (16px) on all metric cards.
+- Auth card internal padding: `{spacing.xl}` (24px).
+- Input field vertical spacing: `{spacing.lg}` (20px) between each field.
+- Schedule strip: horizontal scroll, `{spacing.xs}` (8px) between date chips.
+- Progress bar track height: 6px. Thumb size: 20px. Always vertically centered on track.
 
-- Product UI mocks inside color blocks scale proportionally and never crop. Below 768px they shrink rather than reflow.
-- Template thumbnails in the home grid use lazy loading and animate in on scroll.
-- Sticky-note style FigJam thumbnails maintain their slight off-axis rotation across breakpoints — the rotation is a brand signal, not a desktop-only flourish.
+---
+
+## Progress Ring Specification
+
+```svg
+<!-- Steps ring (96×96 viewBox) -->
+<svg width="96" height="96" viewBox="0 0 96 96">
+  <defs>
+    <linearGradient id="stepsGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stopColor="#6D28D9" />
+      <stop offset="50%" stopColor="#7C3AED" />
+      <stop offset="100%" stopColor="#A855F7" />
+    </linearGradient>
+  </defs>
+  <!-- Track -->
+  <circle cx="48" cy="48" r="40" fill="none" stroke="#F5F5F8" strokeWidth="8" />
+  <!-- Progress arc — strokeDasharray animated by Reanimated -->
+  <circle
+    cx="48" cy="48" r="40"
+    fill="none"
+    stroke="url(#stepsGrad)"
+    strokeWidth="8"
+    strokeLinecap="round"
+    strokeDasharray="251.2"
+    strokeDashoffset="{calculated from progress %}"
+    transform="rotate(-90 48 48)"
+  />
+</svg>
+```
+
+Animate `strokeDashoffset` with React Native Reanimated `useSharedValue` + `withTiming` on mount.
+
+---
+
+## Screen Layout Reference
+
+### Login Screen
+```
+┌─────────────────────────────────┐
+│ [Logo icon top-right]            │
+│                                  │
+│   "Fitness                       │
+│    You Wanna                     │
+│    Have"      [Fitness Illustration]
+│                                  │
+│ ╔══════════════════════════════╗ │
+│ ║ Please Login                 ║ │
+│ ║                              ║ │
+│ ║ ✉  Username@gmail.com        ║ │
+│ ║ ───────────────────────────  ║ │
+│ ║ 🔒  •••••••••   [eye icon]   ║ │
+│ ║ ───────────────────────────  ║ │
+│ ║                              ║ │
+│ ║ Forget Details?  Create acct ║ │
+│ ║                    [→ CTA]   ║ │
+│ ╚══════════════════════════════╝ │
+└─────────────────────────────────┘
+CTA = 56px circle, gradients.cta-button, white arrow
+```
+
+### Dashboard Screen
+```
+┌─────────────────────────────────┐
+│ [⊞ grid icon]      [👤 avatar]  │
+│                                  │
+│ My Activities                    │
+│                                  │
+│ [🔍 Search...                 ] │  ← pill, bg-input
+│                                  │
+│ [Daily] Weekly  Monthly  Yearly  │  ← Daily = gradient pill
+│                                  │
+│ ┌──────────────┐ ┌──────────────┐│
+│ │ Steps    [✏] │ │ Sleep    [🌙]││
+│ │              │ │   8:00       ││ ← gradient card
+│ │   (ring)     │ │   Hours      ││
+│ │   2285       │ └──────────────┘│
+│ │   Steps      │ ┌──────────────┐│
+│ └──────────────┘ │ Calories [⊙] ││
+│ ┌──────────────┐ │              ││
+│ │ Heart    [♥] │ │   (ring)     ││
+│ │ [bar chart]  │ │   357        ││
+│ │ 110 bmp      │ │   kcal       ││
+│ └──────────────┘ └──────────────┘│
+│                                  │
+│ ┌──────────────────────────────┐ │
+│ │ Daily Meals                🍎│ │
+│ └──────────────────────────────┘ │
+│ ┌──────────────────────────────┐ │
+│ │ Other Information           ℹ│ │
+│ └──────────────────────────────┘ │
+└─────────────────────────────────┘
+```
+
+### Session Screen
+```
+┌─────────────────────────────────┐
+│ ‹                             🔍│
+│                                  │
+│ Current Session                  │  ← caption, text-secondary
+│ 40 min                           │  ← display-lg, Poppins Bold
+│ Medium Intensity                 │  ← caption, text-secondary
+│                                  │
+│ Schedule              Aug, 2020  │
+│                                  │
+│  10  [11]  12   13   14          │  ← date chips
+│   S   S    M    T    W           │    selected = gradient-start bg
+│       [🔔]                       │
+│                                  │
+│ Your Progress                    │
+│ ┌──────────────────────────────┐ │
+│ │████████████████████████○     │ │  ← gradient progress bar
+│ └──────────────────────────────┘ │
+│ 40 min / 150 min                 │
+│                                  │
+│              [🏃 runner illus.]  │
+└─────────────────────────────────┘
+```
+
+---
 
 ## Iteration Guide
 
-1. Focus on ONE component at a time and reference it by its `components:` token name (e.g., `{components.button-primary}`, `{components.color-block-section}`).
-2. When introducing a new section, decide **first** which `{colors.block-*}` token it sits on; the surface choice is the most consequential decision.
-3. Default body type to `{typography.body}`; reach for `{typography.subhead}` or `{typography.headline}` only inside a color block.
-4. Run `npx @google/design.md lint DESIGN.md` after edits — `broken-ref`, `contrast-ratio`, and `orphaned-tokens` warnings flag issues automatically.
-5. Add new variants as separate component entries (`-pressed`, `-selected`) — do not bury them in prose.
-6. Keep `{colors.primary}` scarce. If two `button-primary` instances appear in the same viewport, the section is doing too much — neutralize one to `button-secondary`.
-7. Treat `{colors.accent-magenta}` as a single-shot color: one promo CTA per page, never two.
+1. Reference all colors via `{colors.*}` and all gradients via `{gradients.*}` — never use raw hex values in components.
+2. When adding a new metric card: default to white + shadow. Only use a gradient surface for a card if it represents a fundamentally different state (e.g., sleep = rest = dark purple).
+3. Default body typography to `{typography.body}` (Inter 14px Regular). Reach for `{typography.body-lg}` only for lead paragraphs or input fields.
+4. Every new CTA must use `{gradients.primary}` or `{gradients.cta-button}`. Never use a flat colored button for a primary action.
+5. Progress rings and bars are the highest-fidelity components — animate them with Reanimated `withTiming` on mount and on value change.
+6. Keep `{colors.accent-green}` scarce — only habit completion, streak counts, and success toasts. It should feel like a reward signal.
+7. Keep the screen horizontal padding consistent at `{spacing.xl}` (24px) across all screens.
 
-## Known Gaps
+---
 
-- The exact pastel hex values of `{colors.block-*}` are derived from screenshot pixels; the production source likely uses named tokens that aren't exposed via CSS variables. Treat the documented hex values as faithful approximations rather than exact brand specs.
-- Dark mode is not documented because the marketing site does not ship a dark theme — the closest analog is the navy color-block (`color-block-section-navy`) and the inverse-canvas footer.
-- Form-field error and validation styling is not visible on `/contact/` because no error states render in the static screenshot. Inputs have hairline borders and rounded `{rounded.md}` corners; error treatment is not documented.
-- The animated marquee-strip and color-block reveal animations are not documented (per the no-interaction policy).
+## Known Constraints
+
+- `expo-linear-gradient` is required for all gradient surfaces. Install it if not already present: `npx expo install expo-linear-gradient`.
+- Progress ring gradient strokes require SVG `<linearGradient>` defs inside the SVG — React Native SVG does not support CSS gradient syntax. Use `react-native-svg` defs block as shown in the Progress Ring Specification above.
+- Poppins Bold requires `@expo-google-fonts/poppins`. Required weights: `Poppins_600SemiBold`, `Poppins_700Bold`.
+- Inter requires `@expo-google-fonts/inter`. Required weights: `Inter_400Regular`, `Inter_600SemiBold`.
+- Android shadow (`elevation`) does not support colored shadows. The shadow color (#9499A7) is iOS only. Android will render a neutral gray shadow at the given elevation level — this is acceptable.
+- The auth background gradient (`{gradients.auth-bg}`) should fill the entire screen using `<LinearGradient style={{ flex: 1 }}>` as the root container, not as a card background.

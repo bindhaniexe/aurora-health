@@ -2,12 +2,12 @@
 // Per AGENTS.md: all image assets imported and exported from here.
 // Never import images directly inside screens or components.
 
-const onboarding1 = require('@/assets/images/onboarding-1.png');
-const onboarding2 = require('@/assets/images/onboarding-2.png');
-const onboarding3 = require('@/assets/images/onboarding-3.png');
+const onboardingHero     = require('@/assets/images/onboarding-hero.png');
+const onboardingTracking = require('@/assets/images/onboarding-tracking.png');
+const onboardingVoice    = require('@/assets/images/onboarding-voice.png');
 
 export const images = {
-  onboarding1,
-  onboarding2,
-  onboarding3,
+  onboardingHero,
+  onboardingTracking,
+  onboardingVoice,
 } as const;

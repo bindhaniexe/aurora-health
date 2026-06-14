@@ -4,40 +4,60 @@
 @import "nativewind/theme";
 
 @theme {
-  /* Aurora Kebab-Case Colors */
-  --color-bg-primary: #0A0E1A;
-  --color-bg-card: #131929;
-  --color-bg-surface: #1C2539;
-  
-  --color-accent-blue: #4A9EFF;
-  --color-accent-purple: #8B5CF6;
-  --color-accent-green: #10B981;
-  --color-accent-amber: #F59E0B;
-  
-  --color-text-primary: #F1F5F9;
-  --color-text-secondary: #94A3B8;
-  --color-text-muted: #475569;
-  
-  --color-border: #1E293B;
-  --color-error: #EF4444;
-  --color-success: #10B981;
+  /* ── Aurora Light Design System ─────────────────────────────────── */
 
-  /* Aurora CamelCase Colors */
-  --color-bgPrimary: #0A0E1A;
-  --color-bgCard: #131929;
-  --color-bgSurface: #1C2539;
-  
-  --color-accentBlue: #4A9EFF;
-  --color-accentPurple: #8B5CF6;
-  --color-accentGreen: #10B981;
-  --color-accentAmber: #F59E0B;
-  
-  --color-textPrimary: #F1F5F9;
-  --color-textSecondary: #94A3B8;
-  --color-textMuted: #475569;
+  /* Backgrounds */
+  --color-bg-primary:       #FFFFFF;   /* Dashboard, session, feature screens */
+  --color-bg-auth:          #F7F5FF;   /* Auth & onboarding — soft lavender tint */
+  --color-bg-card:          #FFFFFF;   /* Card surfaces (depth via shadow only) */
+  --color-bg-input:         #F5F5F8;   /* Search bars, text input fields */
+  --color-bg-chip:          #F0EEF8;   /* Unselected date/filter chips */
+
+  /* Brand gradient anchors — use inside LinearGradient arrays, not as flat fills */
+  --color-gradient-start:   #6D28D9;   /* Deep violet */
+  --color-gradient-mid:     #A855F7;   /* Mid purple-pink */
+  --color-gradient-end:     #EC4899;   /* Hot pink */
+
+  /* Module accents */
+  --color-accent-purple:    #7C3AED;
+  --color-accent-pink:      #EC4899;
+  --color-accent-green:     #10B981;
+  --color-accent-amber:     #F59E0B;
+
+  /* Text */
+  --color-text-primary:     #1E1B2E;   /* Headings, data values */
+  --color-text-secondary:   #6B7280;   /* Subtitles, labels */
+  --color-text-muted:       #9CA3AF;   /* Placeholders, disabled */
+  --color-text-on-gradient: #FFFFFF;   /* Text on gradient surfaces */
+
+  /* Borders (hairlines only) */
+  --color-border-hairline:  #E5E7EB;
+
+  /* Semantic */
+  --color-error:            #EF4444;
+  --color-success:          #10B981;
+
+  /* CamelCase aliases for NativeWind className usage */
+  --color-bgPrimary:        #FFFFFF;
+  --color-bgAuth:           #F7F5FF;
+  --color-bgCard:           #FFFFFF;
+  --color-bgInput:          #F5F5F8;
+  --color-bgChip:           #F0EEF8;
+  --color-gradientStart:    #6D28D9;
+  --color-gradientMid:      #A855F7;
+  --color-gradientEnd:      #EC4899;
+  --color-accentPurple:     #7C3AED;
+  --color-accentPink:       #EC4899;
+  --color-accentGreen:      #10B981;
+  --color-accentAmber:      #F59E0B;
+  --color-textPrimary:      #1E1B2E;
+  --color-textSecondary:    #6B7280;
+  --color-textMuted:        #9CA3AF;
+  --color-textOnGradient:   #FFFFFF;
+  --color-borderHairline:   #E5E7EB;
 
   /* Custom Fonts */
-  --font-display: "Poppins-Bold", sans-serif;
-  --font-body: "Inter-Regular", sans-serif;
-  --font-mono: "JetBrainsMono", monospace;
+  --font-display:   "Poppins-Bold", sans-serif;
+  --font-body:      "Inter-Regular", sans-serif;
+  --font-mono:      "JetBrainsMono-Regular", monospace;
 }
