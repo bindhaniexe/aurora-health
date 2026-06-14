@@ -1,0 +1,43 @@
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
+@import "nativewind/theme";
+
+@theme {
+  /* Aurora Kebab-Case Colors */
+  --color-bg-primary: #0A0E1A;
+  --color-bg-card: #131929;
+  --color-bg-surface: #1C2539;
+  
+  --color-accent-blue: #4A9EFF;
+  --color-accent-purple: #8B5CF6;
+  --color-accent-green: #10B981;
+  --color-accent-amber: #F59E0B;
+  
+  --color-text-primary: #F1F5F9;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #475569;
+  
+  --color-border: #1E293B;
+  --color-error: #EF4444;
+  --color-success: #10B981;
+
+  /* Aurora CamelCase Colors */
+  --color-bgPrimary: #0A0E1A;
+  --color-bgCard: #131929;
+  --color-bgSurface: #1C2539;
+  
+  --color-accentBlue: #4A9EFF;
+  --color-accentPurple: #8B5CF6;
+  --color-accentGreen: #10B981;
+  --color-accentAmber: #F59E0B;
+  
+  --color-textPrimary: #F1F5F9;
+  --color-textSecondary: #94A3B8;
+  --color-textMuted: #475569;
+
+  /* Custom Fonts */
+  --font-display: "Poppins-Bold", sans-serif;
+  --font-body: "Inter-Regular", sans-serif;
+  --font-mono: "JetBrainsMono", monospace;
+}
