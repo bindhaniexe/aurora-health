@@ -15,6 +15,7 @@ const TABS = [
   { name: 'sleep',     label: 'Sleep',     icon: 'moon'             },
   { name: 'habits',    label: 'Habits',    icon: 'checkmark-circle' },
   { name: 'companion', label: 'Aurora',    icon: 'sparkles'         },
+  { name: 'profile',   label: 'Profile',   icon: 'person'           },
 ] as const;
 
 // ── Custom Tab Bar ────────────────────────────────────────────────────────────
@@ -88,6 +89,7 @@ export default function TabsLayout() {
       <Tabs.Screen name="sleep" />
       <Tabs.Screen name="habits" />
       <Tabs.Screen name="companion" />
+      <Tabs.Screen name="profile" />
     </Tabs>
   );
 }
