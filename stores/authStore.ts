@@ -54,8 +54,17 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true });
 
     try {
-      // 1. Get current session from SecureStore (via Supabase adapter)
-      const { data: { session }, error } = await supabase.auth.getSession();
+      // Race getSession against a 5-second timeout so the app never hangs
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Auth init timeout')), 5000)
+      );
+      const sessionPromise = supabase.auth.getSession();
+
+      const { data: { session }, error } = await Promise.race([
+        sessionPromise,
+        timeoutPromise,
+      ]) as Awaited<typeof sessionPromise>;
+
       if (error) throw error;
 
       set({
@@ -64,7 +73,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         isLoading: false,
       });
 
-      // 2. Subscribe to future auth state changes (token refresh, sign out, etc.)
+      // Subscribe to future auth state changes (token refresh, sign out, etc.)
       supabase.auth.onAuthStateChange((_event, session) => {
         set({
           session,
@@ -72,7 +81,9 @@ export const useAuthStore = create<AuthState>((set) => ({
         });
       });
     } catch (err) {
-      set({ isLoading: false, error: parseAuthError(err as AuthError) });
+      // On timeout or error — treat as no session so the app can continue
+      console.warn('Auth init failed:', (err as Error).message);
+      set({ isLoading: false, session: null, user: null });
     }
   },
 

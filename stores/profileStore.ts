@@ -1,0 +1,58 @@
+import { create } from 'zustand';
+import { Profile } from '@/types';
+import { profileService } from '@/services/profileService';
+import { useAuthStore } from '@/stores/authStore';
+
+interface ProfileState {
+  profile: Profile | null;
+  isLoading: boolean;
+  error: string | null;
+
+  fetchProfile: () => Promise<void>;
+  updateProfile: (updates: Partial<Profile>) => Promise<void>;
+  markOnboardingDone: () => Promise<void>;
+}
+
+export const useProfileStore = create<ProfileState>((set, get) => ({
+  profile: null,
+  isLoading: false,
+  error: null,
+
+  fetchProfile: async () => {
+    const user = useAuthStore.getState().user;
+    if (!user) {
+      set({ profile: null, error: 'No authenticated user' });
+      return;
+    }
+
+    set({ isLoading: true, error: null });
+    try {
+      const profile = await profileService.getProfile(user.id);
+      set({ profile, isLoading: false });
+    } catch (err: any) {
+      set({ error: err.message || 'Failed to fetch profile', isLoading: false });
+    }
+  },
+
+  updateProfile: async (updates: Partial<Profile>) => {
+    const { profile } = get();
+    const user = useAuthStore.getState().user;
+    if (!user || !profile) return;
+
+    // Optimistic update
+    set({ profile: { ...profile, ...updates } });
+
+    try {
+      const updated = await profileService.updateProfile(user.id, updates);
+      set({ profile: updated });
+    } catch (err: any) {
+      // Revert on error
+      set({ profile, error: err.message || 'Failed to update profile' });
+    }
+  },
+
+  markOnboardingDone: async () => {
+    const { updateProfile } = get();
+    await updateProfile({ onboarding_done: true });
+  }
+}));

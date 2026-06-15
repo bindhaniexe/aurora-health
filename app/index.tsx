@@ -1,57 +1,36 @@
-// app/index.tsx
-// Entry point — routing logic:
-//   1. First-ever launch    → onboarding
-//   2. Seen onboarding, no session → auth (login)
-//   3. Has session          → tabs (dashboard)
-//
-// "onboarding_done" is stored in AsyncStorage (lightweight preference, per AGENTS.md).
-
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { View, ActivityIndicator } from 'react-native';
-import { router } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useAuthStore } from '@/stores/authStore';
+import { useRouter } from 'expo-router';
 import { colors } from '@/constants/colors';
-
-const ONBOARDING_KEY = 'aurora_onboarding_done';
+import { useAuthStore } from '@/stores/authStore';
+import { useProfileStore } from '@/stores/profileStore';
 
 export default function Index() {
-  const { session, isLoading, initialize } = useAuthStore();
-  const [onboardingChecked, setOnboardingChecked] = useState(false);
-  const [onboardingDone, setOnboardingDone] = useState(false);
+  const router = useRouter();
+  const { session, isLoading: authLoading } = useAuthStore();
+  const { profile, isLoading: profileLoading } = useProfileStore();
 
-  // Step 1: initialize auth session from SecureStore
   useEffect(() => {
-    initialize();
-  }, [initialize]);
+    if (authLoading) return;
 
-  // Step 2: read onboarding flag from AsyncStorage
-  useEffect(() => {
-    // AsyncStorage.removeItem(ONBOARDING_KEY); // Uncomment to clear onboarding for testing
-    AsyncStorage.getItem(ONBOARDING_KEY).then((value) => {
-      setOnboardingDone(value === 'true');
-      setOnboardingChecked(true);
-    });
-  }, []);
-
-  // Step 3: route once BOTH checks are complete
-  useEffect(() => {
-    if (isLoading || !onboardingChecked) return;
-
-    if (!onboardingDone) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (!session) {
+      // Always show onboarding for unauthenticated users (dev/demo mode)
       router.replace('/(onboarding)' as any);
-    } else if (session) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      router.replace('/(tabs)' as any);
-    } else {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      router.replace('/(auth)' as any);
+      return;
     }
-  }, [isLoading, onboardingChecked, onboardingDone, session]);
+
+    // Has session: wait for profile to load
+    if (profileLoading || !profile) return;
+
+    if (!profile.onboarding_done) {
+      router.replace('/(onboarding)' as any);
+    } else {
+      router.replace('/(tabs)' as any);
+    }
+  }, [session, authLoading, profile, profileLoading, router]);
 
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bgAuth }}>
+    <View style={{ flex: 1, backgroundColor: colors.bgAuth, justifyContent: 'center', alignItems: 'center' }}>
       <ActivityIndicator size="large" color={colors.accentPurple} />
     </View>
   );

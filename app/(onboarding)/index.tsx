@@ -31,6 +31,8 @@ import {
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useAuthStore } from '@/stores/authStore';
+import { useProfileStore } from '@/stores/profileStore';
 import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
@@ -217,6 +219,9 @@ export default function OnboardingScreen() {
   const scrollX = useSharedValue(0);
   const [activeIndex, setActiveIndex] = useState(0);
 
+  const session = useAuthStore((state) => state.session);
+  const markOnboardingDone = useProfileStore((state) => state.markOnboardingDone);
+
   // Ambient glow pulse
   const glowScale = useSharedValue(1);
   React.useEffect(() => {
@@ -243,8 +248,14 @@ export default function OnboardingScreen() {
 
   const finishOnboarding = async () => {
     await AsyncStorage.setItem('aurora_onboarding_done', 'true');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    router.replace('/(auth)' as any);
+    if (session) {
+      await markOnboardingDone();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      router.replace('/(tabs)' as any);
+    } else {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      router.replace('/(auth)' as any);
+    }
   };
 
   const handleNext = () => {
