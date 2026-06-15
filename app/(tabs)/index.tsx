@@ -113,9 +113,10 @@ export default function DashboardScreen() {
         >
           {/* ── Top Bar ──────────────────────────────────────────────── */}
           <Animated.View style={[styles.topBar, headerAnimStyle]}>
-            <PressableScale style={styles.iconButton}>
-              <Ionicons name="grid-outline" size={24} color={colors.textPrimary} />
-            </PressableScale>
+            <View style={styles.greetingContainer}>
+              <Text style={styles.greetingSub}>Good {timeOfDay},</Text>
+              <Text style={styles.greetingTitle}>{firstName}</Text>
+            </View>
 
             <View style={{ flexDirection: 'row', gap: 12 }}>
               <PressableScale 
@@ -124,19 +125,20 @@ export default function DashboardScreen() {
               >
                 <Ionicons name="stats-chart" size={20} color={colors.accentPurple} />
               </PressableScale>
-              <LinearGradient
-                colors={gradients.primary}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.avatar}
-              >
-                <Text style={styles.avatarText}>{initials}</Text>
-              </LinearGradient>
+              <PressableScale onPress={() => router.push('/(tabs)/profile')}>
+                <LinearGradient
+                  colors={gradients.primary}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.avatar}
+                >
+                  <Text style={styles.avatarText}>{initials}</Text>
+                </LinearGradient>
+              </PressableScale>
             </View>
           </Animated.View>
 
-          {/* ── Heading ──────────────────────────────────────────────── */}
-          <Animated.Text style={[styles.heading, headerAnimStyle]}>Good {timeOfDay}, {firstName} 👋</Animated.Text>
+
 
 
 
@@ -219,7 +221,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingTop: 8,
-    marginBottom: 20,
+    marginBottom: 24,
+  },
+  greetingContainer: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+  },
+  greetingSub: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 14,
+    color: colors.textSecondary,
+  },
+  greetingTitle: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: 22,
+    color: colors.textPrimary,
+    marginTop: -2,
+    lineHeight: 28,
   },
   iconButton: {
     width: 42,
@@ -242,13 +260,7 @@ const styles = StyleSheet.create({
     color: colors.textOnGradient,
   },
 
-  // Heading
-  heading: {
-    fontFamily: 'Poppins-Bold',
-    fontSize: 22,
-    color: colors.textPrimary,
-    marginBottom: 16,
-  },
+
 
 
 
