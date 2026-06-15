@@ -29,13 +29,9 @@ import HabitsCard from '@/components/HabitsCard';
 import StepsCard from '@/components/StepsCard';
 import StreakCard from '@/components/StreakCard';
 
-// ── Time tab options ──────────────────────────────────────────────────────────
-const TIME_TABS = ['Daily', 'Weekly', 'Monthly', 'Yearly'] as const;
-type TimeTab = typeof TIME_TABS[number];
 
 // ── Dashboard Screen ──────────────────────────────────────────────────────────
 export default function DashboardScreen() {
-  const [selectedTab, setSelectedTab] = useState<TimeTab>('Daily');
   const { profile } = useProfileStore();
   const { user, guestMode } = useAuthStore();
   const { todayTotal, goalMl, percentage, fetchTodayLogs, isLoading: isHydrationLoading } = useHydration();
@@ -110,53 +106,7 @@ export default function DashboardScreen() {
         {/* ── Heading ──────────────────────────────────────────────── */}
         <Text style={styles.heading}>Good {timeOfDay}, {firstName} 👋</Text>
 
-        {/* ── Search Bar ───────────────────────────────────────────── */}
-        <View style={styles.searchBar}>
-          <Ionicons name="search-outline" size={18} color={colors.textMuted} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search"
-            placeholderTextColor={colors.textMuted}
-            returnKeyType="search"
-          />
-        </View>
 
-        {/* ── Time Tabs ─────────────────────────────────────────────── */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.tabsScrollView}
-          contentContainerStyle={styles.tabsContainer}
-        >
-          {TIME_TABS.map((tab) => {
-            const isSelected = selectedTab === tab;
-            return isSelected ? (
-              <LinearGradient
-                key={tab}
-                colors={gradients.primary}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.selectedTabPill}
-              >
-                <TouchableOpacity
-                  onPress={() => setSelectedTab(tab)}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.selectedTabText}>{tab}</Text>
-                </TouchableOpacity>
-              </LinearGradient>
-            ) : (
-              <TouchableOpacity
-                key={tab}
-                onPress={() => setSelectedTab(tab)}
-                style={styles.unselectedTab}
-                activeOpacity={0.6}
-              >
-                <Text style={styles.unselectedTabText}>{tab}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
 
         {/* ── 2×2 Activity Card Grid ────────────────────────────────── */}
         <InsightBanner insight={insight} isLoading={insightLoading} />
@@ -210,7 +160,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 24,
+    paddingBottom: 110,
   },
 
   // Top bar
@@ -250,55 +200,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
 
-  // Search bar
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.bgInput,
-    borderRadius: radius.pill,
-    paddingHorizontal: 16,
-    paddingVertical: Platform.OS === 'ios' ? 12 : 8,
-    marginBottom: 20,
-    gap: 10,
-  },
-  searchInput: {
-    flex: 1,
-    fontFamily: 'Inter-Regular',
-    fontSize: 15,
-    color: colors.textPrimary,
-    padding: 0,
-    margin: 0,
-  },
 
-  // Time tabs
-  tabsScrollView: {
-    marginBottom: 24,
-  },
-  tabsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingRight: 4,
-  },
-  selectedTabPill: {
-    borderRadius: radius.pill,
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-  },
-  selectedTabText: {
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: 14,
-    color: colors.textOnGradient,
-  },
-  unselectedTab: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  unselectedTabText: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 14,
-    color: colors.textSecondary,
-  },
 
   // Card grid
   cardGrid: {
