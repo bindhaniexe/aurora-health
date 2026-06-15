@@ -11,9 +11,7 @@ import Animated, {
   useSharedValue, 
   withRepeat,
   withSequence,
-  LinearTransition,
-  FadeIn,
-  FadeOut,
+  Easing,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -61,10 +59,9 @@ function TabItem({
   const width = useSharedValue(isFocused ? activeWidth : 48);
 
   useEffect(() => {
-    width.value = withSpring(isFocused ? activeWidth : 48, {
-      damping: 18,
-      stiffness: 150,
-      mass: 0.8,
+    width.value = withTiming(isFocused ? activeWidth : 48, {
+      duration: 220,
+      easing: Easing.bezier(0.25, 1, 0.5, 1),
     });
   }, [isFocused, activeWidth]);
 
@@ -72,21 +69,23 @@ function TabItem({
     return {
       width: width.value,
       backgroundColor: withTiming(isFocused ? '#FFFFFF' : '#131929', {
-        duration: 250,
+        duration: 220,
+        easing: Easing.bezier(0.25, 1, 0.5, 1),
       }),
     };
   });
 
   const textOpacity = useSharedValue(isFocused ? 1 : 0);
-  const textTranslateX = useSharedValue(isFocused ? 0 : -8);
+  const textTranslateX = useSharedValue(isFocused ? 0 : -6);
 
   useEffect(() => {
     textOpacity.value = withTiming(isFocused ? 1 : 0, {
-      duration: 200,
+      duration: 180,
+      easing: Easing.bezier(0.25, 1, 0.5, 1),
     });
-    textTranslateX.value = withSpring(isFocused ? 0 : -8, {
-      damping: 15,
-      stiffness: 120,
+    textTranslateX.value = withTiming(isFocused ? 0 : -6, {
+      duration: 180,
+      easing: Easing.bezier(0.25, 1, 0.5, 1),
     });
   }, [isFocused]);
 
