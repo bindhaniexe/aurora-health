@@ -112,15 +112,17 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   },
 
   deleteHabit: async (habitId: string) => {
-    const { habits, streaks } = get();
+    const { habits, streaks, todayCompletions } = get();
     
     // Save current state for potential rollback
     const originalHabits = habits;
     const originalStreaks = { ...streaks };
+    const originalCompletions = todayCompletions;
     
-    // Optimistic update: remove the habit from active list
+    // Optimistic update: remove the habit and its completions from active lists
     set({
       habits: habits.filter(h => h.id !== habitId),
+      todayCompletions: todayCompletions.filter(c => c.habit_id !== habitId),
     });
     
     try {
@@ -130,7 +132,8 @@ export const useHabitStore = create<HabitState>((set, get) => ({
       // Rollback on failure
       set({
         habits: originalHabits,
-        streaks: originalStreaks
+        streaks: originalStreaks,
+        todayCompletions: originalCompletions,
       });
       throw error;
     }
