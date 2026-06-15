@@ -24,6 +24,13 @@ const TABS = [
   { name: 'habits',    label: 'Habits',    iconName: 'checkmark-circle' },
 ] as const;
 
+const ACTIVE_WIDTHS = {
+  index: 105,
+  hydration: 135,
+  sleep: 110,
+  habits: 115,
+} as const;
+
 function TabItem({ 
   tab, 
   isFocused, 
@@ -50,11 +57,43 @@ function TabItem({
     };
   });
 
+  const activeWidth = ACTIVE_WIDTHS[tab.name as keyof typeof ACTIVE_WIDTHS] || 110;
+  const width = useSharedValue(isFocused ? activeWidth : 48);
+
+  useEffect(() => {
+    width.value = withSpring(isFocused ? activeWidth : 48, {
+      damping: 18,
+      stiffness: 150,
+      mass: 0.8,
+    });
+  }, [isFocused, activeWidth]);
+
   const pillStyle = useAnimatedStyle(() => {
     return {
+      width: width.value,
       backgroundColor: withTiming(isFocused ? '#FFFFFF' : '#131929', {
-        duration: 200,
+        duration: 250,
       }),
+    };
+  });
+
+  const textOpacity = useSharedValue(isFocused ? 1 : 0);
+  const textTranslateX = useSharedValue(isFocused ? 0 : -8);
+
+  useEffect(() => {
+    textOpacity.value = withTiming(isFocused ? 1 : 0, {
+      duration: 200,
+    });
+    textTranslateX.value = withSpring(isFocused ? 0 : -8, {
+      damping: 15,
+      stiffness: 120,
+    });
+  }, [isFocused]);
+
+  const animatedTextStyle = useAnimatedStyle(() => {
+    return {
+      opacity: textOpacity.value,
+      transform: [{ translateX: textTranslateX.value }],
     };
   });
 
@@ -62,14 +101,12 @@ function TabItem({
     <TouchableWithoutFeedback onPressIn={handlePressIn} onPressOut={handlePressOut}>
       <Animated.View style={[animatedStyle, { alignItems: 'center' }]}>
         <Animated.View 
-          layout={LinearTransition.springify().damping(16).stiffness(150)}
           style={[pillStyle, {
             flexDirection: 'row',
             alignItems: 'center',
-            justifyContent: 'center',
+            justifyContent: 'flex-start',
             height: 48,
-            paddingHorizontal: isFocused ? 16 : 0,
-            width: isFocused ? undefined : 48,
+            paddingLeft: 13,
             borderRadius: 999,
             overflow: 'hidden',
           }]}
@@ -79,22 +116,23 @@ function TabItem({
             size={22} 
             color={isFocused ? '#131929' : '#8A94A6'} 
           />
-          {isFocused && (
-            <Animated.Text 
-              entering={FadeIn.duration(200).delay(100)}
-              exiting={FadeOut.duration(100)}
-              style={{
-                marginLeft: 8,
+          <Animated.Text 
+            style={[
+              animatedTextStyle,
+              {
+                position: 'absolute',
+                left: 43, // 13 paddingLeft + 22 icon + 8 gap
                 fontFamily: 'Poppins-SemiBold',
                 fontSize: 13,
                 color: '#131929',
                 includeFontPadding: false,
-              }} 
-              numberOfLines={1}
-            >
-              {tab.label}
-            </Animated.Text>
-          )}
+                width: activeWidth - 43 - 8,
+              }
+            ]} 
+            numberOfLines={1}
+          >
+            {tab.label}
+          </Animated.Text>
         </Animated.View>
       </Animated.View>
     </TouchableWithoutFeedback>
@@ -207,7 +245,7 @@ export default function TabsLayout() {
         tabBar={(props) => <FloatingTabBar {...props} />}
         screenOptions={{ 
           headerShown: false,
-          animation: 'fade' as any, // Supported in newer React Navigation versions
+          animation: 'shift', // Smooth horizontal slide between tab screens in React Navigation v7
         }}
       >
         <Tabs.Screen name="index" />

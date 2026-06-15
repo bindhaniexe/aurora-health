@@ -6,6 +6,7 @@ import { useHydrationStore } from '@/stores/hydrationStore';
 import { useSleepStore } from '@/stores/sleepStore';
 import { useHabitStore } from '@/stores/habitStore';
 import { Audio } from 'expo-av';
+import { Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system/legacy';
 import { cacheDirectory, EncodingType } from 'expo-file-system/legacy';
 
@@ -89,13 +90,23 @@ class RealtimeAgent {
             }
           );
           if (!response.ok) {
-            throw new Error(`ElevenLabs API responded with status ${response.status}`);
+            let detailMsg = '';
+            try {
+              const resJson = await response.json();
+              detailMsg = resJson?.detail?.message || '';
+            } catch (_) {
+              try {
+                const resText = await response.text();
+                detailMsg = resText || '';
+              } catch (__) {}
+            }
+            throw new Error(`ElevenLabs API responded with status ${response.status}${detailMsg ? `: ${detailMsg}` : ''}`);
           }
           const resData = await response.json();
           connectionUrl = resData.signed_url;
-        } catch (fetchErr) {
-          console.error('[RealtimeAgent] Failed to fetch signed URL locally:', fetchErr);
-          throw new Error('Local keys configured but signed URL request failed. Check your internet connection.');
+        } catch (fetchErr: any) {
+          console.warn('[RealtimeAgent] Failed to fetch signed URL locally:', fetchErr);
+          throw new Error(fetchErr.message || 'Local keys configured but signed URL request failed. Check your internet connection.');
         }
       } else {
         console.log('[RealtimeAgent] Attempting to fetch ElevenLabs signed URL from Supabase Edge Function...');
@@ -106,7 +117,7 @@ class RealtimeAgent {
             throw new Error(error?.message || 'Failed to fetch ElevenLabs session URL');
           }
           connectionUrl = data.signed_url;
-        } catch (supabaseErr) {
+        } catch (supabaseErr: any) {
           console.warn('[RealtimeAgent] Supabase connection failed. Falling back to Mock Agent Mode.');
           this.activateMockMode();
           return;
@@ -139,7 +150,7 @@ class RealtimeAgent {
       };
 
       this.ws.onerror = (e) => {
-        console.error('[RealtimeAgent] WebSocket Error:', e);
+        console.warn('[RealtimeAgent] WebSocket Error:', e);
         useCompanionStore.getState().setErrorMessage('Connection error occurred.');
         useCompanionStore.getState().setConnectionState('error');
       };
@@ -149,18 +160,18 @@ class RealtimeAgent {
         useCompanionStore.getState().setConnectionState('idle');
       };
 
-    } catch (err) {
-      console.error('[RealtimeAgent] Failed to connect:', err);
+    } catch (err: any) {
+      console.warn('[RealtimeAgent] Failed to connect:', err);
       console.warn('[RealtimeAgent] Triggering Mock Agent Mode fallback.');
-      this.activateMockMode();
+      this.activateMockMode(err.message || 'Failed to connect to voice agent.');
     }
   }
 
-  private activateMockMode() {
+  private activateMockMode(errorMsg: string | null = null) {
     this.isMockMode = true;
     useCompanionStore.getState().setConnectionState('idle');
-    useCompanionStore.getState().setErrorMessage(null);
-    console.log('[RealtimeAgent] Mock Agent Mode activated.');
+    useCompanionStore.getState().setErrorMessage(errorMsg);
+    console.log('[RealtimeAgent] Mock Agent Mode activated.', errorMsg ? `Error: ${errorMsg}` : '');
   }
 
   public disconnect() {
@@ -185,19 +196,53 @@ class RealtimeAgent {
     }
 
     try {
-      useCompanionStore.getState().setConnectionState('listening');
-      await Audio.requestPermissionsAsync();
+      const permission = await Audio.requestPermissionsAsync();
+      if (permission.status !== 'granted') {
+        useCompanionStore.getState().setErrorMessage('Microphone permission is required to talk to Aurora.');
+        useCompanionStore.getState().setConnectionState('error');
+        return;
+      }
+
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: true,
+        playThroughEarpieceAndroid: false,
       });
 
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
+      // ElevenLabs expects 16kHz PCM (mono). 
+      // On iOS, we can record in WAV format at 16kHz mono.
+      // On Android, MediaRecorder does not support raw PCM/WAV directly, so we fallback to AAC at 16kHz mono.
+      const recordingOptions = {
+        android: {
+          extension: '.m4a',
+          outputFormat: Audio.AndroidOutputFormat.MPEG_4,
+          audioEncoder: Audio.AndroidAudioEncoder.AAC,
+          sampleRate: 16000,
+          numberOfChannels: 1,
+          bitRate: 128000,
+        },
+        ios: {
+          extension: '.wav',
+          audioQuality: Audio.IOSAudioQuality.HIGH,
+          sampleRate: 16000,
+          numberOfChannels: 1,
+          bitRate: 128000,
+          linearPCMBitDepth: 16,
+          linearPCMIsBigEndian: false,
+          linearPCMIsFloat: false,
+        },
+        web: {},
+      };
+
+      const { recording } = await Audio.Recording.createAsync(recordingOptions);
       this.recording = recording;
+      useCompanionStore.getState().setConnectionState('listening');
+      useCompanionStore.getState().setErrorMessage(null);
     } catch (err) {
       console.error('[RealtimeAgent] Failed to start recording:', err);
+      useCompanionStore.getState().setErrorMessage('Failed to access microphone or start recording.');
       useCompanionStore.getState().setConnectionState('error');
     }
   }
@@ -215,8 +260,20 @@ class RealtimeAgent {
       const uri = this.recording.getURI();
       if (!uri) throw new Error('No recording URI');
 
-      const base64 = await FileSystem.readAsStringAsync(uri, { encoding: 'base64' });
+      let base64 = await FileSystem.readAsStringAsync(uri, { encoding: 'base64' });
       
+      // On iOS, since we recorded a WAV file, strip the 44-byte WAV header 
+      // to obtain the raw PCM 16kHz bytes that ElevenLabs expects.
+      if (Platform.OS === 'ios') {
+        try {
+          const binaryString = atob(base64);
+          const rawPcmBinary = binaryString.slice(44);
+          base64 = btoa(rawPcmBinary);
+        } catch (sliceErr) {
+          console.error('[RealtimeAgent] Error slicing WAV header:', sliceErr);
+        }
+      }
+
       // Append a placeholder user transcript
       useCompanionStore.getState().appendTranscript({ role: 'user', text: '🎵 Audio message sent' });
 
@@ -230,6 +287,7 @@ class RealtimeAgent {
       this.currentResponseText = '';
     } catch (err) {
       console.error('[RealtimeAgent] Failed to send recording:', err);
+      useCompanionStore.getState().setErrorMessage('Failed to compile or transmit audio recording.');
       useCompanionStore.getState().setConnectionState('error');
     }
   }

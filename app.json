@@ -12,7 +12,8 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSHealthShareUsageDescription": "Allow Aurora to access your step count and health data to provide personalized insights.",
-        "NSHealthUpdateUsageDescription": "Allow Aurora to log your health data."
+        "NSHealthUpdateUsageDescription": "Allow Aurora to log your health data.",
+        "NSMicrophoneUsageDescription": "Allow Aurora to access your microphone to log health data and talk to your AI companion."
       }
     },
     "android": {
@@ -25,7 +26,8 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "permissions": [
-        "android.permission.health.READ_STEPS"
+        "android.permission.health.READ_STEPS",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
