@@ -31,6 +31,7 @@ import { gradients } from '@/constants/gradients';
 import { radius } from '@/constants/radius';
 import { images } from '@/constants/images';
 import { useAuthStore } from '@/stores/authStore';
+import { PressableScale } from '@/components/animated/PressableScale';
 
 // Simple SVG-free icons using Unicode / Expo vector icons approach
 import { Ionicons } from '@expo/vector-icons';
@@ -125,16 +126,16 @@ export default function LoginScreen() {
           {/* ── Top 55%: fitness illustration + skip link ── */}
           <View style={styles.illustrationWrapper}>
             {/* Skip link — top-right corner */}
-            <TouchableOpacity
+            <PressableScale
               style={styles.skipBtn}
               onPress={() => {
                 setGuestMode(true);
                 router.replace('/(tabs)' as any);
               }}
-              activeOpacity={0.7}
+              scaleDown={0.96}
             >
               <Text style={styles.skipText}>Skip</Text>
-            </TouchableOpacity>
+            </PressableScale>
 
             <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}>
               {/* Central glowing orb behind mascot */}
@@ -236,27 +237,27 @@ export default function LoginScreen() {
               </View>
 
               {/* Forget details */}
-              <TouchableOpacity style={styles.forgotRow} activeOpacity={0.7}>
+              <PressableScale style={styles.forgotRow} scaleDown={0.96}>
                 <Text style={styles.forgotText}>Forget Details?</Text>
-              </TouchableOpacity>
+              </PressableScale>
 
               {/* CTA: circular 56px gradient button + "Create account" link */}
               <View style={styles.ctaRow}>
                 <View style={styles.ctaLeft}>
                   <Text style={styles.ctaLabel}>Sign In</Text>
-                  <TouchableOpacity
+                  <PressableScale
                     onPress={() => router.push('/(auth)/signup')}
-                    activeOpacity={0.7}
+                    scaleDown={0.96}
                   >
                     <Text style={styles.createAccount}>Create account</Text>
-                  </TouchableOpacity>
+                  </PressableScale>
                 </View>
 
                 {/* Circular gradient CTA button */}
-                <TouchableOpacity
+                <PressableScale
                   onPress={handleSignIn}
                   disabled={isLoading}
-                  activeOpacity={0.85}
+                  scaleDown={0.92}
                 >
                   <LinearGradient
                     colors={gradients.ctaButton}
@@ -270,7 +271,7 @@ export default function LoginScreen() {
                       <Ionicons name="arrow-forward" size={24} color="#FFFFFF" />
                     )}
                   </LinearGradient>
-                </TouchableOpacity>
+                </PressableScale>
               </View>
             </View>
           </ScrollView>

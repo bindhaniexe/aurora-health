@@ -7,8 +7,8 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
 } from 'react-native';
+import { PressableScale } from '@/components/animated/PressableScale';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { gradients } from '@/constants/gradients';
@@ -53,10 +53,10 @@ const SleepCard = React.memo(({ lastNight, goalHrs, isLoading, onPress }: SleepC
   }
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.85}
+    <PressableScale
       onPress={onPress}
       style={styles.touchable}
+      scaleDown={0.94}
     >
       <LinearGradient
         colors={gradients.sleepCard}
@@ -105,7 +105,7 @@ const SleepCard = React.memo(({ lastNight, goalHrs, isLoading, onPress }: SleepC
           </View>
         ) : null}
       </LinearGradient>
-    </TouchableOpacity>
+    </PressableScale>
   );
 });
 

@@ -4,14 +4,20 @@ import {
   Text,
   StyleSheet,
   Platform,
-  TouchableOpacity,
-  ScrollView,
   TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import Animated, {
+  useSharedValue,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  interpolate,
+  Extrapolation,
+} from 'react-native-reanimated';
+import { PressableScale } from '@/components/animated/PressableScale';
 import { colors } from '@/constants/colors';
 import { gradients } from '@/constants/gradients';
 import { radius } from '@/constants/radius';
@@ -33,6 +39,7 @@ import { useHealth } from '@/hooks/useHealth';
 import { ScreenTransition } from '@/components/animated/ScreenTransition';
 import { StaggerList } from '@/components/animated/StaggerList';
 import { FloatingOrbs } from '@/components/animated/FloatingOrbs';
+import { SkeletonCard } from '@/components/animated/SkeletonCard';
 
 // ── Dashboard Screen ──────────────────────────────────────────────────────────
 export default function DashboardScreen() {
@@ -77,29 +84,46 @@ export default function DashboardScreen() {
   if (hour < 12) timeOfDay = 'morning';
   else if (hour < 17) timeOfDay = 'afternoon';
 
+  const scrollY = useSharedValue(0);
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
+
+  const headerAnimStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(scrollY.value, [0, 60], [1, 0.7], Extrapolation.CLAMP),
+    transform: [
+      { translateY: interpolate(scrollY.value, [0, 60], [0, -8], Extrapolation.CLAMP) },
+      { scale: interpolate(scrollY.value, [0, 60], [1, 0.96], Extrapolation.CLAMP) }
+    ],
+  }));
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <FloatingOrbs variant="primary" count={3} />
       <ScreenTransition>
-        <ScrollView
+        <Animated.ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
+          onScroll={scrollHandler}
+          scrollEventThrottle={16}
         >
           {/* ── Top Bar ──────────────────────────────────────────────── */}
-          <View style={styles.topBar}>
-            <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
+          <Animated.View style={[styles.topBar, headerAnimStyle]}>
+            <PressableScale style={styles.iconButton}>
               <Ionicons name="grid-outline" size={24} color={colors.textPrimary} />
-            </TouchableOpacity>
+            </PressableScale>
 
             <View style={{ flexDirection: 'row', gap: 12 }}>
-              <TouchableOpacity 
+              <PressableScale 
                 style={styles.iconButton} 
-                activeOpacity={0.7}
                 onPress={() => router.push('/summary')}
               >
                 <Ionicons name="stats-chart" size={20} color={colors.accentPurple} />
-              </TouchableOpacity>
+              </PressableScale>
               <LinearGradient
                 colors={gradients.primary}
                 start={{ x: 0, y: 0 }}
@@ -109,10 +133,10 @@ export default function DashboardScreen() {
                 <Text style={styles.avatarText}>{initials}</Text>
               </LinearGradient>
             </View>
-          </View>
+          </Animated.View>
 
           {/* ── Heading ──────────────────────────────────────────────── */}
-          <Text style={styles.heading}>Good {timeOfDay}, {firstName} 👋</Text>
+          <Animated.Text style={[styles.heading, headerAnimStyle]}>Good {timeOfDay}, {firstName} 👋</Animated.Text>
 
 
 
@@ -121,37 +145,45 @@ export default function DashboardScreen() {
           <View style={styles.cardGrid}>
             <StaggerList staggerDelay={80} childContainerStyle={{ width: '47%' }}>
               {/* Steps card — live data */}
-              <StepsCard 
-                todayTotal={todaySteps}
-                goalSteps={10000}
-                isLoading={isStepsLoading}
-                isGranted={isStepsGranted}
-              />
+              {isStepsLoading ? <SkeletonCard width="100%" /> : (
+                <StepsCard 
+                  todayTotal={todaySteps}
+                  goalSteps={10000}
+                  isLoading={isStepsLoading}
+                  isGranted={isStepsGranted}
+                />
+              )}
 
               {/* Sleep card — live data */}
-              <SleepCard
-                lastNight={lastNight}
-                goalHrs={goalHrs}
-                isLoading={isSleepLoading}
-                onPress={() => router.push('/(tabs)/sleep')}
-              />
+              {isSleepLoading ? <SkeletonCard width="100%" /> : (
+                <SleepCard
+                  lastNight={lastNight}
+                  goalHrs={goalHrs}
+                  isLoading={isSleepLoading}
+                  onPress={() => router.push('/(tabs)/sleep')}
+                />
+              )}
 
               {/* Hydration card — live data */}
-              <HydrationCard
-                todayTotal={todayTotal}
-                goalMl={goalMl}
-                percentage={percentage}
-                isLoading={isHydrationLoading}
-                onPress={() => router.push('/(tabs)/hydration')}
-              />
+              {isHydrationLoading ? <SkeletonCard width="100%" /> : (
+                <HydrationCard
+                  todayTotal={todayTotal}
+                  goalMl={goalMl}
+                  percentage={percentage}
+                  isLoading={isHydrationLoading}
+                  onPress={() => router.push('/(tabs)/hydration')}
+                />
+              )}
 
               {/* Habits card — live data */}
-              <HabitsCard
-                completed={todayCompletions.length}
-                total={habits.length}
-                isLoading={isHabitsLoading}
-                onPress={() => router.push('/(tabs)/habits')}
-              />
+              {isHabitsLoading ? <SkeletonCard width="100%" /> : (
+                <HabitsCard
+                  completed={todayCompletions.length}
+                  total={habits.length}
+                  isLoading={isHabitsLoading}
+                  onPress={() => router.push('/(tabs)/habits')}
+                />
+              )}
             </StaggerList>
           </View>
 
@@ -159,7 +191,7 @@ export default function DashboardScreen() {
           <View style={{ marginTop: 24 }}>
             <StreakCard />
           </View>
-        </ScrollView>
+        </Animated.ScrollView>
       </ScreenTransition>
     </SafeAreaView>
   );

@@ -2,7 +2,8 @@
 // Aurora — Steps placeholder card for the Dashboard 2×2 grid
 
 import React from 'react';
-import { View, Text, StyleSheet, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
+import { PressableScale } from '@/components/animated/PressableScale';
 import Svg, {
   Circle,
   Defs,
@@ -51,10 +52,10 @@ const StepsCard = React.memo(({ todayTotal, goalSteps, isLoading, isGranted, onP
   const formattedSteps = todayTotal.toLocaleString('en-US');
 
   return (
-    <TouchableOpacity
+    <PressableScale
       style={styles.card}
-      activeOpacity={0.85}
       onPress={onPress}
+      scaleDown={0.94}
     >
       {/* ── Icon row ── */}
       <View style={styles.topRow}>
@@ -107,7 +108,7 @@ const StepsCard = React.memo(({ todayTotal, goalSteps, isLoading, isGranted, onP
       <Text style={styles.sub}>
         {isGranted ? `Goal: ${goalSteps.toLocaleString('en-US')}` : 'Needs Permission'}
       </Text>
-    </TouchableOpacity>
+    </PressableScale>
   );
 });
 

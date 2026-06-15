@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors } from '@/constants/colors';
 import { useAuthStore } from '@/stores/authStore';
@@ -134,13 +135,16 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: colors.bgAuth },
-      }}
-    >
-      <Stack.Screen name="summary" options={{ presentation: 'modal' }} />
-    </Stack>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.bgAuth },
+          animation: 'fade',
+        }}
+      >
+        <Stack.Screen name="summary" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+      </Stack>
+    </GestureHandlerRootView>
   );
 }

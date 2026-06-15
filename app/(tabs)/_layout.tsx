@@ -205,7 +205,10 @@ export default function TabsLayout() {
     <ErrorBoundary>
       <Tabs
         tabBar={(props) => <FloatingTabBar {...props} />}
-        screenOptions={{ headerShown: false }}
+        screenOptions={{ 
+          headerShown: false,
+          animation: 'fade' as any, // Supported in newer React Navigation versions
+        }}
       >
         <Tabs.Screen name="index" />
         <Tabs.Screen name="hydration" />

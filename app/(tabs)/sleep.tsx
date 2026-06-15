@@ -13,6 +13,8 @@ import {
   Modal,
   Pressable,
 } from 'react-native';
+import { PressableScale } from '@/components/animated/PressableScale';
+import { AnimatedNumber } from '@/components/animated/AnimatedNumber';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -323,9 +325,11 @@ export default function SleepScreen() {
             <View>
               <Text style={styles.heroLabel}>Last Night</Text>
               {lastNight ? (
-                <Text style={styles.heroHours}>
-                  {fmtHours(lastNight.hours)} Hours
-                </Text>
+                <AnimatedNumber
+                  value={lastNight.hours}
+                  formatter="hours"
+                  style={styles.heroHours}
+                />
               ) : (
                 <Text style={styles.heroEmpty}>Not logged yet</Text>
               )}
@@ -414,14 +418,13 @@ export default function SleepScreen() {
           end={{ x: 1, y: 0 }}
           style={styles.fabGrad}
         >
-          <TouchableOpacity
+          <PressableScale
             style={styles.fab}
             onPress={() => setModalVisible(true)}
-            activeOpacity={0.85}
           >
             <Ionicons name="add" size={20} color="white" />
             <Text style={styles.fabText}>Log Sleep</Text>
-          </TouchableOpacity>
+          </PressableScale>
         </LinearGradient>
       </View>
       </ScreenTransition>

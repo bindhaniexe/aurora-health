@@ -4,6 +4,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withSequence } from 'react-native-reanimated';
+import { PressableScale } from './animated/PressableScale';
 import { colors } from '@/constants/colors';
 import { gradients } from '@/constants/gradients';
 import { radius } from '@/constants/radius';
@@ -16,31 +17,16 @@ interface HabitItemProps {
   onComplete: (id: string) => void;
 }
 
-const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
-
 export default function HabitItem({ id, name, isCompletedToday, streak, onComplete }: HabitItemProps) {
-  const scale = useSharedValue(1);
-
   const handlePress = () => {
     if (isCompletedToday) return; // Prevent double trigger
-    scale.value = withSequence(
-      withSpring(0.9, { damping: 10, stiffness: 400 }),
-      withSpring(1, { damping: 10, stiffness: 400 })
-    );
     onComplete(id);
   };
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: scale.value }],
-    };
-  });
-
   return (
-    <AnimatedTouchableOpacity 
-      activeOpacity={0.8} 
+    <PressableScale 
       onPress={handlePress} 
-      style={[styles.container, animatedStyle]}
+      style={styles.container}
     >
       <View style={styles.leftContent}>
         <Text style={[styles.name, isCompletedToday && styles.nameCompleted]}>
@@ -68,7 +54,7 @@ export default function HabitItem({ id, name, isCompletedToday, streak, onComple
           <View style={styles.emptyCircle} />
         )}
       </View>
-    </AnimatedTouchableOpacity>
+    </PressableScale>
   );
 }
 

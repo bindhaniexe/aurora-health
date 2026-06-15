@@ -12,6 +12,7 @@ import { hydrationService } from '@/services/hydrationService';
 import { sleepService } from '@/services/sleepService';
 import { insightService } from '@/services/insightService';
 import { useHabitStore } from '@/stores/habitStore';
+import { PressableScale } from '@/components/animated/PressableScale';
 
 export default function WeeklySummaryScreen() {
   const router = useRouter();
@@ -76,9 +77,9 @@ export default function WeeklySummaryScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.closeButton}>
+        <PressableScale onPress={() => router.back()} style={styles.closeButton} scaleDown={0.9}>
           <Ionicons name="close" size={24} color={colors.textPrimary} />
-        </TouchableOpacity>
+        </PressableScale>
         <Text style={styles.title}>Weekly Summary</Text>
         <View style={{ width: 24 }} />
       </View>

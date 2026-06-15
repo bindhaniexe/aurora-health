@@ -22,7 +22,6 @@ import {
   View,
   Text,
   Image,
-  Pressable,
   Dimensions,
   ScrollView,
   StyleSheet,
@@ -43,6 +42,7 @@ import Animated, {
   withTiming,
   withRepeat,
   withSequence,
+  withSpring,
   type SharedValue,
 } from 'react-native-reanimated';
 import { colors } from '@/constants/colors';
@@ -50,6 +50,7 @@ import { gradients } from '@/constants/gradients';
 import { radius } from '@/constants/radius';
 import { images } from '@/constants/images';
 import { FloatingOrbs } from '@/components/animated/FloatingOrbs';
+import { PressableScale } from '@/components/animated/PressableScale';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -111,22 +112,14 @@ interface DotProps {
 
 function DotIndicator({ index, scrollX }: DotProps) {
   const dotStyle = useAnimatedStyle(() => {
-    const width = interpolate(
-      scrollX.value,
-      [(index - 1) * SCREEN_WIDTH, index * SCREEN_WIDTH, (index + 1) * SCREEN_WIDTH],
-      [8, 24, 8],
-      Extrapolation.CLAMP
-    );
-    const opacity = interpolate(
-      scrollX.value,
-      [(index - 1) * SCREEN_WIDTH, index * SCREEN_WIDTH, (index + 1) * SCREEN_WIDTH],
-      [0.35, 1, 0.35],
-      Extrapolation.CLAMP
-    );
+    // Determine if this dot is active based on scroll position
+    const isActive = Math.round(scrollX.value / SCREEN_WIDTH) === index;
+    const width = withSpring(isActive ? 24 : 8, { damping: 12, stiffness: 200 });
+    const opacity = withSpring(isActive ? 1 : 0.35, { damping: 15 });
     const backgroundColor = interpolateColor(
       scrollX.value,
-      [0, SCREEN_WIDTH, SCREEN_WIDTH * 2],
-      [colors.accentPurple, colors.accentPurple, colors.accentPurple]
+      [(index - 1) * SCREEN_WIDTH, index * SCREEN_WIDTH, (index + 1) * SCREEN_WIDTH],
+      [colors.textMuted, colors.accentPurple, colors.textMuted]
     );
     return { width, opacity, backgroundColor };
   });
@@ -307,12 +300,13 @@ export default function OnboardingScreen() {
         {/* Header — Skip button */}
         <View style={styles.header}>
           <Animated.View style={skipStyle}>
-            <Pressable
+            <PressableScale
               onPress={handleSkip}
-              style={({ pressed }) => [styles.skipButton, { opacity: pressed ? 0.6 : 1 }]}
+              style={styles.skipButton}
+              scaleDown={0.94}
             >
               <Text style={styles.skipText}>Skip</Text>
-            </Pressable>
+            </PressableScale>
           </Animated.View>
         </View>
 
@@ -344,9 +338,9 @@ export default function OnboardingScreen() {
           </View>
 
           {/* Gradient CTA pill button */}
-          <Pressable
+          <PressableScale
             onPress={handleNext}
-            style={({ pressed }) => [{ opacity: pressed ? 0.92 : 1 }]}
+            scaleDown={0.96}
           >
             <LinearGradient
               colors={gradients.primary}
@@ -359,7 +353,7 @@ export default function OnboardingScreen() {
               </Text>
               <Text style={styles.ctaArrow}>→</Text>
             </LinearGradient>
-          </Pressable>
+          </PressableScale>
 
           {/* Terms micro-copy */}
           <Text style={styles.termsText}>

@@ -10,6 +10,7 @@ import { useProfileStore } from '@/stores/profileStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useRouter } from 'expo-router';
 import { ScreenTransition } from '@/components/animated/ScreenTransition';
+import { PressableScale } from '@/components/animated/PressableScale';
 
 export default function ProfileScreen() {
   const { profile, updateProfile } = useProfileStore();
@@ -88,8 +89,7 @@ export default function ProfileScreen() {
               placeholderTextColor={colors.textMuted}
             />
           </View>
-          
-          <TouchableOpacity onPress={handleSaveGoals} activeOpacity={0.8} style={{ marginTop: 16 }}>
+          <PressableScale onPress={handleSaveGoals} style={{ marginTop: 16 }}>
             <LinearGradient
               colors={gradients.primary}
               start={{ x: 0, y: 0 }}
@@ -98,7 +98,7 @@ export default function ProfileScreen() {
             >
               <Text style={styles.saveButtonText}>Save Goals</Text>
             </LinearGradient>
-          </TouchableOpacity>
+          </PressableScale>
         </View>
 
         {/* Section 2: Account */}
@@ -144,9 +144,9 @@ export default function ProfileScreen() {
             <Text style={styles.value}>1.0.0</Text>
           </View>
           <View style={styles.divider} />
-          <TouchableOpacity style={styles.rowGroup} onPress={handleSignOut}>
+          <PressableScale style={styles.rowGroup} onPress={handleSignOut} scaleDown={0.96}>
             <Text style={[styles.label, { color: colors.error, fontFamily: 'Inter-Medium' }]}>Sign Out</Text>
-          </TouchableOpacity>
+          </PressableScale>
         </View>
       </ScrollView>
       </ScreenTransition>

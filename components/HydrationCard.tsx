@@ -3,7 +3,7 @@
 // Shows today's total, goal, and a small SVG progress ring.
 
 import React from 'react';
-import { View, Text, StyleSheet, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import Svg, {
   Circle,
   Defs,
@@ -13,6 +13,8 @@ import Svg, {
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@/constants/colors';
 import { radius } from '@/constants/radius';
+import { PressableScale } from '@/components/animated/PressableScale';
+import { AnimatedNumber } from '@/components/animated/AnimatedNumber';
 
 interface HydrationCardProps {
   todayTotal: number;    // ml drunk today
@@ -50,11 +52,13 @@ const HydrationCard = React.memo(({
 
   const strokeDash = (percentage / 100) * CIRCUMFERENCE;
 
+  // formatHydration is handled internally by AnimatedNumber now
+
   return (
-    <TouchableOpacity
+    <PressableScale
       style={styles.card}
-      activeOpacity={0.85}
       onPress={onPress}
+      scaleDown={0.94}
     >
       {/* ── Icon row ── */}
       <View style={styles.topRow}>
@@ -94,18 +98,18 @@ const HydrationCard = React.memo(({
       </View>
 
       {/* ── Value ── */}
-      <Text style={styles.value}>
-        {todayTotal >= 1000
-          ? `${(todayTotal / 1000).toFixed(1)}L`
-          : `${todayTotal}ml`}
-      </Text>
+      <AnimatedNumber 
+        value={todayTotal}
+        formatter="hydration"
+        style={styles.value}
+      />
 
       {/* ── Label ── */}
       <Text style={styles.label}>Hydration</Text>
 
       {/* ── Goal progress ── */}
       <Text style={styles.sub}>{percentage}% of {goalMl >= 1000 ? `${goalMl / 1000}L` : `${goalMl}ml`}</Text>
-    </TouchableOpacity>
+    </PressableScale>
   );
 });
 

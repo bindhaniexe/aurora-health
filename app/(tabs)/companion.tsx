@@ -13,6 +13,7 @@ import { realtimeAgent } from '@/lib/realtimeAgent';
 import { FadeIn } from 'react-native-reanimated';
 import { ScreenTransition } from '@/components/animated/ScreenTransition';
 import { FloatingOrbs } from '@/components/animated/FloatingOrbs';
+import { PressableScale } from '@/components/animated/PressableScale';
 
 export default function CompanionScreen() {
   const { connectionState, transcript, errorMessage, clearTranscript } = useCompanionStore();
@@ -61,18 +62,18 @@ export default function CompanionScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Aurora</Text>
         <Text style={styles.subtitle}>Your AI Health Companion</Text>
-        <TouchableOpacity style={styles.clearButton} onPress={clearTranscript}>
+        <PressableScale style={styles.clearButton} onPress={clearTranscript} scaleDown={0.9}>
           <Feather name="trash-2" size={18} color={colors.textSecondary} />
-        </TouchableOpacity>
+        </PressableScale>
       </View>
 
       {errorMessage && errorMessage !== 'Failed to fetch session token' && (
         <View style={styles.errorContainer}>
           <Feather name="alert-circle" size={20} color={colors.error} />
           <Text style={styles.errorText}>{errorMessage}</Text>
-          <TouchableOpacity onPress={() => realtimeAgent.connect()}>
+          <PressableScale onPress={() => realtimeAgent.connect()} scaleDown={0.96}>
             <Text style={styles.retryText}>Retry</Text>
-          </TouchableOpacity>
+          </PressableScale>
         </View>
       )}
 

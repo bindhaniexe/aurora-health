@@ -1,10 +1,10 @@
 // components/WaterBottle.tsx
 // Aurora — Animated SVG water bottle
 // Fill level animates smoothly as user logs water.
-// Uses react-native-svg + standard Animated library for cross-platform compatibility.
+// Uses react-native-svg + Reanimated v3 for smooth cross-platform animations.
 
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, StyleSheet } from 'react-native';
 import Svg, {
   Path,
   Defs,
@@ -13,11 +13,24 @@ import Svg, {
   ClipPath,
   Rect,
   G,
+  Circle,
 } from 'react-native-svg';
+import Animated, {
+  useSharedValue,
+  useAnimatedProps,
+  withTiming,
+  Easing,
+  useAnimatedStyle,
+  withSequence,
+  withSpring,
+  withDelay,
+} from 'react-native-reanimated';
 import { colors } from '@/constants/colors';
+import { AnimatedNumber } from './animated/AnimatedNumber';
 
-// Create an Animated version of SVG Rect so we can animate its props
 const AnimatedRect = Animated.createAnimatedComponent(Rect);
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+const AnimatedView = Animated.createAnimatedComponent(View);
 
 interface WaterBottleProps {
   /** 0–100 fill percentage */
@@ -36,70 +49,102 @@ const FILL_TOP = 42;       // top of fillable area in SVG units
 const FILL_BOTTOM = 178;   // bottom of fillable area in SVG units
 const MAX_FILL_H = FILL_BOTTOM - FILL_TOP; // 136
 
-/**
- * Bottle body path:
- *   Shoulders from neck (x=18,y=40 → x=82,y=40)
- *   Sides taper slightly
- *   Rounded bottom
- */
 const BOTTLE_BODY_PATH =
   'M18,40 Q10,44 10,54 L10,172 Q10,188 26,188 L74,188 Q90,188 90,172 L90,54 Q90,44 82,40 Z';
 
 export default function WaterBottle({ filledPercent, size = 150 }: WaterBottleProps) {
   const svgHeight = (size / VB_W) * VB_H;
 
-  // Animated Value (0 to 1) representing the fill fraction
-  const fillAnim = useRef(new Animated.Value(0)).current;
+  const target = Math.max(0, Math.min(100, filledPercent));
+  
+  const fillAnim = useSharedValue(0);
+  const rippleScale = useSharedValue(0);
+  const rippleOpacity = useSharedValue(0);
+  const bottleScale = useSharedValue(1);
+  
+  const prevFilledPercent = useRef(0);
 
   useEffect(() => {
-    const target = Math.max(0, Math.min(1, filledPercent / 100));
-    Animated.timing(fillAnim, {
-      toValue: target,
+    // Fill animation
+    fillAnim.value = withTiming(target / 100, {
       duration: 800,
       easing: Easing.out(Easing.cubic),
-      useNativeDriver: false, // SVG property animation must run on JS thread
-    }).start();
-  }, [filledPercent, fillAnim]);
+    });
 
-  // Interpolate y and height for the Rect fill from bottom to top
-  const animatedY = fillAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [FILL_TOP + MAX_FILL_H, FILL_TOP],
+    // Ripple effect on add
+    if (target > prevFilledPercent.current && target <= 100) {
+      rippleScale.value = 0;
+      rippleOpacity.value = 1;
+      rippleScale.value = withTiming(2, { duration: 600, easing: Easing.out(Easing.quad) });
+      rippleOpacity.value = withTiming(0, { duration: 600, easing: Easing.out(Easing.quad) });
+    }
+
+    // Bounce on completion
+    if (target >= 100 && prevFilledPercent.current < 100) {
+      bottleScale.value = withSequence(
+        withTiming(1.05, { duration: 150 }),
+        withTiming(0.98, { duration: 150 }),
+        withSpring(1, { damping: 10, stiffness: 100 })
+      );
+    }
+    
+    prevFilledPercent.current = target;
+  }, [target, fillAnim, rippleScale, rippleOpacity, bottleScale]);
+
+  const animatedProps = useAnimatedProps(() => {
+    const y = FILL_TOP + MAX_FILL_H - fillAnim.value * MAX_FILL_H;
+    const h = fillAnim.value * MAX_FILL_H;
+    return {
+      y,
+      height: h,
+    };
   });
 
-  const animatedHeight = fillAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, MAX_FILL_H],
+  const rippleProps = useAnimatedProps(() => {
+    const y = FILL_TOP + MAX_FILL_H - fillAnim.value * MAX_FILL_H;
+    return {
+      cy: y,
+      r: 30 * rippleScale.value,
+      opacity: rippleOpacity.value,
+    };
   });
+
+  const bottleAnimStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: bottleScale.value }]
+  }));
 
   return (
-    <View style={[styles.container, { width: size, height: svgHeight }]}>
+    <AnimatedView style={[styles.container, { width: size, height: svgHeight }, bottleAnimStyle]}>
       <Svg width={size} height={svgHeight} viewBox={`0 0 ${VB_W} ${VB_H}`}>
         <Defs>
-          {/* Gradient for water: deep violet → mid purple → hot pink (top → bottom) */}
           <SvgLinearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
             <Stop offset="0"   stopColor="#6D28D9" stopOpacity="1" />
             <Stop offset="0.5" stopColor="#A855F7" stopOpacity="1" />
             <Stop offset="1"   stopColor="#EC4899" stopOpacity="1" />
           </SvgLinearGradient>
 
-          {/* Clip path: bottle body shape — water is clipped to this */}
           <ClipPath id="bottleClip">
             <Path d={BOTTLE_BODY_PATH} />
           </ClipPath>
         </Defs>
 
-        {/* ── Empty bottle background (soft lavender) ── */}
+        {/* ── Empty bottle background ── */}
         <Path d={BOTTLE_BODY_PATH} fill="#EDE9FE" />
 
-        {/* ── Animated water fill, clipped to bottle shape ── */}
+        {/* ── Animated water fill ── */}
         <G clipPath="url(#bottleClip)">
           <AnimatedRect
             x={FILL_X - 2}
             width={VB_W - (FILL_X - 2) * 2}
             fill="url(#waterGrad)"
-            y={animatedY}
-            height={animatedHeight}
+            animatedProps={animatedProps}
+          />
+          
+          {/* Ripple Effect */}
+          <AnimatedCircle
+            cx={VB_W / 2}
+            fill="rgba(255,255,255,0.4)"
+            animatedProps={rippleProps}
           />
         </G>
 
@@ -154,9 +199,13 @@ export default function WaterBottle({ filledPercent, size = 150 }: WaterBottlePr
           { bottom: svgHeight * 0.30 },
         ]}
       >
-        <Text style={styles.percentText}>{Math.round(filledPercent)}%</Text>
+        <AnimatedNumber
+          value={target}
+          suffix="%"
+          style={styles.percentText}
+        />
       </View>
-    </View>
+    </AnimatedView>
   );
 }
 

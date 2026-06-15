@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import Animated, {
@@ -9,45 +9,41 @@ import Animated, {
   withTiming,
   withSequence,
   Easing,
+  withDelay,
 } from 'react-native-reanimated';
 import { gradients } from '@/constants/gradients';
 import { colors } from '@/constants/colors';
 import { radius } from '@/constants/radius';
 import { CompanionState } from '@/stores/companionStore';
+import { PressableScale } from './animated/PressableScale';
 
 interface MicButtonProps {
   state: CompanionState;
   onPress: () => void;
 }
 
+const BUTTON_SIZE = 64;
+
 export function MicButton({ state, onPress }: MicButtonProps) {
-  const pulseScale = useSharedValue(1);
-  const pulseOpacity = useSharedValue(0.5);
   const spinRotation = useSharedValue(0);
 
-  useEffect(() => {
-    if (state === 'listening') {
-      pulseScale.value = withRepeat(
-        withSequence(
-          withTiming(1.4, { duration: 1000, easing: Easing.inOut(Easing.ease) }),
-          withTiming(1, { duration: 1000, easing: Easing.inOut(Easing.ease) })
-        ),
-        -1,
-        true
-      );
-      pulseOpacity.value = withRepeat(
-        withSequence(
-          withTiming(0, { duration: 1000, easing: Easing.inOut(Easing.ease) }),
-          withTiming(0.4, { duration: 1000, easing: Easing.inOut(Easing.ease) })
-        ),
-        -1,
-        true
-      );
-    } else {
-      pulseScale.value = withTiming(1);
-      pulseOpacity.value = withTiming(0);
-    }
+  // 3 Rings for listening state
+  const ring1Scale = useSharedValue(1);
+  const ring1Opac = useSharedValue(0);
+  const ring2Scale = useSharedValue(1);
+  const ring2Opac = useSharedValue(0);
+  const ring3Scale = useSharedValue(1);
+  const ring3Opac = useSharedValue(0);
 
+  // 5 Bars for speaking state
+  const bar1H = useSharedValue(4);
+  const bar2H = useSharedValue(4);
+  const bar3H = useSharedValue(4);
+  const bar4H = useSharedValue(4);
+  const bar5H = useSharedValue(4);
+
+  useEffect(() => {
+    // Processing spin
     if (state === 'processing') {
       spinRotation.value = withRepeat(
         withTiming(360, { duration: 1000, easing: Easing.linear }),
@@ -57,16 +53,84 @@ export function MicButton({ state, onPress }: MicButtonProps) {
     } else {
       spinRotation.value = 0;
     }
-  }, [state]);
 
-  const pulseStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: pulseScale.value }],
-    opacity: pulseOpacity.value,
-  }));
+    // Listening rings
+    if (state === 'listening') {
+      const ringAnim = (scale: Animated.SharedValue<number>, opac: Animated.SharedValue<number>, delay: number) => {
+        scale.value = withDelay(
+          delay,
+          withRepeat(
+            withTiming(1.3, { duration: 1200, easing: Easing.out(Easing.ease) }),
+            -1,
+            false
+          )
+        );
+        opac.value = withDelay(
+          delay,
+          withRepeat(
+            withSequence(
+              withTiming(1, { duration: 0 }),
+              withTiming(0, { duration: 1200, easing: Easing.out(Easing.ease) })
+            ),
+            -1,
+            false
+          )
+        );
+      };
+      
+      ringAnim(ring1Scale, ring1Opac, 0);
+      ringAnim(ring2Scale, ring2Opac, 400);
+      ringAnim(ring3Scale, ring3Opac, 800);
+    } else {
+      ring1Scale.value = 1; ring1Opac.value = 0;
+      ring2Scale.value = 1; ring2Opac.value = 0;
+      ring3Scale.value = 1; ring3Opac.value = 0;
+    }
+
+    // Speaking waveform
+    if (state === 'speaking') {
+      const animateBar = (bar: Animated.SharedValue<number>, delay: number, duration: number) => {
+        bar.value = withDelay(
+          delay,
+          withRepeat(
+            withSequence(
+              withTiming(28, { duration, easing: Easing.inOut(Easing.ease) }),
+              withTiming(4, { duration, easing: Easing.inOut(Easing.ease) })
+            ),
+            -1,
+            true
+          )
+        );
+      };
+      
+      animateBar(bar1H, 0, 400);
+      animateBar(bar2H, 100, 300);
+      animateBar(bar3H, 200, 500);
+      animateBar(bar4H, 150, 350);
+      animateBar(bar5H, 50, 450);
+    } else {
+      bar1H.value = withTiming(4);
+      bar2H.value = withTiming(4);
+      bar3H.value = withTiming(4);
+      bar4H.value = withTiming(4);
+      bar5H.value = withTiming(4);
+    }
+  }, [state]);
 
   const spinStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${spinRotation.value}deg` }],
   }));
+
+  const getRingStyle = (scale: Animated.SharedValue<number>, opac: Animated.SharedValue<number>) => 
+    useAnimatedStyle(() => ({
+      transform: [{ scale: scale.value }],
+      opacity: opac.value,
+    }));
+
+  const getBarStyle = (height: Animated.SharedValue<number>) => 
+    useAnimatedStyle(() => ({
+      height: height.value,
+    }));
 
   const getGradientColors = () => {
     switch (state) {
@@ -82,7 +146,6 @@ export function MicButton({ state, onPress }: MicButtonProps) {
     switch (state) {
       case 'error': return 'alert-circle';
       case 'processing': return 'loader';
-      case 'speaking': return 'volume-2';
       case 'listening': return 'mic';
       default: return 'mic';
     }
@@ -90,9 +153,12 @@ export function MicButton({ state, onPress }: MicButtonProps) {
 
   return (
     <View style={styles.container}>
-      <Animated.View style={[styles.pulseRing, pulseStyle, { backgroundColor: colors.gradientMid }]} />
-      
-      <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={styles.buttonWrapper}>
+      {/* Listening Rings */}
+      <Animated.View style={[styles.pulseRing, getRingStyle(ring1Scale, ring1Opac)]} />
+      <Animated.View style={[styles.pulseRing, getRingStyle(ring2Scale, ring2Opac)]} />
+      <Animated.View style={[styles.pulseRing, getRingStyle(ring3Scale, ring3Opac)]} />
+
+      <PressableScale onPress={onPress} scaleDown={0.92} style={styles.buttonWrapper}>
         <Animated.View style={state === 'processing' ? spinStyle : undefined}>
           <LinearGradient
             colors={getGradientColors()}
@@ -100,10 +166,20 @@ export function MicButton({ state, onPress }: MicButtonProps) {
             end={{ x: 1, y: 1 }}
             style={styles.gradientCircle}
           >
-            <Feather name={getIcon()} size={28} color="#FFFFFF" />
+            {state === 'speaking' ? (
+              <View style={styles.waveform}>
+                <Animated.View style={[styles.bar, getBarStyle(bar1H), { backgroundColor: '#E9D5FF' }]} />
+                <Animated.View style={[styles.bar, getBarStyle(bar2H), { backgroundColor: '#D8B4FE' }]} />
+                <Animated.View style={[styles.bar, getBarStyle(bar3H), { backgroundColor: '#C084FC' }]} />
+                <Animated.View style={[styles.bar, getBarStyle(bar4H), { backgroundColor: '#A855F7' }]} />
+                <Animated.View style={[styles.bar, getBarStyle(bar5H), { backgroundColor: '#9333EA' }]} />
+              </View>
+            ) : (
+              <Feather name={getIcon()} size={28} color="#FFFFFF" />
+            )}
           </LinearGradient>
         </Animated.View>
-      </TouchableOpacity>
+      </PressableScale>
     </View>
   );
 }
@@ -112,8 +188,8 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 100,
-    height: 100,
+    width: BUTTON_SIZE * 2,
+    height: BUTTON_SIZE * 2,
   },
   buttonWrapper: {
     zIndex: 10,
@@ -124,17 +200,29 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   gradientCircle: {
-    width: 64,
-    height: 64,
+    width: BUTTON_SIZE,
+    height: BUTTON_SIZE,
     borderRadius: radius.full,
     alignItems: 'center',
     justifyContent: 'center',
   },
   pulseRing: {
     position: 'absolute',
-    width: 64,
-    height: 64,
+    width: BUTTON_SIZE,
+    height: BUTTON_SIZE,
     borderRadius: radius.full,
+    backgroundColor: gradients.primary[0],
+    opacity: 0.3,
     zIndex: 1,
+  },
+  waveform: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    height: 32, // container height
+  },
+  bar: {
+    width: 4,
+    borderRadius: 2,
   },
 });

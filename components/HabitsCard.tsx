@@ -2,7 +2,9 @@
 // Aurora — Habits summary card for the Dashboard 2×2 grid
 
 import React from 'react';
-import { View, Text, StyleSheet, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
+import { PressableScale } from '@/components/animated/PressableScale';
+import { AnimatedNumber } from '@/components/animated/AnimatedNumber';
 import Svg, {
   Circle,
   Defs,
@@ -49,10 +51,10 @@ const HabitsCard = React.memo(({
   const strokeDash = (percentage / 100) * CIRCUMFERENCE;
 
   return (
-    <TouchableOpacity
+    <PressableScale
       style={styles.card}
-      activeOpacity={0.85}
       onPress={onPress}
+      scaleDown={0.94}
     >
       {/* ── Icon row ── */}
       <View style={styles.topRow}>
@@ -92,9 +94,11 @@ const HabitsCard = React.memo(({
       </View>
 
       {/* ── Value ── */}
-      <Text style={styles.value}>
-        {completed} / {total} done
-      </Text>
+      <AnimatedNumber
+        value={completed}
+        suffix={` / ${total} done`}
+        style={styles.value}
+      />
 
       {/* ── Label ── */}
       <Text style={styles.label}>Habits Today</Text>
@@ -103,7 +107,7 @@ const HabitsCard = React.memo(({
       <Text style={styles.sub}>
         {percentage === 100 && total > 0 ? 'All done! 🎉' : 'completed today'}
       </Text>
-    </TouchableOpacity>
+    </PressableScale>
   );
 });
 

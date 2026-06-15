@@ -11,6 +11,7 @@ import { gradients } from '@/constants/gradients';
 import { radius } from '@/constants/radius';
 import { ScreenTransition } from '@/components/animated/ScreenTransition';
 import { StaggerList } from '@/components/animated/StaggerList';
+import { PressableScale } from '@/components/animated/PressableScale';
 
 export default function HabitsScreen() {
   const { habits, addHabit, completeHabit } = useHabits();
@@ -89,9 +90,8 @@ export default function HabitsScreen() {
       </ScrollView>
 
       {/* FAB */}
-      <TouchableOpacity 
+      <PressableScale 
         style={styles.fabContainer} 
-        activeOpacity={0.8}
         onPress={() => setModalVisible(true)}
       >
         <LinearGradient
@@ -103,7 +103,7 @@ export default function HabitsScreen() {
           <Ionicons name="add" size={24} color={colors.textOnGradient} />
           <Text style={styles.fabText}>Add Habit</Text>
         </LinearGradient>
-      </TouchableOpacity>
+      </PressableScale>
       </ScreenTransition>
 
       {/* Add Habit Modal */}
@@ -120,9 +120,9 @@ export default function HabitsScreen() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>New Habit</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
+              <PressableScale onPress={() => setModalVisible(false)} haptic="light">
                 <Ionicons name="close" size={24} color={colors.textPrimary} />
-              </TouchableOpacity>
+              </PressableScale>
             </View>
 
             <View style={styles.inputGroup}>
@@ -140,36 +140,37 @@ export default function HabitsScreen() {
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Frequency</Text>
               <View style={styles.frequencyRow}>
-                <TouchableOpacity
+                <PressableScale
                   style={[
                     styles.freqBtn,
                     newHabitFrequency === 'daily' && styles.freqBtnActive
                   ]}
                   onPress={() => setNewHabitFrequency('daily')}
+                  scaleDown={0.96}
                 >
                   <Text style={[
                     styles.freqBtnText,
                     newHabitFrequency === 'daily' && styles.freqBtnTextActive
                   ]}>Daily</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
+                </PressableScale>
+                <PressableScale
                   style={[
                     styles.freqBtn,
                     newHabitFrequency === 'weekly' && styles.freqBtnActive
                   ]}
                   onPress={() => setNewHabitFrequency('weekly')}
+                  scaleDown={0.96}
                 >
                   <Text style={[
                     styles.freqBtnText,
                     newHabitFrequency === 'weekly' && styles.freqBtnTextActive
                   ]}>Weekly</Text>
-                </TouchableOpacity>
+                </PressableScale>
               </View>
             </View>
 
-            <TouchableOpacity 
+            <PressableScale 
               style={styles.saveBtnContainer} 
-              activeOpacity={0.8}
               onPress={handleSaveHabit}
             >
               <LinearGradient
@@ -180,7 +181,7 @@ export default function HabitsScreen() {
               >
                 <Text style={styles.saveBtnText}>Save Habit</Text>
               </LinearGradient>
-            </TouchableOpacity>
+            </PressableScale>
           </View>
         </KeyboardAvoidingView>
       </Modal>

@@ -24,6 +24,7 @@ import { gradients } from '@/constants/gradients';
 import { radius } from '@/constants/radius';
 import { images } from '@/constants/images';
 import { useAuthStore } from '@/stores/authStore';
+import { PressableScale } from '@/components/animated/PressableScale';
 
 export default function SignupScreen() {
   const [name, setName] = useState('');
@@ -214,19 +215,19 @@ export default function SignupScreen() {
               <View style={styles.ctaRow}>
                 <View style={styles.ctaLeft}>
                   <Text style={styles.ctaLabel}>Get Started</Text>
-                  <TouchableOpacity
+                  <PressableScale
                     onPress={() => router.back()}
-                    activeOpacity={0.7}
+                    scaleDown={0.96}
                   >
                     <Text style={styles.loginLink}>Already have an account?</Text>
-                  </TouchableOpacity>
+                  </PressableScale>
                 </View>
 
                 {/* Circular gradient CTA button */}
-                <TouchableOpacity
+                <PressableScale
                   onPress={handleSignUp}
                   disabled={isLoading}
-                  activeOpacity={0.85}
+                  scaleDown={0.92}
                 >
                   <LinearGradient
                     colors={gradients.ctaButton}
@@ -240,7 +241,7 @@ export default function SignupScreen() {
                       <Ionicons name="arrow-forward" size={24} color="#FFFFFF" />
                     )}
                   </LinearGradient>
-                </TouchableOpacity>
+                </PressableScale>
               </View>
             </View>
           </ScrollView>

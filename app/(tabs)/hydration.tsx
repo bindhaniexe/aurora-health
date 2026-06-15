@@ -7,8 +7,6 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
-  ScrollView,
   ActivityIndicator,
   Alert,
 } from 'react-native';
@@ -25,6 +23,15 @@ import { HydrationLog } from '@/types';
 import { useAuthStore } from '@/stores/authStore';
 import { ScreenTransition } from '@/components/animated/ScreenTransition';
 import { StaggerList } from '@/components/animated/StaggerList';
+import Animated, {
+  useSharedValue,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  interpolate,
+  Extrapolation,
+} from 'react-native-reanimated';
+import { PressableScale } from '@/components/animated/PressableScale';
+import { AnimatedNumber } from '@/components/animated/AnimatedNumber';
 
 // ── Quick add presets ─────────────────────────────────────────────────────────
 const QUICK_ADD = [
@@ -118,24 +125,44 @@ export default function HydrationScreen() {
     );
   }, [resetToday]);
 
+  const scrollY = useSharedValue(0);
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
+
+  const headerAnimStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(scrollY.value, [0, 60], [1, 0.7], Extrapolation.CLAMP),
+    transform: [
+      { translateY: interpolate(scrollY.value, [0, 60], [0, -8], Extrapolation.CLAMP) },
+      { scale: interpolate(scrollY.value, [0, 60], [1, 0.96], Extrapolation.CLAMP) }
+    ],
+  }));
+
+  // formatHydration is handled internally by AnimatedNumber now
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScreenTransition>
-        <ScrollView
+        <Animated.ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
+          onScroll={scrollHandler}
+          scrollEventThrottle={16}
         >
         {/* ── Header ──────────────────────────────────────────────── */}
-        <View style={styles.header}>
+        <Animated.View style={[styles.header, headerAnimStyle]}>
           <View>
-            <Text style={styles.heading}>Today&apos;s Hydration</Text>
+            <Animated.Text style={[styles.heading, headerAnimStyle]}>Today&apos;s Hydration</Animated.Text>
             <Text style={styles.dateLabel}>{getTodayLabel()}</Text>
           </View>
-          <TouchableOpacity style={styles.resetBtn} onPress={handleReset} activeOpacity={0.7}>
+          <PressableScale style={styles.resetBtn} onPress={handleReset}>
             <Ionicons name="refresh-outline" size={18} color={colors.textSecondary} />
-          </TouchableOpacity>
-        </View>
+          </PressableScale>
+        </Animated.View>
 
         {/* ── Error banner ─────────────────────────────────────────── */}
         {error && (
@@ -159,11 +186,11 @@ export default function HydrationScreen() {
 
           {/* ── Volume label ── */}
           <View style={styles.volumeRow}>
-            <Text style={styles.volumeTotal}>
-              {todayTotal >= 1000
-                ? `${(todayTotal / 1000).toFixed(1)} L`
-                : `${todayTotal} ml`}
-            </Text>
+            <AnimatedNumber
+              value={todayTotal}
+              formatter="hydration"
+              style={styles.volumeTotal}
+            />
             <Text style={styles.volumeSeparator}> of </Text>
             <Text style={styles.volumeGoal}>
               {goalMl >= 1000 ? `${goalMl / 1000} L` : `${goalMl} ml`}
@@ -191,9 +218,8 @@ export default function HydrationScreen() {
           <View style={styles.quickAddRow}>
             <StaggerList staggerDelay={60} childContainerStyle={{ flex: 1 }}>
               {QUICK_ADD.map(({ label, amount }) => (
-                <TouchableOpacity
+                <PressableScale
                   key={amount}
-                  activeOpacity={0.85}
                   onPress={() => handleAddWater(amount)}
                   style={styles.quickAddWrapper}
                 >
@@ -206,7 +232,7 @@ export default function HydrationScreen() {
                     <Ionicons name="add" size={16} color={colors.textOnGradient} />
                     <Text style={styles.quickAddText}>{label}</Text>
                   </LinearGradient>
-                </TouchableOpacity>
+                </PressableScale>
               ))}
             </StaggerList>
           </View>
@@ -240,7 +266,7 @@ export default function HydrationScreen() {
             logs.map((log) => <LogItem key={log.id} log={log} />)
           )}
         </View>
-        </ScrollView>
+        </Animated.ScrollView>
       </ScreenTransition>
     </SafeAreaView>
   );
