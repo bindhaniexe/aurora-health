@@ -244,7 +244,7 @@ export default function TabsLayout() {
         tabBar={(props) => <FloatingTabBar {...props} />}
         screenOptions={{ 
           headerShown: false,
-          animation: 'shift', // Smooth horizontal slide between tab screens in React Navigation v7
+          animation: 'none', // Instant tab screen switching to prevent trailing slide-shadow artifacts
         }}
       >
         <Tabs.Screen name="index" />
