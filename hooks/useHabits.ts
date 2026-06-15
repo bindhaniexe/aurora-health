@@ -18,7 +18,8 @@ export function useHabits() {
     isLoading, 
     fetchHabits, 
     addHabit, 
-    completeHabit 
+    completeHabit,
+    deleteHabit
   } = useHabitStore();
 
   useEffect(() => {
@@ -42,6 +43,7 @@ export function useHabits() {
     isLoading,
     addHabit,
     completeHabit,
+    deleteHabit,
     fetchHabits, // expose just in case for manual refresh
   };
 }

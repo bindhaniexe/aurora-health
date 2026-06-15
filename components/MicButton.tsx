@@ -10,6 +10,7 @@ import Animated, {
   withSequence,
   Easing,
   withDelay,
+  SharedValue,
 } from 'react-native-reanimated';
 import { gradients } from '@/constants/gradients';
 import { colors } from '@/constants/colors';
@@ -56,7 +57,7 @@ export function MicButton({ state, onPress }: MicButtonProps) {
 
     // Listening rings
     if (state === 'listening') {
-      const ringAnim = (scale: Animated.SharedValue<number>, opac: Animated.SharedValue<number>, delay: number) => {
+      const ringAnim = (scale: SharedValue<number>, opac: SharedValue<number>, delay: number) => {
         scale.value = withDelay(
           delay,
           withRepeat(
@@ -89,7 +90,7 @@ export function MicButton({ state, onPress }: MicButtonProps) {
 
     // Speaking waveform
     if (state === 'speaking') {
-      const animateBar = (bar: Animated.SharedValue<number>, delay: number, duration: number) => {
+      const animateBar = (bar: SharedValue<number>, delay: number, duration: number) => {
         bar.value = withDelay(
           delay,
           withRepeat(
@@ -121,13 +122,13 @@ export function MicButton({ state, onPress }: MicButtonProps) {
     transform: [{ rotate: `${spinRotation.value}deg` }],
   }));
 
-  const getRingStyle = (scale: Animated.SharedValue<number>, opac: Animated.SharedValue<number>) => 
+  const getRingStyle = (scale: SharedValue<number>, opac: SharedValue<number>) => 
     useAnimatedStyle(() => ({
       transform: [{ scale: scale.value }],
       opacity: opac.value,
     }));
 
-  const getBarStyle = (height: Animated.SharedValue<number>) => 
+  const getBarStyle = (height: SharedValue<number>) => 
     useAnimatedStyle(() => ({
       height: height.value,
     }));

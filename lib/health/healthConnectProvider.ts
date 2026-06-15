@@ -3,7 +3,7 @@ import {
   requestPermission,
   readRecords,
   getSdkStatus,
-  SdkAvailableStatus,
+  SdkAvailabilityStatus,
   Permission,
 } from 'react-native-health-connect';
 import { DailyStepData, HealthProvider, WeeklyStepData } from './types';
@@ -18,7 +18,7 @@ export const healthConnectProvider: HealthProvider = {
     if (Platform.OS !== 'android') return false;
     try {
       const status = await getSdkStatus();
-      return status === SdkAvailableStatus.SDK_AVAILABLE;
+      return status === SdkAvailabilityStatus.SDK_AVAILABLE;
     } catch (e) {
       console.error('[HealthConnect] isAvailable error:', e);
       return false;

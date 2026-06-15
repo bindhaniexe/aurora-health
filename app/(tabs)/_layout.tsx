@@ -184,9 +184,9 @@ function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   );
 }
 
-class ErrorBoundary extends Component {
-  state = { hasError: false, error: null };
-  static getDerivedStateFromError(error) { return { hasError: true, error }; }
+class ErrorBoundary extends Component<{ children: React.ReactNode }> {
+  state = { hasError: false, error: null as any };
+  static getDerivedStateFromError(error: any) { return { hasError: true, error }; }
   render() {
     if (this.state.hasError) {
       return (

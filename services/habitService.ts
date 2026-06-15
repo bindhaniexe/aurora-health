@@ -240,5 +240,36 @@ export const habitService = {
     }
 
     return streak;
+  },
+
+  /**
+   * Soft-delete a habit.
+   */
+  async deleteHabit(habitId: string): Promise<void> {
+    const user = await getAuthenticatedUser();
+
+    if (!user) {
+      const existing = await AsyncStorage.getItem(LOCAL_HABITS_KEY);
+      if (existing) {
+        const allHabits: Habit[] = JSON.parse(existing);
+        const updatedHabits = allHabits.map(h => 
+          h.id === habitId ? { ...h, is_active: false } : h
+        );
+        await AsyncStorage.setItem(LOCAL_HABITS_KEY, JSON.stringify(updatedHabits));
+      }
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('habits')
+        .update({ is_active: false })
+        .eq('id', habitId);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('HabitService deleteHabit error:', error);
+      throw new Error('Something went wrong deleting your habit. Please try again.');
+    }
   }
 };

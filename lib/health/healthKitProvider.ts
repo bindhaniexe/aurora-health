@@ -98,7 +98,7 @@ export const healthKitProvider: HealthProvider = {
   },
 
   subscribeToStepUpdates(callback: (steps: number) => void): () => void {
-    AppleHealthKit.initStepCountObserver({}, () => {});
+    (AppleHealthKit as any).initStepCountObserver({}, () => {});
     const HealthkitEventEmitter = new NativeEventEmitter(NativeModules.AppleHealthKit);
     const subscription = HealthkitEventEmitter.addListener(
       'observer',

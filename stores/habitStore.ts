@@ -14,6 +14,7 @@ interface HabitState {
   fetchHabits: () => Promise<void>;
   addHabit: (name: string, frequency: 'daily' | 'weekly') => Promise<void>;
   completeHabit: (habitId: string) => Promise<void>;
+  deleteHabit: (habitId: string) => Promise<void>;
 }
 
 export const useHabitStore = create<HabitState>((set, get) => ({
@@ -107,6 +108,31 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         todayCompletions,
         streaks,
       });
+    }
+  },
+
+  deleteHabit: async (habitId: string) => {
+    const { habits, streaks } = get();
+    
+    // Save current state for potential rollback
+    const originalHabits = habits;
+    const originalStreaks = { ...streaks };
+    
+    // Optimistic update: remove the habit from active list
+    set({
+      habits: habits.filter(h => h.id !== habitId),
+    });
+    
+    try {
+      await habitService.deleteHabit(habitId);
+    } catch (error) {
+      console.error('Error deleting habit:', error);
+      // Rollback on failure
+      set({
+        habits: originalHabits,
+        streaks: originalStreaks
+      });
+      throw error;
     }
   },
 }));

@@ -1,12 +1,12 @@
 import React from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
+import { View, StyleSheet, Platform, DimensionValue } from 'react-native';
 import { SkeletonPulse } from './SkeletonPulse';
 import { colors } from '@/constants/colors';
 import { radius } from '@/constants/radius';
 
 interface SkeletonCardProps {
-  width?: number | string;
-  height?: number | string;
+  width?: DimensionValue;
+  height?: DimensionValue;
 }
 
 export function SkeletonCard({ width = '48%', height = 120 }: SkeletonCardProps) {

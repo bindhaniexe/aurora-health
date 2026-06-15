@@ -1,9 +1,10 @@
 // app/(tabs)/habits.tsx
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput, Platform, KeyboardAvoidingView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Modal, TextInput, Platform, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useHabits } from '@/hooks/useHabits';
 import HabitItem from '@/components/HabitItem';
 import { colors } from '@/constants/colors';
@@ -12,7 +13,6 @@ import { radius } from '@/constants/radius';
 import { ScreenTransition } from '@/components/animated/ScreenTransition';
 import { StaggerList } from '@/components/animated/StaggerList';
 import { PressableScale } from '@/components/animated/PressableScale';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const HABIT_SUGGESTIONS = [
   'Drink water',
@@ -26,7 +26,7 @@ const HABIT_SUGGESTIONS = [
 ];
 
 export default function HabitsScreen() {
-  const { habits, addHabit, completeHabit } = useHabits();
+  const { habits, addHabit, completeHabit, deleteHabit } = useHabits();
   const [modalVisible, setModalVisible] = useState(false);
   const [newHabitName, setNewHabitName] = useState('');
   const [newHabitFrequency, setNewHabitFrequency] = useState<'daily' | 'weekly'>('daily');
@@ -50,176 +50,176 @@ export default function HabitsScreen() {
   const todayStr = new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'short', day: 'numeric' }).format(new Date());
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScreenTransition>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.dateText}>{todayStr}</Text>
-          <Text style={styles.title}>My Habits</Text>
-        </View>
-
-        {/* Progress Card */}
-        <View style={styles.progressCard}>
-          <Text style={styles.progressText}>
-            {completedTodayCount} of {totalCount} done today
-          </Text>
-          <View style={styles.progressBarTrack}>
-            <LinearGradient
-              colors={gradients.progressBar}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={[styles.progressBarFill, { width: `${progressPct}%` }]}
-            />
-          </View>
-        </View>
-
-        {/* Habits List */}
-        {totalCount === 0 ? (
-          <View style={styles.emptyState}>
-            <View style={styles.emptyIconContainer}>
-              <Ionicons name="leaf-outline" size={32} color={colors.textSecondary} />
-            </View>
-            <Text style={styles.emptyText}>No habits yet.</Text>
-            <Text style={styles.emptySubtext}>Let&apos;s build your first one.</Text>
-          </View>
-        ) : (
-          <View style={styles.list}>
-            <StaggerList staggerDelay={70}>
-              {habits.map(habit => (
-                <HabitItem
-                  key={habit.id}
-                  id={habit.id}
-                  name={habit.name}
-                  isCompletedToday={habit.isCompletedToday}
-                  streak={habit.streak}
-                  onComplete={handleComplete}
-                />
-              ))}
-            </StaggerList>
-          </View>
-        )}
-      </ScrollView>
-
-      {/* FAB */}
-      <PressableScale 
-        style={styles.fabContainer} 
-        onPress={() => setModalVisible(true)}
-      >
-        <LinearGradient
-          colors={gradients.primary}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.fab}
-        >
-          <Ionicons name="add" size={24} color={colors.textOnGradient} />
-          <Text style={styles.fabText}>Add Habit</Text>
-        </LinearGradient>
-      </PressableScale>
-      </ScreenTransition>
-
-      {/* Add Habit Modal */}
-      <Modal
-        visible={modalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <KeyboardAvoidingView 
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            style={styles.modalOverlay}
-          >
-            <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>New Habit</Text>
-              <PressableScale onPress={() => setModalVisible(false)} haptic="light">
-                <Ionicons name="close" size={24} color={colors.textPrimary} />
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView style={styles.safeArea}>
+        <ScreenTransition>
+          <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+            {/* Header */}
+            <View style={styles.headerRow}>
+              <View>
+                <Text style={styles.dateText}>{todayStr}</Text>
+                <Text style={styles.title}>My Habits</Text>
+              </View>
+              <PressableScale onPress={() => setModalVisible(true)}>
+                <LinearGradient
+                  colors={gradients.primary}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.addButton}
+                >
+                  <Ionicons name="add" size={18} color={colors.textOnGradient} />
+                  <Text style={styles.addButtonText}>Add</Text>
+                </LinearGradient>
               </PressableScale>
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Habit Name</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="e.g. Read 10 pages"
-                placeholderTextColor={colors.textMuted}
-                value={newHabitName}
-                onChangeText={setNewHabitName}
-                autoFocus
-              />
-              <View style={styles.suggestionsContainer}>
-                {HABIT_SUGGESTIONS.map((item) => (
-                  <PressableScale
-                    key={item}
-                    style={[
-                      styles.suggestionChip,
-                      newHabitName === item && styles.suggestionChipActive
-                    ]}
-                    onPress={() => setNewHabitName(item)}
-                    scaleDown={0.95}
-                  >
-                    <Text style={[
-                      styles.suggestionText,
-                      newHabitName === item && styles.suggestionTextActive
-                    ]}>
-                      {item}
-                    </Text>
-                  </PressableScale>
-                ))}
+            {/* Progress Card */}
+            <View style={styles.progressCard}>
+              <Text style={styles.progressText}>
+                {completedTodayCount} of {totalCount} done today
+              </Text>
+              <View style={styles.progressBarTrack}>
+                <LinearGradient
+                  colors={gradients.progressBar}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={[styles.progressBarFill, { width: `${progressPct}%` }]}
+                />
               </View>
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Frequency</Text>
-              <View style={styles.frequencyRow}>
-                <PressableScale
-                  style={[
-                    styles.freqBtn,
-                    newHabitFrequency === 'daily' && styles.freqBtnActive
-                  ]}
-                  onPress={() => setNewHabitFrequency('daily')}
-                  scaleDown={0.96}
-                >
-                  <Text style={[
-                    styles.freqBtnText,
-                    newHabitFrequency === 'daily' && styles.freqBtnTextActive
-                  ]}>Daily</Text>
-                </PressableScale>
-                <PressableScale
-                  style={[
-                    styles.freqBtn,
-                    newHabitFrequency === 'weekly' && styles.freqBtnActive
-                  ]}
-                  onPress={() => setNewHabitFrequency('weekly')}
-                  scaleDown={0.96}
-                >
-                  <Text style={[
-                    styles.freqBtnText,
-                    newHabitFrequency === 'weekly' && styles.freqBtnTextActive
-                  ]}>Weekly</Text>
-                </PressableScale>
+            {/* Habits List */}
+            {totalCount === 0 ? (
+              <View style={styles.emptyState}>
+                <View style={styles.emptyIconContainer}>
+                  <Ionicons name="leaf-outline" size={32} color={colors.textSecondary} />
+                </View>
+                <Text style={styles.emptyText}>No habits yet.</Text>
+                <Text style={styles.emptySubtext}>Let&apos;s build your first one.</Text>
               </View>
-            </View>
+            ) : (
+              <View style={styles.list}>
+                <StaggerList staggerDelay={70}>
+                  {habits.map(habit => (
+                    <HabitItem
+                      key={habit.id}
+                      id={habit.id}
+                      name={habit.name}
+                      isCompletedToday={habit.isCompletedToday}
+                      streak={habit.streak}
+                      onComplete={handleComplete}
+                      onDelete={deleteHabit}
+                    />
+                  ))}
+                </StaggerList>
+              </View>
+            )}
+          </ScrollView>
+        </ScreenTransition>
 
-            <PressableScale 
-              style={styles.saveBtnContainer} 
-              onPress={handleSaveHabit}
+        {/* Add Habit Modal */}
+        <Modal
+          visible={modalVisible}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <KeyboardAvoidingView 
+              behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+              style={styles.modalOverlay}
             >
-              <LinearGradient
-                colors={gradients.primary}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.saveBtn}
-              >
-                <Text style={styles.saveBtnText}>Save Habit</Text>
-              </LinearGradient>
-            </PressableScale>
-          </View>
-        </KeyboardAvoidingView>
-      </GestureHandlerRootView>
-    </Modal>
-    </SafeAreaView>
+              <View style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>New Habit</Text>
+                  <PressableScale onPress={() => setModalVisible(false)} haptic="light">
+                    <Ionicons name="close" size={24} color={colors.textPrimary} />
+                  </PressableScale>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Habit Name</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g. Read 10 pages"
+                    placeholderTextColor={colors.textMuted}
+                    value={newHabitName}
+                    onChangeText={setNewHabitName}
+                    autoFocus
+                  />
+                  <View style={styles.suggestionsContainer}>
+                    {HABIT_SUGGESTIONS.map((item) => (
+                      <PressableScale
+                        key={item}
+                        style={[
+                          styles.suggestionChip,
+                          newHabitName === item && styles.suggestionChipActive
+                        ]}
+                        onPress={() => setNewHabitName(item)}
+                        scaleDown={0.95}
+                      >
+                        <Text style={[
+                          styles.suggestionText,
+                          newHabitName === item && styles.suggestionTextActive
+                        ]}>
+                          {item}
+                        </Text>
+                      </PressableScale>
+                    ))}
+                  </View>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Frequency</Text>
+                  <View style={styles.frequencyRow}>
+                    <PressableScale
+                      style={[
+                        styles.freqBtn,
+                        newHabitFrequency === 'daily' && styles.freqBtnActive
+                      ]}
+                      onPress={() => setNewHabitFrequency('daily')}
+                      scaleDown={0.96}
+                    >
+                      <Text style={[
+                        styles.freqBtnText,
+                        newHabitFrequency === 'daily' && styles.freqBtnTextActive
+                      ]}>Daily</Text>
+                    </PressableScale>
+                    <PressableScale
+                      style={[
+                        styles.freqBtn,
+                        newHabitFrequency === 'weekly' && styles.freqBtnActive
+                      ]}
+                      onPress={() => setNewHabitFrequency('weekly')}
+                      scaleDown={0.96}
+                    >
+                      <Text style={[
+                        styles.freqBtnText,
+                        newHabitFrequency === 'weekly' && styles.freqBtnTextActive
+                      ]}>Weekly</Text>
+                    </PressableScale>
+                  </View>
+                </View>
+
+                <PressableScale 
+                  style={styles.saveBtnContainer} 
+                  onPress={handleSaveHabit}
+                >
+                  <LinearGradient
+                    colors={gradients.primary}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.saveBtn}
+                  >
+                    <Text style={styles.saveBtnText}>Save Habit</Text>
+                  </LinearGradient>
+                </PressableScale>
+              </View>
+            </KeyboardAvoidingView>
+          </GestureHandlerRootView>
+        </Modal>
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }
 
@@ -232,9 +232,12 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 24,
-    paddingBottom: 100, // Space for FAB
+    paddingBottom: 110, // Space to scroll past floating tab bar
   },
-  header: {
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 24,
   },
   dateText: {
@@ -247,6 +250,20 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Bold',
     fontSize: 32,
     color: colors.textPrimary,
+  },
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: radius.pill,
+    gap: 4,
+  },
+  addButtonText: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: 14,
+    color: colors.textOnGradient,
+    includeFontPadding: false,
   },
   progressCard: {
     backgroundColor: colors.bgCard,
@@ -308,36 +325,6 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: 0,
-  },
-  fabContainer: {
-    position: 'absolute',
-    bottom: 24,
-    alignSelf: 'center',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#9499A7',
-        shadowOpacity: 0.25,
-        shadowOffset: { width: 0, height: 4 },
-        shadowRadius: 12,
-      },
-      android: {
-        elevation: 8,
-      },
-    }),
-  },
-  fab: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: radius.pill,
-    gap: 8,
-  },
-  fabText: {
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: 16,
-    color: colors.textOnGradient,
-    includeFontPadding: false,
   },
   modalOverlay: {
     flex: 1,

@@ -1,9 +1,9 @@
 // components/HabitItem.tsx
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring, withSequence } from 'react-native-reanimated';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { PressableScale } from './animated/PressableScale';
 import { colors } from '@/constants/colors';
 import { gradients } from '@/constants/gradients';
@@ -15,46 +15,65 @@ interface HabitItemProps {
   isCompletedToday: boolean;
   streak: number;
   onComplete: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
-export default function HabitItem({ id, name, isCompletedToday, streak, onComplete }: HabitItemProps) {
+export default function HabitItem({ id, name, isCompletedToday, streak, onComplete, onDelete }: HabitItemProps) {
   const handlePress = () => {
     if (isCompletedToday) return; // Prevent double trigger
     onComplete(id);
   };
 
-  return (
-    <PressableScale 
-      onPress={handlePress} 
-      style={styles.container}
-    >
-      <View style={styles.leftContent}>
-        <Text style={[styles.name, isCompletedToday && styles.nameCompleted]}>
-          {name}
-        </Text>
-        {streak > 0 && (
-          <View style={styles.streakBadge}>
-            <Ionicons name="flame" size={12} color={colors.accentGreen} />
-            <Text style={styles.streakText}>{streak} Day Streak</Text>
-          </View>
-        )}
+  const renderLeftActions = () => {
+    return (
+      <View style={styles.deleteActionContainer}>
+        <View style={styles.deleteActionContent}>
+          <Ionicons name="trash" size={20} color="#FFFFFF" />
+          <Text style={styles.deleteActionText}>Delete</Text>
+        </View>
       </View>
+    );
+  };
 
-      <View style={styles.rightContent}>
-        {isCompletedToday ? (
-          <LinearGradient
-            colors={gradients.primary}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.completedCircle}
-          >
-            <Ionicons name="checkmark" size={18} color={colors.textOnGradient} />
-          </LinearGradient>
-        ) : (
-          <View style={styles.emptyCircle} />
-        )}
-      </View>
-    </PressableScale>
+  return (
+    <Swipeable
+      renderLeftActions={renderLeftActions}
+      onSwipeableLeftOpen={() => onDelete(id)}
+      leftThreshold={80}
+      containerStyle={styles.swipeableContainer}
+    >
+      <PressableScale 
+        onPress={handlePress} 
+        style={styles.container}
+      >
+        <View style={styles.leftContent}>
+          <Text style={[styles.name, isCompletedToday && styles.nameCompleted]}>
+            {name}
+          </Text>
+          {streak > 0 && (
+            <View style={styles.streakBadge}>
+              <Ionicons name="flame" size={12} color={colors.accentGreen} />
+              <Text style={styles.streakText}>{streak} Day Streak</Text>
+            </View>
+          )}
+        </View>
+
+        <View style={styles.rightContent}>
+          {isCompletedToday ? (
+            <LinearGradient
+              colors={gradients.primary}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.completedCircle}
+            >
+              <Ionicons name="checkmark" size={18} color={colors.textOnGradient} />
+            </LinearGradient>
+          ) : (
+            <View style={styles.emptyCircle} />
+          )}
+        </View>
+      </PressableScale>
+    </Swipeable>
   );
 }
 
@@ -123,5 +142,26 @@ const styles = StyleSheet.create({
     borderRadius: radius.full,
     borderWidth: 2,
     borderColor: colors.borderHairline,
+  },
+  deleteActionContainer: {
+    backgroundColor: colors.error,
+    borderRadius: radius.lg,
+    marginBottom: 12,
+    justifyContent: 'center',
+    paddingLeft: 20,
+    flex: 1,
+  },
+  deleteActionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  deleteActionText: {
+    color: '#FFFFFF',
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: 14,
+  },
+  swipeableContainer: {
+    overflow: 'visible',
   },
 });
