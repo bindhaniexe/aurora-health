@@ -12,6 +12,7 @@ import { radius } from '@/constants/radius';
 import { ScreenTransition } from '@/components/animated/ScreenTransition';
 import { StaggerList } from '@/components/animated/StaggerList';
 import { PressableScale } from '@/components/animated/PressableScale';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const HABIT_SUGGESTIONS = [
   'Drink water',
@@ -124,11 +125,12 @@ export default function HabitsScreen() {
         animationType="slide"
         onRequestClose={() => setModalVisible(false)}
       >
-        <KeyboardAvoidingView 
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={styles.modalOverlay}
-        >
-          <View style={styles.modalContent}>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <KeyboardAvoidingView 
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            style={styles.modalOverlay}
+          >
+            <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>New Habit</Text>
               <PressableScale onPress={() => setModalVisible(false)} haptic="light">
@@ -215,7 +217,8 @@ export default function HabitsScreen() {
             </PressableScale>
           </View>
         </KeyboardAvoidingView>
-      </Modal>
+      </GestureHandlerRootView>
+    </Modal>
     </SafeAreaView>
   );
 }
