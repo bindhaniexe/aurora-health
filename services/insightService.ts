@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { Profile } from '@/types';
 import { HealthSummary } from '@/hooks/useHealthSummary';
 
@@ -51,22 +50,24 @@ export const insightService = {
         return cachedInsight;
       }
 
-      const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
-      if (!apiKey || apiKey === 'your_key_from_aistudio.google.com') {
+      const apiKey = process.env.EXPO_PUBLIC_GROQ_API_KEY;
+      if (!apiKey) {
         const fallbacks = [
           "Drink an extra glass of water today to keep your energy up!",
           "Great job showing up today! Consistency is your superpower.",
           "Take a deep breath and stretch. Your body will thank you.",
           "Small daily steps lead to massive results over time.",
-          "You're doing amazing! Keep building those healthy habits."
+          "You're doing amazing! Keep building those healthy habits.",
+          "A short walk outside can do wonders for your mental clarity.",
+          "Prioritize your sleep tonight your body repairs itself while you rest.",
+          "Stay hydrated! Even mild dehydration can drain your energy.",
+          "Celebrate your small wins today. Every step forward counts.",
+          "Take a moment to close your eyes and take 3 deep breaths."
         ];
         const fallbackText = fallbacks[Math.floor(Math.random() * fallbacks.length)];
         await this.saveInsight(profile.id, fallbackText);
         return fallbackText;
       }
-
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
       const prompt = `You are Aurora, a friendly health companion.
 Based on this user's health data:
@@ -77,8 +78,26 @@ Based on this user's health data:
 Write exactly ONE short, warm, encouraging health tip or observation.
 Maximum 20 words. Plain text only. No quotes. No bullet points.`;
 
-      const result = await model.generateContent(prompt);
-      const text = result.response.text().trim();
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [{ role: 'user', content: prompt }],
+          max_tokens: 60,
+          temperature: 0.7
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP Error: ${response.status}`);
+      }
+
+      const result = await response.json();
+      const text = result.choices?.[0]?.message?.content?.trim();
 
       if (text) {
         await this.saveInsight(profile.id, text);
