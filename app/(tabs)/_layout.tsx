@@ -244,7 +244,7 @@ export default function TabsLayout() {
         tabBar={(props) => <FloatingTabBar {...props} />}
         screenOptions={{ 
           headerShown: false,
-          animation: 'none', // Instant tab screen switching to prevent trailing slide-shadow artifacts
+          animation: 'fade', // Smooth cross-fade tab screen transition to avoid slide shadow artifacts
         }}
       >
         <Tabs.Screen name="index" />
