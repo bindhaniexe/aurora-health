@@ -73,6 +73,11 @@ export default function RootLayout() {
     hasRouted.current = true;
 
     const doInitialRoute = async () => {
+      // TEMPORARY BYPASS: Always route to onboarding for testing
+      router.replace('/(onboarding)' as any);
+      return;
+
+      /*
       if (session && profile) {
         // Authenticated user: respect onboarding_done flag
         if (!profile.onboarding_done) {
@@ -95,6 +100,7 @@ export default function RootLayout() {
       } else {
         router.replace('/(onboarding)' as any);
       }
+      */
     };
 
     doInitialRoute();
@@ -110,6 +116,8 @@ export default function RootLayout() {
     const inAuth  = segments[0] === '(auth)';
     const inTabs  = segments[0] === '(tabs)';
 
+    // TEMPORARY BYPASS: Disable reactive guard for onboarding testing
+    /*
     if (session && profile?.onboarding_done && inAuth) {
       // User just signed in while on the auth screen → advance to tabs
       router.replace('/(tabs)' as any);
@@ -117,6 +125,7 @@ export default function RootLayout() {
       // Session expired or user signed out while in tabs → back to auth
       router.replace('/(auth)' as any);
     }
+    */
   }, [session, profile, segments, guestMode, router]);
 
   // Keep the screen blank (splash still showing) until fonts are ready

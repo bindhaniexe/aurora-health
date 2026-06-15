@@ -21,6 +21,9 @@ import SleepCard from '@/components/SleepCard';
 import { useHydration } from '@/hooks/useHydration';
 import { useSleep } from '@/hooks/useSleep';
 import { useAuthStore } from '@/stores/authStore';
+import { useHealthSummary } from '@/hooks/useHealthSummary';
+import { generateInsight } from '@/services/insightService';
+import InsightBanner from '@/components/InsightBanner';
 
 // ── Time tab options ──────────────────────────────────────────────────────────
 const TIME_TABS = ['Daily', 'Weekly', 'Monthly', 'Yearly'] as const;
@@ -60,6 +63,9 @@ export default function DashboardScreen() {
   const { user, guestMode } = useAuthStore();
   const { todayTotal, goalMl, percentage, fetchTodayLogs } = useHydration();
   const { lastNight, goalHrs, fetchLogs: fetchSleepLogs } = useSleep();
+  const summary = useHealthSummary();
+  const [insight, setInsight] = useState<string | null>(null);
+  const [insightLoading, setInsightLoading] = useState(true);
 
   // Fetch data on mount
   useEffect(() => {
@@ -68,6 +74,15 @@ export default function DashboardScreen() {
       fetchSleepLogs();
     }
   }, [user, guestMode]);
+
+  useEffect(() => {
+    if (!profile) return;
+    setInsightLoading(true);
+    generateInsight(summary, profile)
+      .then(text => setInsight(text))
+      .catch(() => setInsight(null))
+      .finally(() => setInsightLoading(false));
+  }, [profile?.id]);
 
   // Get initials for avatar fallback
   const initials = profile?.name
@@ -149,6 +164,8 @@ export default function DashboardScreen() {
         </ScrollView>
 
         {/* ── 2×2 Activity Card Grid ────────────────────────────────── */}
+        <InsightBanner insight={insight} isLoading={insightLoading} />
+        
         <View style={styles.cardGrid}>
           {/* Hydration card — live data */}
           <HydrationCard
