@@ -1,0 +1,210 @@
+// services/habitService.ts
+// Aurora — Habits Supabase service layer
+
+import { supabase } from '@/lib/supabase';
+import { Habit, HabitCompletion } from '@/types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const LOCAL_HABITS_KEY = '@aurora_habits';
+const LOCAL_COMPLETIONS_KEY = '@aurora_habit_completions';
+
+/** Returns today's date as YYYY-MM-DD in local time */
+function todayDateStr(): string {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+export const habitService = {
+  /**
+   * Fetch all active habits for the current user.
+   */
+  async getHabits(): Promise<Habit[]> {
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      const existing = await AsyncStorage.getItem(LOCAL_HABITS_KEY);
+      return existing ? JSON.parse(existing) : [];
+    }
+
+    const { data, error } = await supabase
+      .from('habits')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data ?? [];
+  },
+
+  /**
+   * Create a new habit.
+   */
+  async createHabit(name: string, frequency: 'daily' | 'weekly'): Promise<Habit> {
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      const existing = await AsyncStorage.getItem(LOCAL_HABITS_KEY);
+      const allHabits: Habit[] = existing ? JSON.parse(existing) : [];
+      
+      const newHabit: Habit = {
+        id: Math.random().toString(36).substring(2, 11),
+        user_id: 'guest',
+        name,
+        frequency,
+        is_active: true,
+        created_at: new Date().toISOString(),
+      };
+      
+      allHabits.push(newHabit); // Add to end (or unshift to start, but DB orders by created_at)
+      await AsyncStorage.setItem(LOCAL_HABITS_KEY, JSON.stringify(allHabits));
+      return newHabit;
+    }
+
+    const { data, error } = await supabase
+      .from('habits')
+      .insert({
+        user_id: user.id,
+        name,
+        frequency,
+        is_active: true,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  /**
+   * Mark a habit as completed for today.
+   */
+  async completeHabit(habitId: string): Promise<HabitCompletion> {
+    const { data: { user } } = await supabase.auth.getUser();
+    const today = todayDateStr();
+
+    if (!user) {
+      const existing = await AsyncStorage.getItem(LOCAL_COMPLETIONS_KEY);
+      const allCompletions: HabitCompletion[] = existing ? JSON.parse(existing) : [];
+      
+      // Check if already completed today
+      const alreadyCompleted = allCompletions.find(c => c.habit_id === habitId && c.completed_date === today);
+      if (alreadyCompleted) return alreadyCompleted;
+
+      const newCompletion: HabitCompletion = {
+        id: Math.random().toString(36).substring(2, 11),
+        habit_id: habitId,
+        user_id: 'guest',
+        completed_date: today,
+        created_at: new Date().toISOString(),
+      };
+      
+      allCompletions.unshift(newCompletion);
+      await AsyncStorage.setItem(LOCAL_COMPLETIONS_KEY, JSON.stringify(allCompletions));
+      return newCompletion;
+    }
+
+    const { data, error } = await supabase
+      .from('habit_completions')
+      .upsert(
+        {
+          habit_id: habitId,
+          user_id: user.id,
+          completed_date: today,
+        },
+        { onConflict: 'habit_id,completed_date' }
+      )
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  /**
+   * Fetch all habit completions recorded today.
+   */
+  async getTodayCompletions(): Promise<HabitCompletion[]> {
+    const { data: { user } } = await supabase.auth.getUser();
+    const today = todayDateStr();
+
+    if (!user) {
+      const existing = await AsyncStorage.getItem(LOCAL_COMPLETIONS_KEY);
+      const allCompletions: HabitCompletion[] = existing ? JSON.parse(existing) : [];
+      return allCompletions.filter(c => c.completed_date === today);
+    }
+
+    const { data, error } = await supabase
+      .from('habit_completions')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('completed_date', today);
+
+    if (error) throw error;
+    return data ?? [];
+  },
+
+  /**
+   * Calculate consecutive days a habit has been completed up to today or yesterday.
+   */
+  async getStreakForHabit(habitId: string): Promise<number> {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    let completions: HabitCompletion[] = [];
+    if (!user) {
+      const existing = await AsyncStorage.getItem(LOCAL_COMPLETIONS_KEY);
+      const allCompletions: HabitCompletion[] = existing ? JSON.parse(existing) : [];
+      completions = allCompletions
+        .filter(c => c.habit_id === habitId)
+        .sort((a, b) => b.completed_date.localeCompare(a.completed_date));
+    } else {
+      const { data, error } = await supabase
+        .from('habit_completions')
+        .select('*')
+        .eq('habit_id', habitId)
+        .order('completed_date', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching completions for streak', error);
+        return 0;
+      }
+      completions = data ?? [];
+    }
+
+    if (completions.length === 0) return 0;
+
+    // Filter to unique dates just in case
+    const uniqueDates = Array.from(new Set(completions.map(c => c.completed_date)));
+
+    let streak = 0;
+    const d = new Date();
+    let currentCheckDate = todayDateStr();
+    
+    if (uniqueDates[0] === currentCheckDate) {
+      streak++;
+      d.setDate(d.getDate() - 1);
+      currentCheckDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    } else {
+      d.setDate(d.getDate() - 1);
+      currentCheckDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      if (uniqueDates[0] !== currentCheckDate) {
+        return 0;
+      }
+    }
+
+    for (let i = streak === 1 ? 1 : 0; i < uniqueDates.length; i++) {
+      if (uniqueDates[i] === currentCheckDate) {
+        streak++;
+        d.setDate(d.getDate() - 1);
+        currentCheckDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      } else {
+        break;
+      }
+    }
+
+    return streak;
+  }
+};
