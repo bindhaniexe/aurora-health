@@ -27,6 +27,7 @@ import InsightBanner from '@/components/InsightBanner';
 import { useHabits } from '@/hooks/useHabits';
 import HabitsCard from '@/components/HabitsCard';
 import StepsCard from '@/components/StepsCard';
+import StreakCard from '@/components/StreakCard';
 
 // ── Time tab options ──────────────────────────────────────────────────────────
 const TIME_TABS = ['Daily', 'Weekly', 'Monthly', 'Yearly'] as const;
@@ -87,14 +88,23 @@ export default function DashboardScreen() {
             <Ionicons name="grid-outline" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
 
-          <LinearGradient
-            colors={gradients.primary}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.avatar}
-          >
-            <Text style={styles.avatarText}>{initials}</Text>
-          </LinearGradient>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
+            <TouchableOpacity 
+              style={styles.iconButton} 
+              activeOpacity={0.7}
+              onPress={() => router.push('/summary')}
+            >
+              <Ionicons name="stats-chart" size={20} color={colors.accentPurple} />
+            </TouchableOpacity>
+            <LinearGradient
+              colors={gradients.primary}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.avatar}
+            >
+              <Text style={styles.avatarText}>{initials}</Text>
+            </LinearGradient>
+          </View>
         </View>
 
         {/* ── Heading ──────────────────────────────────────────────── */}
@@ -178,6 +188,11 @@ export default function DashboardScreen() {
             isLoading={isHabitsLoading}
             onPress={() => router.push('/(tabs)/habits')}
           />
+        </View>
+
+        {/* ── Streaks ──────────────────────────────────────────────── */}
+        <View style={{ marginTop: 24 }}>
+          <StreakCard />
         </View>
       </ScrollView>
     </SafeAreaView>

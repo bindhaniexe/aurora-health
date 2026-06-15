@@ -18,6 +18,7 @@ export default function ProfileScreen() {
   const [waterGoal, setWaterGoal] = useState(profile?.water_goal_ml?.toString() || '2500');
   const [sleepGoal, setSleepGoal] = useState(profile?.sleep_goal_hrs?.toString() || '8');
   const [name, setName] = useState(profile?.name || '');
+  const [memoryNotes, setMemoryNotes] = useState(profile?.memory_notes || '');
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
   const handleSaveGoals = async () => {
@@ -25,6 +26,7 @@ export default function ProfileScreen() {
       await updateProfile({
         water_goal_ml: parseInt(waterGoal, 10) || 2500,
         sleep_goal_hrs: parseFloat(sleepGoal) || 8,
+        memory_notes: memoryNotes.trim() === '' ? null : memoryNotes.trim(),
       });
       Alert.alert('Success', 'Goals updated successfully');
     } catch (error) {
@@ -107,6 +109,18 @@ export default function ProfileScreen() {
               value={name}
               onChangeText={setName}
               placeholderTextColor={colors.textMuted}
+            />
+          </View>
+          <View style={styles.divider} />
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Health Memory Notes</Text>
+            <TextInput
+              style={[styles.input, { minHeight: 80, textAlignVertical: 'top' }]}
+              value={memoryNotes}
+              onChangeText={setMemoryNotes}
+              placeholder="E.g., I am training for a 5k, feeling stressed..."
+              placeholderTextColor={colors.textMuted}
+              multiline
             />
           </View>
           <View style={styles.divider} />

@@ -139,6 +139,8 @@ export default function RootLayout() {
         headerShown: false,
         contentStyle: { backgroundColor: colors.bgAuth },
       }}
-    />
+    >
+      <Stack.Screen name="summary" options={{ presentation: 'modal' }} />
+    </Stack>
   );
 }

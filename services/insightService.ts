@@ -111,6 +111,52 @@ Maximum 20 words. Plain text only. No quotes. No bullet points.`;
       console.warn('[InsightCache] Error generating insight:', (err as Error).message);
       return null;
     }
+  },
+
+  async generateWeeklySummary(
+    weeklyData: { hydrationAvg: number; sleepAvg: number; habitRate: number },
+    profile: Profile
+  ): Promise<string | null> {
+    try {
+      const apiKey = process.env.EXPO_PUBLIC_GROQ_API_KEY;
+      if (!apiKey) {
+        return "You had a solid week! Keep focusing on your daily habits and staying hydrated. Small steps every day lead to big results.";
+      }
+
+      const prompt = `You are Aurora, a friendly health companion.
+Based on this user's weekly health averages:
+- Hydration average: ${Math.round(weeklyData.hydrationAvg)}ml / day (goal: ${profile.water_goal_ml}ml)
+- Sleep average: ${weeklyData.sleepAvg.toFixed(1)} hours / night (goal: ${profile.sleep_goal_hrs}hrs)
+- Habit completion rate: ${Math.round(weeklyData.habitRate)}%
+
+Write exactly TWO sentences summarizing their week. Be warm, encouraging, and provide one specific tip based on the data. Plain text only. No quotes. No bullet points.`;
+
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [{ role: 'user', content: prompt }],
+          max_tokens: 100,
+          temperature: 0.7
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP Error: ${response.status}`);
+      }
+
+      const result = await response.json();
+      const text = result.choices?.[0]?.message?.content?.trim();
+
+      return text || null;
+    } catch (err: unknown) {
+      console.warn('[InsightCache] Error generating weekly summary:', (err as Error).message);
+      return null;
+    }
   }
 };
 
