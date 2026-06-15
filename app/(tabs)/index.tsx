@@ -28,6 +28,8 @@ import { useHabits } from '@/hooks/useHabits';
 import HabitsCard from '@/components/HabitsCard';
 import StepsCard from '@/components/StepsCard';
 import StreakCard from '@/components/StreakCard';
+import { useSteps } from '@/hooks/useSteps';
+import { useHealth } from '@/hooks/useHealth';
 import { ScreenTransition } from '@/components/animated/ScreenTransition';
 import { StaggerList } from '@/components/animated/StaggerList';
 import { FloatingOrbs } from '@/components/animated/FloatingOrbs';
@@ -40,6 +42,8 @@ export default function DashboardScreen() {
   const { lastNight, goalHrs, fetchLogs: fetchSleepLogs, isLoading: isSleepLoading } = useSleep();
   const { habits, todayCompletions, fetchHabits, isLoading: isHabitsLoading } = useHabits();
   const summary = useHealthSummary();
+  const { todaySteps, isLoading: isStepsLoading, isGranted: isStepsGranted } = useSteps();
+  const { initializeHealth } = useHealth(); // triggers init if undetermined
   const [insight, setInsight] = useState<string | null>(null);
   const [insightLoading, setInsightLoading] = useState(true);
 
@@ -116,8 +120,13 @@ export default function DashboardScreen() {
           <InsightBanner insight={insight} isLoading={insightLoading} />
           <View style={styles.cardGrid}>
             <StaggerList staggerDelay={80} childContainerStyle={{ width: '47%' }}>
-              {/* Steps card — placeholder */}
-              <StepsCard isLoading={false} />
+              {/* Steps card — live data */}
+              <StepsCard 
+                todayTotal={todaySteps}
+                goalSteps={10000}
+                isLoading={isStepsLoading}
+                isGranted={isStepsGranted}
+              />
 
               {/* Sleep card — live data */}
               <SleepCard

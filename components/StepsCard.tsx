@@ -15,7 +15,10 @@ import { radius } from '@/constants/radius';
 import { gradients } from '@/constants/gradients';
 
 interface StepsCardProps {
+  todayTotal: number;
+  goalSteps: number;
   isLoading?: boolean;
+  isGranted?: boolean;
   onPress?: () => void;
 }
 
@@ -25,7 +28,7 @@ const STROKE_WIDTH = 5;
 const R = (RING_SIZE - STROKE_WIDTH) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * R;
 
-const StepsCard = React.memo(({ isLoading, onPress }: StepsCardProps) => {
+const StepsCard = React.memo(({ todayTotal, goalSteps, isLoading, isGranted, onPress }: StepsCardProps) => {
   if (isLoading) {
     return (
       <View style={styles.card}>
@@ -39,9 +42,13 @@ const StepsCard = React.memo(({ isLoading, onPress }: StepsCardProps) => {
     );
   }
 
-  // Placeholder values
-  const percentage = 0; // Hardcoded to 0 for MVP
+  // Calculate percentage safely
+  const validGoal = goalSteps > 0 ? goalSteps : 10000;
+  const percentage = Math.min(100, Math.max(0, (todayTotal / validGoal) * 100));
   const strokeDash = (percentage / 100) * CIRCUMFERENCE;
+
+  // Format steps nicely (e.g., 2,500)
+  const formattedSteps = todayTotal.toLocaleString('en-US');
 
   return (
     <TouchableOpacity
@@ -71,29 +78,35 @@ const StepsCard = React.memo(({ isLoading, onPress }: StepsCardProps) => {
             fill="none"
           />
           {/* Progress arc */}
-          <Circle
-            cx={RING_SIZE / 2}
-            cy={RING_SIZE / 2}
-            r={R}
-            stroke="url(#stepsRingGrad)"
-            strokeWidth={STROKE_WIDTH}
-            fill="none"
-            strokeDasharray={`${strokeDash} ${CIRCUMFERENCE}`}
-            strokeLinecap="round"
-            rotation="-90"
-            origin={`${RING_SIZE / 2}, ${RING_SIZE / 2}`}
-          />
+          {percentage > 0 && (
+            <Circle
+              cx={RING_SIZE / 2}
+              cy={RING_SIZE / 2}
+              r={R}
+              stroke="url(#stepsRingGrad)"
+              strokeWidth={STROKE_WIDTH}
+              fill="none"
+              strokeDasharray={`${strokeDash} ${CIRCUMFERENCE}`}
+              strokeLinecap="round"
+              rotation="-90"
+              origin={`${RING_SIZE / 2}, ${RING_SIZE / 2}`}
+            />
+          )}
         </Svg>
       </View>
 
       {/* ── Value ── */}
-      <Text style={styles.value}>— steps</Text>
+      <Text style={styles.value} numberOfLines={1} adjustsFontSizeToFit>
+        {isGranted ? formattedSteps : '—'}
+      </Text>
 
       {/* ── Label ── */}
       <Text style={styles.label}>Steps Today</Text>
 
       {/* ── Subtitle ── */}
-      <Text style={styles.sub}>not tracked</Text>
+      <Text style={styles.sub}>
+        {isGranted ? `Goal: ${goalSteps.toLocaleString('en-US')}` : 'Needs Permission'}
+      </Text>
     </TouchableOpacity>
   );
 });
