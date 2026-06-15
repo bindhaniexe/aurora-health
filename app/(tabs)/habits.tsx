@@ -65,7 +65,7 @@ export default function HabitsScreen() {
               <Ionicons name="leaf-outline" size={32} color={colors.textSecondary} />
             </View>
             <Text style={styles.emptyText}>No habits yet.</Text>
-            <Text style={styles.emptySubtext}>Let's build your first one.</Text>
+            <Text style={styles.emptySubtext}>Let&apos;s build your first one.</Text>
           </View>
         ) : (
           <View style={styles.list}>

@@ -4,6 +4,7 @@ import { HealthSummary } from '@/hooks/useHealthSummary';
 
 export const insightService = {
   async getTodayInsight(userId: string): Promise<string | null> {
+    if (userId === 'guest') return null;
     const today = new Date().toISOString().split('T')[0];
     const { data, error } = await supabase
       .from('insights_cache')
@@ -23,6 +24,7 @@ export const insightService = {
   },
 
   async saveInsight(userId: string, text: string): Promise<void> {
+    if (userId === 'guest') return;
     const today = new Date().toISOString().split('T')[0];
     const { error } = await supabase
       .from('insights_cache')

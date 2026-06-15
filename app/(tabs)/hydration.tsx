@@ -126,7 +126,7 @@ export default function HydrationScreen() {
         {/* ── Header ──────────────────────────────────────────────── */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.heading}>Today's Hydration</Text>
+            <Text style={styles.heading}>Today&apos;s Hydration</Text>
             <Text style={styles.dateLabel}>{getTodayLabel()}</Text>
           </View>
           <TouchableOpacity style={styles.resetBtn} onPress={handleReset} activeOpacity={0.7}>
@@ -217,7 +217,7 @@ export default function HydrationScreen() {
 
         {/* ── Today's log list ─────────────────────────────────────── */}
         <View style={styles.logSection}>
-          <Text style={styles.sectionTitle}>Today's Logs</Text>
+          <Text style={styles.sectionTitle}>Today&apos;s Logs</Text>
 
           {isLoading ? (
             <View style={styles.loadingWrap}>

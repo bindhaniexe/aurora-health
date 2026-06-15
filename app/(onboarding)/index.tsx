@@ -250,10 +250,10 @@ export default function OnboardingScreen() {
     await AsyncStorage.setItem('aurora_onboarding_done', 'true');
     if (session) {
       await markOnboardingDone();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       router.replace('/(tabs)' as any);
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       router.replace('/(auth)' as any);
     }
   };

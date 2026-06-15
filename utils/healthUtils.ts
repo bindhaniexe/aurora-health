@@ -22,7 +22,7 @@ export function sleepQualityLabel(hrs: number): 'poor' | 'fair' | 'good' | 'grea
  * Computes current consecutive habit completion streak backwards from today or yesterday.
  * Expects an array of objects containing `completed_date` (format YYYY-MM-DD).
  */
-export function streakCount(completions: Array<{ completed_date: string }>): number {
+export function streakCount(completions: { completed_date: string }[]): number {
   if (!completions || completions.length === 0) return 0;
 
   // Extract date portion and sort in descending order (latest first)

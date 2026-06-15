@@ -96,7 +96,7 @@ export default function InsightBanner({ insight, isLoading }: InsightBannerProps
         </View>
         
         <View style={styles.textContent}>
-          <Text style={styles.label}>AURORA'S INSIGHT</Text>
+          <Text style={styles.label}>AURORA&apos;S INSIGHT</Text>
           <Text style={styles.text}>{insight}</Text>
         </View>
       </View>

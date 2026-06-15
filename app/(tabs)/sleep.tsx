@@ -377,7 +377,7 @@ export default function SleepScreen() {
             <View style={styles.emptyChart}>
               <Ionicons name="moon-outline" size={40} color={colors.textMuted} />
               <Text style={styles.emptyChartText}>
-                Log tonight's sleep to start tracking your patterns.
+                Log tonight&apos;s sleep to start tracking your patterns.
               </Text>
             </View>
           )}
