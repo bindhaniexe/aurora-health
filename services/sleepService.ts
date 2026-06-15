@@ -5,6 +5,20 @@
 import { supabase } from '@/lib/supabase';
 import { SleepLog } from '@/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuthStore } from '@/stores/authStore';
+
+async function getAuthenticatedUser() {
+  let user = useAuthStore.getState().user;
+  if (!user) {
+    try {
+      const { data } = await supabase.auth.getUser();
+      user = data.user;
+    } catch {
+      user = null;
+    }
+  }
+  return user;
+}
 
 const LOCAL_KEY = '@aurora_sleep_logs';
 
@@ -36,9 +50,7 @@ export const sleepService = {
     hours: number,
     quality?: SleepLog['quality'],
   ): Promise<SleepLog> {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getAuthenticatedUser();
 
     if (!user) {
       // Guest mode — persist to AsyncStorage
@@ -88,9 +100,7 @@ export const sleepService = {
    * Defaults to 7 days.
    */
   async getRecentLogs(days = 7): Promise<SleepLog[]> {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getAuthenticatedUser();
 
     const cutoff = nDaysAgoDateStr(days - 1); // inclusive range
 
@@ -122,9 +132,7 @@ export const sleepService = {
    * Fetch today's sleep log, or null if none exists.
    */
   async getTodayLog(): Promise<SleepLog | null> {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getAuthenticatedUser();
 
     const today = todayDateStr();
 

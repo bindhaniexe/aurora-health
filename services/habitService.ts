@@ -4,9 +4,23 @@
 import { supabase } from '@/lib/supabase';
 import { Habit, HabitCompletion } from '@/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuthStore } from '@/stores/authStore';
 
 const LOCAL_HABITS_KEY = '@aurora_habits';
 const LOCAL_COMPLETIONS_KEY = '@aurora_habit_completions';
+
+async function getAuthenticatedUser() {
+  let user = useAuthStore.getState().user;
+  if (!user) {
+    try {
+      const { data } = await supabase.auth.getUser();
+      user = data.user;
+    } catch {
+      user = null;
+    }
+  }
+  return user;
+}
 
 /** Returns today's date as YYYY-MM-DD in local time */
 function todayDateStr(): string {
@@ -22,7 +36,7 @@ export const habitService = {
    * Fetch all active habits for the current user.
    */
   async getHabits(): Promise<Habit[]> {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getAuthenticatedUser();
 
     if (!user) {
       const existing = await AsyncStorage.getItem(LOCAL_HABITS_KEY);
@@ -49,7 +63,7 @@ export const habitService = {
    * Create a new habit.
    */
   async createHabit(name: string, frequency: 'daily' | 'weekly'): Promise<Habit> {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getAuthenticatedUser();
 
     if (!user) {
       const existing = await AsyncStorage.getItem(LOCAL_HABITS_KEY);
@@ -93,7 +107,7 @@ export const habitService = {
    * Mark a habit as completed for today.
    */
   async completeHabit(habitId: string): Promise<HabitCompletion> {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getAuthenticatedUser();
     const today = todayDateStr();
 
     if (!user) {
@@ -143,7 +157,7 @@ export const habitService = {
    * Fetch all habit completions recorded today.
    */
   async getTodayCompletions(): Promise<HabitCompletion[]> {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getAuthenticatedUser();
     const today = todayDateStr();
 
     if (!user) {
@@ -171,7 +185,7 @@ export const habitService = {
    * Calculate consecutive days a habit has been completed up to today or yesterday.
    */
   async getStreakForHabit(habitId: string): Promise<number> {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getAuthenticatedUser();
     
     let completions: HabitCompletion[] = [];
     if (!user) {

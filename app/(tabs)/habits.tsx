@@ -13,6 +13,17 @@ import { ScreenTransition } from '@/components/animated/ScreenTransition';
 import { StaggerList } from '@/components/animated/StaggerList';
 import { PressableScale } from '@/components/animated/PressableScale';
 
+const HABIT_SUGGESTIONS = [
+  'Drink water',
+  'Read a book',
+  'Meditate 10m',
+  'Walk 10k steps',
+  'Workout 30m',
+  'Journaling',
+  'Stretch 10m',
+  'Early to bed'
+];
+
 export default function HabitsScreen() {
   const { habits, addHabit, completeHabit } = useHabits();
   const [modalVisible, setModalVisible] = useState(false);
@@ -135,6 +146,26 @@ export default function HabitsScreen() {
                 onChangeText={setNewHabitName}
                 autoFocus
               />
+              <View style={styles.suggestionsContainer}>
+                {HABIT_SUGGESTIONS.map((item) => (
+                  <PressableScale
+                    key={item}
+                    style={[
+                      styles.suggestionChip,
+                      newHabitName === item && styles.suggestionChipActive
+                    ]}
+                    onPress={() => setNewHabitName(item)}
+                    scaleDown={0.95}
+                  >
+                    <Text style={[
+                      styles.suggestionText,
+                      newHabitName === item && styles.suggestionTextActive
+                    ]}>
+                      {item}
+                    </Text>
+                  </PressableScale>
+                ))}
+              </View>
             </View>
 
             <View style={styles.inputGroup}>
@@ -378,6 +409,31 @@ const styles = StyleSheet.create({
   saveBtnText: {
     fontFamily: 'Poppins-SemiBold',
     fontSize: 16,
+    color: colors.textOnGradient,
+  },
+  suggestionsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 12,
+  },
+  suggestionChip: {
+    backgroundColor: colors.bgChip,
+    borderRadius: radius.pill,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  suggestionChipActive: {
+    backgroundColor: colors.accentPurple,
+  },
+  suggestionText: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 13,
+    color: colors.accentPurple,
+  },
+  suggestionTextActive: {
     color: colors.textOnGradient,
   },
 });

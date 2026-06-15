@@ -5,6 +5,20 @@
 import { supabase } from '@/lib/supabase';
 import { HydrationLog } from '@/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuthStore } from '@/stores/authStore';
+
+async function getAuthenticatedUser() {
+  let user = useAuthStore.getState().user;
+  if (!user) {
+    try {
+      const { data } = await supabase.auth.getUser();
+      user = data.user;
+    } catch {
+      user = null;
+    }
+  }
+  return user;
+}
 
 /** Returns today's date as YYYY-MM-DD in local time */
 function todayDateStr(): string {
@@ -35,9 +49,7 @@ export const hydrationService = {
    * Fetch all hydration logs for today (midnight → now), ordered newest-first.
    */
   async getTodayLogs(): Promise<HydrationLog[]> {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getAuthenticatedUser();
 
     if (!user) {
       const localLogsStr = await AsyncStorage.getItem('@aurora_hydration_logs');
@@ -67,9 +79,7 @@ export const hydrationService = {
    * Insert a new hydration log for the authenticated user.
    */
   async addLog(amount_ml: number): Promise<HydrationLog> {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getAuthenticatedUser();
 
     if (!user) {
       const localLogsStr = await AsyncStorage.getItem('@aurora_hydration_logs');
@@ -108,9 +118,7 @@ export const hydrationService = {
    * Fetch hydration logs for the past 7 days (today inclusive), ordered oldest-first.
    */
   async getWeeklyLogs(): Promise<HydrationLog[]> {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getAuthenticatedUser();
 
     if (!user) {
       const localLogsStr = await AsyncStorage.getItem('@aurora_hydration_logs');
@@ -140,9 +148,7 @@ export const hydrationService = {
    * Delete all of today's logs — used for a daily reset / undo-all action.
    */
   async deleteTodayLogs(): Promise<void> {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getAuthenticatedUser();
 
     if (!user) {
       const localLogsStr = await AsyncStorage.getItem('@aurora_hydration_logs');
