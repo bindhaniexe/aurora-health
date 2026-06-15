@@ -24,37 +24,13 @@ import { useAuthStore } from '@/stores/authStore';
 import { useHealthSummary } from '@/hooks/useHealthSummary';
 import { generateInsight } from '@/services/insightService';
 import InsightBanner from '@/components/InsightBanner';
+import { useHabits } from '@/hooks/useHabits';
+import HabitsCard from '@/components/HabitsCard';
+import StepsCard from '@/components/StepsCard';
 
 // ── Time tab options ──────────────────────────────────────────────────────────
 const TIME_TABS = ['Daily', 'Weekly', 'Monthly', 'Yearly'] as const;
 type TimeTab = typeof TIME_TABS[number];
-
-// ── Placeholder activity card data (non-sleep / non-hydration modules) ─────────
-const PLACEHOLDER_CARDS = [
-  { id: 'heart',    title: 'Heart',    icon: 'heart',    color: colors.accentPink  },
-  { id: 'calories', title: 'Calories', icon: 'flame',    color: colors.accentAmber },
-] as const;
-
-// ── Generic placeholder card ──────────────────────────────────────────────────
-function PlaceholderCard({
-  title,
-  icon,
-  color,
-}: {
-  title: string;
-  icon: string;
-  color: string;
-}) {
-  return (
-    <View style={styles.card}>
-      <View style={[styles.cardIconWrap, { backgroundColor: color + '18' }]}>
-        <Ionicons name={icon as any} size={24} color={color} />
-      </View>
-      <Text style={styles.cardTitle}>{title}</Text>
-      <Text style={styles.cardPlaceholder}>Coming soon</Text>
-    </View>
-  );
-}
 
 // ── Dashboard Screen ──────────────────────────────────────────────────────────
 export default function DashboardScreen() {
@@ -63,6 +39,7 @@ export default function DashboardScreen() {
   const { user, guestMode } = useAuthStore();
   const { todayTotal, goalMl, percentage, fetchTodayLogs } = useHydration();
   const { lastNight, goalHrs, fetchLogs: fetchSleepLogs } = useSleep();
+  const { habits, todayCompletions, fetchHabits } = useHabits();
   const summary = useHealthSummary();
   const [insight, setInsight] = useState<string | null>(null);
   const [insightLoading, setInsightLoading] = useState(true);
@@ -72,6 +49,7 @@ export default function DashboardScreen() {
     if (user || guestMode) {
       fetchTodayLogs();
       fetchSleepLogs();
+      fetchHabits();
     }
   }, [user, guestMode]);
 
@@ -85,9 +63,16 @@ export default function DashboardScreen() {
   }, [profile?.id]);
 
   // Get initials for avatar fallback
+  const firstName = profile?.name ? profile.name.split(' ')[0] : 'there';
   const initials = profile?.name
-    ? profile.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
-    : 'AU';
+    ? profile.name[0].toUpperCase()
+    : 'A';
+
+  // Dynamic greeting
+  const hour = new Date().getHours();
+  let timeOfDay = 'evening';
+  if (hour < 12) timeOfDay = 'morning';
+  else if (hour < 17) timeOfDay = 'afternoon';
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -113,7 +98,7 @@ export default function DashboardScreen() {
         </View>
 
         {/* ── Heading ──────────────────────────────────────────────── */}
-        <Text style={styles.heading}>My Activities</Text>
+        <Text style={styles.heading}>Good {timeOfDay}, {firstName} 👋</Text>
 
         {/* ── Search Bar ───────────────────────────────────────────── */}
         <View style={styles.searchBar}>
@@ -165,15 +150,9 @@ export default function DashboardScreen() {
 
         {/* ── 2×2 Activity Card Grid ────────────────────────────────── */}
         <InsightBanner insight={insight} isLoading={insightLoading} />
-        
         <View style={styles.cardGrid}>
-          {/* Hydration card — live data */}
-          <HydrationCard
-            todayTotal={todayTotal}
-            goalMl={goalMl}
-            percentage={percentage}
-            onPress={() => router.push('/(tabs)/hydration')}
-          />
+          {/* Steps card — placeholder */}
+          <StepsCard />
 
           {/* Sleep card — live data */}
           <SleepCard
@@ -182,15 +161,20 @@ export default function DashboardScreen() {
             onPress={() => router.push('/(tabs)/sleep')}
           />
 
-          {/* Placeholder cards for upcoming modules */}
-          {PLACEHOLDER_CARDS.map((card) => (
-            <PlaceholderCard
-              key={card.id}
-              title={card.title}
-              icon={card.icon}
-              color={card.color}
-            />
-          ))}
+          {/* Hydration card — live data */}
+          <HydrationCard
+            todayTotal={todayTotal}
+            goalMl={goalMl}
+            percentage={percentage}
+            onPress={() => router.push('/(tabs)/hydration')}
+          />
+
+          {/* Habits card — live data */}
+          <HabitsCard
+            completed={todayCompletions.length}
+            total={habits.length}
+            onPress={() => router.push('/(tabs)/habits')}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
