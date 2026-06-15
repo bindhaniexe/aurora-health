@@ -98,7 +98,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const { signInWithEmail, isLoading, error, clearError } = useAuthStore();
+  const { signInWithEmail, isLoading, error, clearError, setGuestMode } = useAuthStore();
 
   const handleSignIn = async () => {
     if (!email.trim() || !password.trim()) return;
@@ -127,7 +127,10 @@ export default function LoginScreen() {
             {/* Skip link — top-right corner */}
             <TouchableOpacity
               style={styles.skipBtn}
-              onPress={() => router.replace('/(tabs)' as any)}
+              onPress={() => {
+                setGuestMode(true);
+                router.replace('/(tabs)' as any);
+              }}
               activeOpacity={0.7}
             >
               <Text style={styles.skipText}>Skip</Text>

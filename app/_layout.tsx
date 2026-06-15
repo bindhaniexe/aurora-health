@@ -11,7 +11,7 @@ import { useProfileStore } from '@/stores/profileStore';
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const { isLoading: authLoading, session } = useAuthStore();
+  const { isLoading: authLoading, session, guestMode } = useAuthStore();
   const { profile, fetchProfile, isLoading: profileLoading } = useProfileStore();
   const segments = useSegments();
   const router = useRouter();
@@ -39,12 +39,12 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, fontError, authLoading]);
 
-  // Fetch profile when session appears
+  // Fetch profile when session appears or guestMode is active
   useEffect(() => {
-    if (session) {
+    if (session || guestMode) {
       useProfileStore.getState().fetchProfile();
     }
-  }, [session]);
+  }, [session, guestMode]);
 
   // Reactive navigation guard — handles changes AFTER initial routing
   // (e.g. sign-in → tabs, sign-out → onboarding)
@@ -68,11 +68,12 @@ export default function RootLayout() {
         }
       }
     } else if (!session) {
-      if (inTabsGroup) {
+      // Allow guest users (skipped login) to stay in tabs without a session
+      if (inTabsGroup && !guestMode) {
         router.replace('/(onboarding)' as any);
       }
     }
-  }, [session, authLoading, profile, profileLoading, segments, fontsLoaded, fontError, router]);
+  }, [session, authLoading, profile, profileLoading, segments, fontsLoaded, fontError, router, guestMode]);
 
   // Return null (blank) until fonts are ready
   if (!fontsLoaded && !fontError) {

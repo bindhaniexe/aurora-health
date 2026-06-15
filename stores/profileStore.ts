@@ -19,6 +19,25 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   error: null,
 
   fetchProfile: async () => {
+    const { guestMode } = useAuthStore.getState();
+    if (guestMode) {
+      set({
+        profile: {
+          id: 'guest',
+          name: 'Guest User',
+          water_goal_ml: 2500,
+          sleep_goal_hrs: 8,
+          goals: ['Hydration', 'Better Sleep'],
+          onboarding_done: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        isLoading: false,
+        error: null,
+      });
+      return;
+    }
+
     const user = useAuthStore.getState().user;
     if (!user) {
       set({ profile: null, error: 'No authenticated user' });
@@ -36,7 +55,13 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
 
   updateProfile: async (updates: Partial<Profile>) => {
     const { profile } = get();
-    const user = useAuthStore.getState().user;
+    const { user, guestMode } = useAuthStore.getState();
+    
+    if (guestMode && profile) {
+      set({ profile: { ...profile, ...updates } });
+      return;
+    }
+
     if (!user || !profile) return;
 
     // Optimistic update

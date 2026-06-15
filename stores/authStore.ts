@@ -12,6 +12,8 @@ interface AuthState {
   user: User | null;
   isLoading: boolean;
   error: string | null;
+  /** True when user explicitly skipped login — allows unauthenticated tab access */
+  guestMode: boolean;
 
   // Actions
   initialize: () => Promise<void>;
@@ -19,6 +21,7 @@ interface AuthState {
   signUpWithEmail: (email: string, password: string, name: string) => Promise<void>;
   signOut: () => Promise<void>;
   clearError: () => void;
+  setGuestMode: (value: boolean) => void;
 }
 
 // Human-readable error messages for Supabase auth error codes
@@ -47,8 +50,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isLoading: true,
   error: null,
+  guestMode: false,
 
   clearError: () => set({ error: null }),
+  setGuestMode: (value: boolean) => set({ guestMode: value }),
 
   initialize: async () => {
     set({ isLoading: true });
@@ -122,7 +127,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      set({ session: null, user: null, isLoading: false });
+      // Clear guest mode on sign out so routing guard redirects correctly
+      set({ session: null, user: null, isLoading: false, guestMode: false });
     } catch (err) {
       set({ isLoading: false, error: parseAuthError(err as AuthError) });
     }
