@@ -79,7 +79,7 @@ export default function CompanionScreen() {
         {transcript.length === 0 && connectionState !== 'processing' && (
           <View style={styles.emptyState}>
             <Text style={styles.emptyStateText}>
-              Say &quot;Log 500ml of water&quot; or ask &quot;How is my sleep?&quot;
+              Tap the mic to start talking to Aurora
             </Text>
           </View>
         )}

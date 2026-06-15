@@ -18,6 +18,7 @@ interface HydrationCardProps {
   todayTotal: number;    // ml drunk today
   goalMl: number;        // daily goal in ml
   percentage: number;    // 0–100
+  isLoading?: boolean;
   onPress?: () => void;
 }
 
@@ -27,12 +28,26 @@ const STROKE_WIDTH = 5;
 const R = (RING_SIZE - STROKE_WIDTH) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * R;
 
-export default function HydrationCard({
+const HydrationCard = React.memo(({
   todayTotal,
   goalMl,
   percentage,
+  isLoading,
   onPress,
-}: HydrationCardProps) {
+}: HydrationCardProps) => {
+  if (isLoading) {
+    return (
+      <View style={styles.card}>
+        <View style={[styles.topRow, { marginBottom: 16 }]}>
+          <View style={[styles.iconWrap, { backgroundColor: '#F3F4F6' }]} />
+          <View style={{ width: RING_SIZE, height: RING_SIZE, borderRadius: RING_SIZE/2, backgroundColor: '#F3F4F6' }} />
+        </View>
+        <View style={{ height: 24, backgroundColor: '#F3F4F6', borderRadius: 4, width: '60%', marginBottom: 8 }} />
+        <View style={{ height: 16, backgroundColor: '#F3F4F6', borderRadius: 4, width: '80%' }} />
+      </View>
+    );
+  }
+
   const strokeDash = (percentage / 100) * CIRCUMFERENCE;
 
   return (
@@ -92,7 +107,9 @@ export default function HydrationCard({
       <Text style={styles.sub}>{percentage}% of {goalMl >= 1000 ? `${goalMl / 1000}L` : `${goalMl}ml`}</Text>
     </TouchableOpacity>
   );
-}
+});
+
+export default HydrationCard;
 
 const styles = StyleSheet.create({
   card: {

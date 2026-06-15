@@ -48,14 +48,19 @@ export const hydrationService = {
         .sort((a, b) => new Date(b.logged_at).getTime() - new Date(a.logged_at).getTime());
     }
 
-    const { data, error } = await supabase
-      .from('hydration_logs')
-      .select('*')
-      .gte('logged_at', startOfTodayISO())
-      .order('logged_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('hydration_logs')
+        .select('*')
+        .gte('logged_at', startOfTodayISO())
+        .order('logged_at', { ascending: false });
 
-    if (error) throw error;
-    return data ?? [];
+      if (error) throw error;
+      return data ?? [];
+    } catch (error) {
+      console.error('HydrationService getTodayLogs error:', error);
+      throw new Error('Something went wrong fetching today logs. Please try again.');
+    }
   },
 
   /**
@@ -80,18 +85,23 @@ export const hydrationService = {
       return newLog;
     }
 
-    const { data, error } = await supabase
-      .from('hydration_logs')
-      .insert({
-        user_id: user.id,
-        amount_ml,
-        logged_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('hydration_logs')
+        .insert({
+          user_id: user.id,
+          amount_ml,
+          logged_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
 
-    if (error) throw error;
-    return data;
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('HydrationService addLog error:', error);
+      throw new Error('Something went wrong saving your log. Please try again.');
+    }
   },
 
   /**
@@ -111,14 +121,19 @@ export const hydrationService = {
         .sort((a, b) => new Date(a.logged_at).getTime() - new Date(b.logged_at).getTime());
     }
 
-    const { data, error } = await supabase
-      .from('hydration_logs')
-      .select('*')
-      .gte('logged_at', startOfNDaysAgoISO(6)) // 6 days ago + today = 7 days
-      .order('logged_at', { ascending: true });
+    try {
+      const { data, error } = await supabase
+        .from('hydration_logs')
+        .select('*')
+        .gte('logged_at', startOfNDaysAgoISO(6)) // 6 days ago + today = 7 days
+        .order('logged_at', { ascending: true });
 
-    if (error) throw error;
-    return data ?? [];
+      if (error) throw error;
+      return data ?? [];
+    } catch (error) {
+      console.error('HydrationService getWeeklyLogs error:', error);
+      throw new Error('Something went wrong fetching weekly logs. Please try again.');
+    }
   },
 
   /**
@@ -138,12 +153,17 @@ export const hydrationService = {
       return;
     }
 
-    const { error } = await supabase
-      .from('hydration_logs')
-      .delete()
-      .eq('user_id', user.id)
-      .gte('logged_at', startOfTodayISO());
+    try {
+      const { error } = await supabase
+        .from('hydration_logs')
+        .delete()
+        .eq('user_id', user.id)
+        .gte('logged_at', startOfTodayISO());
 
-    if (error) throw error;
+      if (error) throw error;
+    } catch (error) {
+      console.error('HydrationService deleteTodayLogs error:', error);
+      throw new Error('Something went wrong deleting today logs. Please try again.');
+    }
   },
 };

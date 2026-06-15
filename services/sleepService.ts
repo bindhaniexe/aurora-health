@@ -60,23 +60,27 @@ export const sleepService = {
       return newLog;
     }
 
-    // Authenticated — upsert by (user_id, sleep_date)
-    const { data, error } = await supabase
-      .from('sleep_logs')
-      .upsert(
-        {
-          user_id: user.id,
-          hours,
-          quality: quality ?? null,
-          sleep_date: todayDateStr(),
-        },
-        { onConflict: 'user_id,sleep_date' },
-      )
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('sleep_logs')
+        .upsert(
+          {
+            user_id: user.id,
+            hours,
+            quality: quality ?? null,
+            sleep_date: todayDateStr(),
+          },
+          { onConflict: 'user_id,sleep_date' },
+        )
+        .select()
+        .single();
 
-    if (error) throw error;
-    return data;
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('SleepService addSleepLog error:', error);
+      throw new Error('Something went wrong saving your sleep log. Please try again.');
+    }
   },
 
   /**
@@ -98,15 +102,20 @@ export const sleepService = {
         .sort((a, b) => b.sleep_date.localeCompare(a.sleep_date));
     }
 
-    const { data, error } = await supabase
-      .from('sleep_logs')
-      .select('*')
-      .eq('user_id', user.id)
-      .gte('sleep_date', cutoff)
-      .order('sleep_date', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('sleep_logs')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('sleep_date', cutoff)
+        .order('sleep_date', { ascending: false });
 
-    if (error) throw error;
-    return data ?? [];
+      if (error) throw error;
+      return data ?? [];
+    } catch (error) {
+      console.error('SleepService getRecentLogs error:', error);
+      throw new Error('Something went wrong fetching recent sleep logs. Please try again.');
+    }
   },
 
   /**
@@ -125,14 +134,19 @@ export const sleepService = {
       return allLogs.find((l) => l.sleep_date === today) ?? null;
     }
 
-    const { data, error } = await supabase
-      .from('sleep_logs')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('sleep_date', today)
-      .maybeSingle();
+    try {
+      const { data, error } = await supabase
+        .from('sleep_logs')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('sleep_date', today)
+        .maybeSingle();
 
-    if (error) throw error;
-    return data;
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('SleepService getTodayLog error:', error);
+      throw new Error("Something went wrong fetching today's sleep log. Please try again.");
+    }
   },
 };

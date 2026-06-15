@@ -106,9 +106,9 @@ Maximum 20 words. Plain text only. No quotes. No bullet points.`;
         return text;
       }
       return null;
-    } catch (err) {
+    } catch (err: unknown) {
       // Catch silently on any error, do NOT throw
-      console.warn('[InsightCache] Error generating insight:', err);
+      console.warn('[InsightCache] Error generating insight:', (err as Error).message);
       return null;
     }
   }

@@ -29,15 +29,20 @@ export const habitService = {
       return existing ? JSON.parse(existing) : [];
     }
 
-    const { data, error } = await supabase
-      .from('habits')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('is_active', true)
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('habits')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return data ?? [];
+      if (error) throw error;
+      return data ?? [];
+    } catch (error) {
+      console.error('HabitService getHabits error:', error);
+      throw new Error('Something went wrong fetching habits. Please try again.');
+    }
   },
 
   /**
@@ -64,19 +69,24 @@ export const habitService = {
       return newHabit;
     }
 
-    const { data, error } = await supabase
-      .from('habits')
-      .insert({
-        user_id: user.id,
-        name,
-        frequency,
-        is_active: true,
-      })
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('habits')
+        .insert({
+          user_id: user.id,
+          name,
+          frequency,
+          is_active: true,
+        })
+        .select()
+        .single();
 
-    if (error) throw error;
-    return data;
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('HabitService createHabit error:', error);
+      throw new Error('Something went wrong creating your habit. Please try again.');
+    }
   },
 
   /**
@@ -107,21 +117,26 @@ export const habitService = {
       return newCompletion;
     }
 
-    const { data, error } = await supabase
-      .from('habit_completions')
-      .upsert(
-        {
-          habit_id: habitId,
-          user_id: user.id,
-          completed_date: today,
-        },
-        { onConflict: 'habit_id,completed_date' }
-      )
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('habit_completions')
+        .upsert(
+          {
+            habit_id: habitId,
+            user_id: user.id,
+            completed_date: today,
+          },
+          { onConflict: 'habit_id,completed_date' }
+        )
+        .select()
+        .single();
 
-    if (error) throw error;
-    return data;
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('HabitService completeHabit error:', error);
+      throw new Error('Something went wrong completing your habit. Please try again.');
+    }
   },
 
   /**
@@ -137,14 +152,19 @@ export const habitService = {
       return allCompletions.filter(c => c.completed_date === today);
     }
 
-    const { data, error } = await supabase
-      .from('habit_completions')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('completed_date', today);
+    try {
+      const { data, error } = await supabase
+        .from('habit_completions')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('completed_date', today);
 
-    if (error) throw error;
-    return data ?? [];
+      if (error) throw error;
+      return data ?? [];
+    } catch (error) {
+      console.error('HabitService getTodayCompletions error:', error);
+      throw new Error("Something went wrong fetching today's habits. Please try again.");
+    }
   },
 
   /**

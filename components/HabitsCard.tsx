@@ -16,6 +16,7 @@ import { radius } from '@/constants/radius';
 interface HabitsCardProps {
   completed: number;
   total: number;
+  isLoading?: boolean;
   onPress?: () => void;
 }
 
@@ -25,11 +26,25 @@ const STROKE_WIDTH = 5;
 const R = (RING_SIZE - STROKE_WIDTH) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * R;
 
-export default function HabitsCard({
+const HabitsCard = React.memo(({
   completed,
   total,
+  isLoading,
   onPress,
-}: HabitsCardProps) {
+}: HabitsCardProps) => {
+  if (isLoading) {
+    return (
+      <View style={styles.card}>
+        <View style={[styles.topRow, { marginBottom: 16 }]}>
+          <View style={[styles.iconWrap, { backgroundColor: '#F3F4F6' }]} />
+          <View style={{ width: RING_SIZE, height: RING_SIZE, borderRadius: RING_SIZE/2, backgroundColor: '#F3F4F6' }} />
+        </View>
+        <View style={{ height: 24, backgroundColor: '#F3F4F6', borderRadius: 4, width: '60%', marginBottom: 8 }} />
+        <View style={{ height: 16, backgroundColor: '#F3F4F6', borderRadius: 4, width: '80%' }} />
+      </View>
+    );
+  }
+
   const percentage = total === 0 ? 0 : Math.min(100, Math.max(0, (completed / total) * 100));
   const strokeDash = (percentage / 100) * CIRCUMFERENCE;
 
@@ -90,7 +105,9 @@ export default function HabitsCard({
       </Text>
     </TouchableOpacity>
   );
-}
+});
+
+export default HabitsCard;
 
 const styles = StyleSheet.create({
   card: {

@@ -48,8 +48,9 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     try {
       const profile = await profileService.getProfile(user.id);
       set({ profile, isLoading: false });
-    } catch (err: any) {
-      set({ error: err.message || 'Failed to fetch profile', isLoading: false });
+    } catch (err: unknown) {
+      const error = err as Error;
+      set({ error: error.message || 'Failed to fetch profile', isLoading: false });
     }
   },
 
@@ -70,9 +71,10 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     try {
       const updated = await profileService.updateProfile(user.id, updates);
       set({ profile: updated });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as Error;
       // Revert on error
-      set({ profile, error: err.message || 'Failed to update profile' });
+      set({ profile, error: error.message || 'Failed to update profile' });
     }
   },
 

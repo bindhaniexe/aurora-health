@@ -15,6 +15,7 @@ import { radius } from '@/constants/radius';
 import { gradients } from '@/constants/gradients';
 
 interface StepsCardProps {
+  isLoading?: boolean;
   onPress?: () => void;
 }
 
@@ -24,7 +25,20 @@ const STROKE_WIDTH = 5;
 const R = (RING_SIZE - STROKE_WIDTH) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * R;
 
-export default function StepsCard({ onPress }: StepsCardProps) {
+const StepsCard = React.memo(({ isLoading, onPress }: StepsCardProps) => {
+  if (isLoading) {
+    return (
+      <View style={styles.card}>
+        <View style={[styles.topRow, { marginBottom: 16 }]}>
+          <View style={[styles.iconWrap, { backgroundColor: '#F3F4F6' }]} />
+          <View style={{ width: RING_SIZE, height: RING_SIZE, borderRadius: RING_SIZE/2, backgroundColor: '#F3F4F6' }} />
+        </View>
+        <View style={{ height: 24, backgroundColor: '#F3F4F6', borderRadius: 4, width: '60%', marginBottom: 8 }} />
+        <View style={{ height: 16, backgroundColor: '#F3F4F6', borderRadius: 4, width: '80%' }} />
+      </View>
+    );
+  }
+
   // Placeholder values
   const percentage = 0; // Hardcoded to 0 for MVP
   const strokeDash = (percentage / 100) * CIRCUMFERENCE;
@@ -82,7 +96,9 @@ export default function StepsCard({ onPress }: StepsCardProps) {
       <Text style={styles.sub}>not tracked</Text>
     </TouchableOpacity>
   );
-}
+});
+
+export default StepsCard;
 
 const styles = StyleSheet.create({
   card: {

@@ -19,6 +19,7 @@ import type { SleepLog } from '@/types';
 interface SleepCardProps {
   lastNight: SleepLog | null;
   goalHrs: number;
+  isLoading?: boolean;
   onPress?: () => void;
 }
 
@@ -36,8 +37,20 @@ const QUALITY_LABELS: Record<string, string> = {
   great: '⭐ Great',
 };
 
-export default function SleepCard({ lastNight, goalHrs, onPress }: SleepCardProps) {
+const SleepCard = React.memo(({ lastNight, goalHrs, isLoading, onPress }: SleepCardProps) => {
   const hasData = lastNight !== null;
+
+  if (isLoading) {
+    return (
+      <View style={[styles.card, { backgroundColor: colors.bgCard }]}>
+        <View style={styles.headerRow}>
+          <View style={[styles.iconWrap, { backgroundColor: '#F3F4F6' }]} />
+        </View>
+        <View style={{ height: 24, backgroundColor: '#F3F4F6', borderRadius: 4, width: '60%', marginBottom: 8 }} />
+        <View style={{ height: 16, backgroundColor: '#F3F4F6', borderRadius: 4, width: '80%' }} />
+      </View>
+    );
+  }
 
   return (
     <TouchableOpacity
@@ -94,7 +107,9 @@ export default function SleepCard({ lastNight, goalHrs, onPress }: SleepCardProp
       </LinearGradient>
     </TouchableOpacity>
   );
-}
+});
+
+export default SleepCard;
 
 const styles = StyleSheet.create({
   touchable: {

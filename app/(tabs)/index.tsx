@@ -37,9 +37,9 @@ export default function DashboardScreen() {
   const [selectedTab, setSelectedTab] = useState<TimeTab>('Daily');
   const { profile } = useProfileStore();
   const { user, guestMode } = useAuthStore();
-  const { todayTotal, goalMl, percentage, fetchTodayLogs } = useHydration();
-  const { lastNight, goalHrs, fetchLogs: fetchSleepLogs } = useSleep();
-  const { habits, todayCompletions, fetchHabits } = useHabits();
+  const { todayTotal, goalMl, percentage, fetchTodayLogs, isLoading: isHydrationLoading } = useHydration();
+  const { lastNight, goalHrs, fetchLogs: fetchSleepLogs, isLoading: isSleepLoading } = useSleep();
+  const { habits, todayCompletions, fetchHabits, isLoading: isHabitsLoading } = useHabits();
   const summary = useHealthSummary();
   const [insight, setInsight] = useState<string | null>(null);
   const [insightLoading, setInsightLoading] = useState(true);
@@ -152,12 +152,13 @@ export default function DashboardScreen() {
         <InsightBanner insight={insight} isLoading={insightLoading} />
         <View style={styles.cardGrid}>
           {/* Steps card — placeholder */}
-          <StepsCard />
+          <StepsCard isLoading={false} />
 
           {/* Sleep card — live data */}
           <SleepCard
             lastNight={lastNight}
             goalHrs={goalHrs}
+            isLoading={isSleepLoading}
             onPress={() => router.push('/(tabs)/sleep')}
           />
 
@@ -166,6 +167,7 @@ export default function DashboardScreen() {
             todayTotal={todayTotal}
             goalMl={goalMl}
             percentage={percentage}
+            isLoading={isHydrationLoading}
             onPress={() => router.push('/(tabs)/hydration')}
           />
 
@@ -173,6 +175,7 @@ export default function DashboardScreen() {
           <HabitsCard
             completed={todayCompletions.length}
             total={habits.length}
+            isLoading={isHabitsLoading}
             onPress={() => router.push('/(tabs)/habits')}
           />
         </View>

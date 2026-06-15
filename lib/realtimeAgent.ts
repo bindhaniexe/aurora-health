@@ -183,7 +183,7 @@ class RealtimeAgent {
     this.ws.send(JSON.stringify({ type: 'response.create' }));
   }
 
-  private async handleServerEvent(event: any) {
+  private async handleServerEvent(event: { type: string; delta?: string; name?: string; call_id?: string; arguments?: string; error?: { message: string } }) {
     switch (event.type) {
       case 'response.audio.delta': {
         // Collect base64 audio chunks
@@ -195,12 +195,14 @@ class RealtimeAgent {
       }
       case 'response.text.delta':
       case 'response.audio_transcript.delta': {
-        if (!this.currentResponseText) {
-          useCompanionStore.getState().appendTranscript({ role: 'aurora', text: event.delta });
-          this.currentResponseText += event.delta;
-        } else {
-          this.currentResponseText += event.delta;
-          useCompanionStore.getState().updateLastTranscript(this.currentResponseText);
+        if (event.delta) {
+          if (!this.currentResponseText) {
+            useCompanionStore.getState().appendTranscript({ role: 'aurora', text: event.delta });
+            this.currentResponseText += event.delta;
+          } else {
+            this.currentResponseText += event.delta;
+            useCompanionStore.getState().updateLastTranscript(this.currentResponseText);
+          }
         }
         break;
       }
@@ -215,9 +217,9 @@ class RealtimeAgent {
       }
       case 'response.function_call_arguments.done': {
         useCompanionStore.getState().setConnectionState('processing');
-        const toolName = event.name;
+        const toolName = event.name || '';
         const callId = event.call_id;
-        const args = JSON.parse(event.arguments);
+        const args = JSON.parse(event.arguments || '{}');
 
         const result = await agentService.executeToolCall(toolName, args);
 
@@ -234,7 +236,7 @@ class RealtimeAgent {
       }
       case 'error': {
         console.error('Server error:', event.error);
-        useCompanionStore.getState().setErrorMessage(event.error.message);
+        useCompanionStore.getState().setErrorMessage(event.error?.message || 'Unknown error');
         useCompanionStore.getState().setConnectionState('error');
         break;
       }
