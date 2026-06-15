@@ -10,6 +10,9 @@ import { radius } from '@/constants/radius';
 import { MicButton } from '@/components/MicButton';
 import { useCompanionStore } from '@/stores/companionStore';
 import { realtimeAgent } from '@/lib/realtimeAgent';
+import { FadeIn } from 'react-native-reanimated';
+import { ScreenTransition } from '@/components/animated/ScreenTransition';
+import { FloatingOrbs } from '@/components/animated/FloatingOrbs';
 
 export default function CompanionScreen() {
   const { connectionState, transcript, errorMessage, clearTranscript } = useCompanionStore();
@@ -53,6 +56,8 @@ export default function CompanionScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <FloatingOrbs variant="calm" count={3} />
+      <ScreenTransition entering={FadeIn}>
       <View style={styles.header}>
         <Text style={styles.title}>Aurora</Text>
         <Text style={styles.subtitle}>Your AI Health Companion</Text>
@@ -119,6 +124,7 @@ export default function CompanionScreen() {
         <MicButton state={connectionState} onPress={handleMicPress} />
         <Text style={styles.statusText}>{getStatusText()}</Text>
       </KeyboardAvoidingView>
+      </ScreenTransition>
     </SafeAreaView>
   );
 }
@@ -127,6 +133,8 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: colors.bgPrimary,
+    position: 'relative',
+    overflow: 'hidden',
   },
   header: {
     paddingHorizontal: 20,

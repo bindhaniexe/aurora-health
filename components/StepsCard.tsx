@@ -102,7 +102,7 @@ export default StepsCard;
 
 const styles = StyleSheet.create({
   card: {
-    width: '47%',
+    width: '100%',
     backgroundColor: colors.bgCard,
     borderRadius: radius.lg,
     padding: 16,

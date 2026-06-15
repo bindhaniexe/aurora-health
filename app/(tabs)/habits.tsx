@@ -9,6 +9,8 @@ import HabitItem from '@/components/HabitItem';
 import { colors } from '@/constants/colors';
 import { gradients } from '@/constants/gradients';
 import { radius } from '@/constants/radius';
+import { ScreenTransition } from '@/components/animated/ScreenTransition';
+import { StaggerList } from '@/components/animated/StaggerList';
 
 export default function HabitsScreen() {
   const { habits, addHabit, completeHabit } = useHabits();
@@ -36,7 +38,8 @@ export default function HabitsScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScreenTransition>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.dateText}>{todayStr}</Text>
@@ -69,16 +72,18 @@ export default function HabitsScreen() {
           </View>
         ) : (
           <View style={styles.list}>
-            {habits.map(habit => (
-              <HabitItem
-                key={habit.id}
-                id={habit.id}
-                name={habit.name}
-                isCompletedToday={habit.isCompletedToday}
-                streak={habit.streak}
-                onComplete={handleComplete}
-              />
-            ))}
+            <StaggerList staggerDelay={70}>
+              {habits.map(habit => (
+                <HabitItem
+                  key={habit.id}
+                  id={habit.id}
+                  name={habit.name}
+                  isCompletedToday={habit.isCompletedToday}
+                  streak={habit.streak}
+                  onComplete={handleComplete}
+                />
+              ))}
+            </StaggerList>
           </View>
         )}
       </ScrollView>
@@ -99,6 +104,7 @@ export default function HabitsScreen() {
           <Text style={styles.fabText}>Add Habit</Text>
         </LinearGradient>
       </TouchableOpacity>
+      </ScreenTransition>
 
       {/* Add Habit Modal */}
       <Modal
@@ -186,6 +192,8 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: colors.bgPrimary,
+    position: 'relative',
+    overflow: 'hidden',
   },
   scrollContent: {
     padding: 24,

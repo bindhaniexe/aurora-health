@@ -9,6 +9,7 @@ import { radius } from '@/constants/radius';
 import { useProfileStore } from '@/stores/profileStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useRouter } from 'expo-router';
+import { ScreenTransition } from '@/components/animated/ScreenTransition';
 
 export default function ProfileScreen() {
   const { profile, updateProfile } = useProfileStore();
@@ -44,8 +45,9 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bgPrimary }} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bgPrimary, position: 'relative', overflow: 'hidden' }} edges={['top']}>
+      <ScreenTransition>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Top Section */}
         <View style={styles.topSection}>
           <LinearGradient
@@ -147,6 +149,7 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      </ScreenTransition>
     </SafeAreaView>
   );
 }

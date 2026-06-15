@@ -23,6 +23,8 @@ import { useHydration } from '@/hooks/useHydration';
 import WaterBottle from '@/components/WaterBottle';
 import { HydrationLog } from '@/types';
 import { useAuthStore } from '@/stores/authStore';
+import { ScreenTransition } from '@/components/animated/ScreenTransition';
+import { StaggerList } from '@/components/animated/StaggerList';
 
 // ── Quick add presets ─────────────────────────────────────────────────────────
 const QUICK_ADD = [
@@ -118,11 +120,12 @@ export default function HydrationScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScreenTransition>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
         {/* ── Header ──────────────────────────────────────────────── */}
         <View style={styles.header}>
           <View>
@@ -186,24 +189,26 @@ export default function HydrationScreen() {
         <View style={styles.quickAddSection}>
           <Text style={styles.sectionTitle}>Quick Add</Text>
           <View style={styles.quickAddRow}>
-            {QUICK_ADD.map(({ label, amount }) => (
-              <TouchableOpacity
-                key={amount}
-                activeOpacity={0.85}
-                onPress={() => handleAddWater(amount)}
-                style={styles.quickAddWrapper}
-              >
-                <LinearGradient
-                  colors={gradients.primary}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.quickAddPill}
+            <StaggerList staggerDelay={60} childContainerStyle={{ flex: 1 }}>
+              {QUICK_ADD.map(({ label, amount }) => (
+                <TouchableOpacity
+                  key={amount}
+                  activeOpacity={0.85}
+                  onPress={() => handleAddWater(amount)}
+                  style={styles.quickAddWrapper}
                 >
-                  <Ionicons name="add" size={16} color={colors.textOnGradient} />
-                  <Text style={styles.quickAddText}>{label}</Text>
-                </LinearGradient>
-              </TouchableOpacity>
-            ))}
+                  <LinearGradient
+                    colors={gradients.primary}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.quickAddPill}
+                  >
+                    <Ionicons name="add" size={16} color={colors.textOnGradient} />
+                    <Text style={styles.quickAddText}>{label}</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              ))}
+            </StaggerList>
           </View>
         </View>
 
@@ -235,7 +240,8 @@ export default function HydrationScreen() {
             logs.map((log) => <LogItem key={log.id} log={log} />)
           )}
         </View>
-      </ScrollView>
+        </ScrollView>
+      </ScreenTransition>
     </SafeAreaView>
   );
 }
@@ -245,6 +251,8 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: colors.bgPrimary,
+    position: 'relative',
+    overflow: 'hidden',
   },
   scroll: {
     flex: 1,
@@ -369,7 +377,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   quickAddWrapper: {
-    flex: 1,
+    width: '100%',
   },
   quickAddPill: {
     flexDirection: 'row',

@@ -113,9 +113,10 @@ export default SleepCard;
 
 const styles = StyleSheet.create({
   touchable: {
-    width: '47%',
+    width: '100%',
   },
   card: {
+    width: '100%',
     borderRadius: radius.lg,
     padding: 16,
     minHeight: 140,

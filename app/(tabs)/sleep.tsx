@@ -30,6 +30,7 @@ import { colors } from '@/constants/colors';
 import { gradients } from '@/constants/gradients';
 import { radius } from '@/constants/radius';
 import type { SleepLog } from '@/types';
+import { ScreenTransition } from '@/components/animated/ScreenTransition';
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -301,11 +302,12 @@ export default function SleepScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScreenTransition>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
         {/* ── Header ── */}
         <Text style={styles.screenTitle}>Sleep Tracker</Text>
         <Text style={styles.screenSubtitle}>Track your rest, improve your health</Text>
@@ -422,6 +424,7 @@ export default function SleepScreen() {
           </TouchableOpacity>
         </LinearGradient>
       </View>
+      </ScreenTransition>
 
       {/* ── Log Modal ── */}
       <LogSleepModal
@@ -438,6 +441,8 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: colors.bgPrimary,
+    position: 'relative',
+    overflow: 'hidden',
   },
   scroll: {
     flex: 1,

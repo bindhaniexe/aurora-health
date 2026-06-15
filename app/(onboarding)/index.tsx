@@ -49,6 +49,7 @@ import { colors } from '@/constants/colors';
 import { gradients } from '@/constants/gradients';
 import { radius } from '@/constants/radius';
 import { images } from '@/constants/images';
+import { FloatingOrbs } from '@/components/animated/FloatingOrbs';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -295,8 +296,9 @@ export default function OnboardingScreen() {
       colors={gradients.authBg}
       start={{ x: 0, y: 0 }}
       end={{ x: 0, y: 1 }}
-      style={{ flex: 1 }}
+      style={{ flex: 1, position: 'relative', overflow: 'hidden' }}
     >
+      <FloatingOrbs variant="warm" count={2} />
       <SafeAreaView style={styles.safeArea}>
 
         {/* Ambient decorative glow orb */}
