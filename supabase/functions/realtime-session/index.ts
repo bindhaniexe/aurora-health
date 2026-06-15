@@ -14,38 +14,36 @@ serve(async (req) => {
   }
 
   try {
-    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
-    if (!OPENAI_API_KEY) {
-      throw new Error('OPENAI_API_KEY is not set in environment');
+    const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY');
+    const ELEVENLABS_AGENT_ID = Deno.env.get('ELEVENLABS_AGENT_ID');
+    
+    if (!ELEVENLABS_API_KEY || !ELEVENLABS_AGENT_ID) {
+      throw new Error('ELEVENLABS_API_KEY or ELEVENLABS_AGENT_ID is not set in Supabase environment secrets');
     }
 
-    // Call OpenAI Realtime API to create an ephemeral session
-    const response = await fetch('https://api.openai.com/v1/realtime/sessions', {
-      method: 'POST',
+    // Call ElevenLabs API to get a signed URL for Conversational AI WebSocket
+    const response = await fetch(`https://api.elevenlabs.io/v1/convai/conversation/get-signed-url?agent_id=${ELEVENLABS_AGENT_ID}`, {
+      method: 'GET',
       headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
+        'xi-api-key': ELEVENLABS_API_KEY,
       },
-      body: JSON.stringify({
-        model: 'gpt-4o-realtime-preview-2024-12-17',
-        voice: 'alloy',
-      }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('OpenAI API Error:', errorText);
-      throw new Error('Failed to create session with OpenAI');
+      console.error('ElevenLabs API Error:', errorText);
+      throw new Error(`Failed to generate signed URL from ElevenLabs: ${response.statusText}`);
     }
 
     const data = await response.json();
     
-    // We return the entire response, which contains the client_secret
+    // We return the response, which contains the signed_url
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
   } catch (error) {
+    console.error('Edge function error:', error.message);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,
