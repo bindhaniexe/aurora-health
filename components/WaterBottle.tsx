@@ -3,7 +3,7 @@
 // Fill level animates smoothly as user logs water.
 // Uses react-native-svg + Reanimated v3 for smooth cross-platform animations.
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
 import Svg, {
   Path,
@@ -11,25 +11,20 @@ import Svg, {
   LinearGradient as SvgLinearGradient,
   Stop,
   ClipPath,
-  Rect,
   G,
-  Circle,
 } from 'react-native-svg';
 import Animated, {
   useSharedValue,
-  useAnimatedProps,
   withTiming,
   Easing,
   useAnimatedStyle,
   withSequence,
   withSpring,
-  withDelay,
+  withRepeat,
+  useAnimatedProps,
 } from 'react-native-reanimated';
-import { colors } from '@/constants/colors';
-import { AnimatedNumber } from './animated/AnimatedNumber';
 
-const AnimatedRect = Animated.createAnimatedComponent(Rect);
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+const AnimatedPath = Animated.createAnimatedComponent(Path);
 const AnimatedView = Animated.createAnimatedComponent(View);
 
 interface WaterBottleProps {
@@ -44,7 +39,6 @@ const VB_W = 100;
 const VB_H = 200;
 
 // The fill clip region (inside bottle body)
-const FILL_X = 12;
 const FILL_TOP = 42;       // top of fillable area in SVG units
 const FILL_BOTTOM = 178;   // bottom of fillable area in SVG units
 const MAX_FILL_H = FILL_BOTTOM - FILL_TOP; // 136
@@ -58,28 +52,43 @@ export default function WaterBottle({ filledPercent, size = 150 }: WaterBottlePr
   const target = Math.max(0, Math.min(100, filledPercent));
   
   const fillAnim = useSharedValue(0);
-  const rippleScale = useSharedValue(0);
-  const rippleOpacity = useSharedValue(0);
+  const frontWavePhase = useSharedValue(0);
+  const backWavePhase = useSharedValue(0);
   const bottleScale = useSharedValue(1);
   
   const prevFilledPercent = useRef(0);
 
   useEffect(() => {
-    // Fill animation
+    // Start continuous horizontal wave phase animations (0 to 2*PI radians represents a full wavelength)
+    frontWavePhase.value = 0;
+    frontWavePhase.value = withRepeat(
+      withTiming(2 * Math.PI, {
+        duration: 2000,
+        easing: Easing.linear,
+      }),
+      -1, // infinite loop
+      false // do not reverse, continuous forward flow
+    );
+
+    backWavePhase.value = 0;
+    backWavePhase.value = withRepeat(
+      withTiming(-2 * Math.PI, {
+        duration: 3500,
+        easing: Easing.linear,
+      }),
+      -1, // infinite loop
+      false // do not reverse, continuous backward flow
+    );
+  }, []);
+
+  useEffect(() => {
+    // Fill level animation (1000ms duration for extra smooth rise and fall)
     fillAnim.value = withTiming(target / 100, {
-      duration: 800,
+      duration: 1000,
       easing: Easing.out(Easing.cubic),
     });
 
-    // Ripple effect on add
-    if (target > prevFilledPercent.current && target <= 100) {
-      rippleScale.value = 0;
-      rippleOpacity.value = 1;
-      rippleScale.value = withTiming(2, { duration: 600, easing: Easing.out(Easing.quad) });
-      rippleOpacity.value = withTiming(0, { duration: 600, easing: Easing.out(Easing.quad) });
-    }
-
-    // Bounce on completion
+    // Bounce on completion celebration
     if (target >= 100 && prevFilledPercent.current < 100) {
       bottleScale.value = withSequence(
         withTiming(1.05, { duration: 150 }),
@@ -89,24 +98,51 @@ export default function WaterBottle({ filledPercent, size = 150 }: WaterBottlePr
     }
     
     prevFilledPercent.current = target;
-  }, [target, fillAnim, rippleScale, rippleOpacity, bottleScale]);
+  }, [target, fillAnim, bottleScale]);
 
-  const animatedProps = useAnimatedProps(() => {
-    const y = FILL_TOP + MAX_FILL_H - fillAnim.value * MAX_FILL_H;
-    const h = fillAnim.value * MAX_FILL_H;
-    return {
-      y,
-      height: h,
-    };
+  // Dynamically generate the wave path on the UI thread inside useAnimatedProps
+  const frontWaveProps = useAnimatedProps(() => {
+    const y_level = FILL_TOP + MAX_FILL_H - fillAnim.value * MAX_FILL_H;
+    const phase = frontWavePhase.value;
+    
+    const N = 20; // number of segments to draw the wave
+    const width = 80; // bottle internal width
+    const startX = 10;
+    const endX = 90;
+    const freq = (2 * Math.PI) / 60; // wavelength of 60 units
+    const amp = 4.5; // wave amplitude (height)
+
+    let d = `M ${startX} ${y_level + amp * Math.sin(startX * freq + phase)}`;
+    for (let i = 1; i <= N; i++) {
+      const x = startX + i * (width / N);
+      const y = y_level + amp * Math.sin(x * freq + phase);
+      d += ` L ${x} ${y}`;
+    }
+    d += ` L ${endX} 220 L ${startX} 220 Z`;
+
+    return { d };
   });
 
-  const rippleProps = useAnimatedProps(() => {
-    const y = FILL_TOP + MAX_FILL_H - fillAnim.value * MAX_FILL_H;
-    return {
-      cy: y,
-      r: 30 * rippleScale.value,
-      opacity: rippleOpacity.value,
-    };
+  const backWaveProps = useAnimatedProps(() => {
+    const y_level = FILL_TOP + MAX_FILL_H - fillAnim.value * MAX_FILL_H;
+    const phase = backWavePhase.value;
+    
+    const N = 20;
+    const width = 80;
+    const startX = 10;
+    const endX = 90;
+    const freq = (2 * Math.PI) / 75; // slightly different wavelength
+    const amp = 2.8; // shallower back wave
+
+    let d = `M ${startX} ${y_level + amp * Math.sin(startX * freq + phase)}`;
+    for (let i = 1; i <= N; i++) {
+      const x = startX + i * (width / N);
+      const y = y_level + amp * Math.sin(x * freq + phase);
+      d += ` L ${x} ${y}`;
+    }
+    d += ` L ${endX} 220 L ${startX} 220 Z`;
+
+    return { d };
   });
 
   const bottleAnimStyle = useAnimatedStyle(() => ({
@@ -117,7 +153,8 @@ export default function WaterBottle({ filledPercent, size = 150 }: WaterBottlePr
     <AnimatedView style={[styles.container, { width: size, height: svgHeight }, bottleAnimStyle]}>
       <Svg width={size} height={svgHeight} viewBox={`0 0 ${VB_W} ${VB_H}`}>
         <Defs>
-          <SvgLinearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
+          {/* Lock the gradient range to the bottle height for static color rendering */}
+          <SvgLinearGradient id="waterGrad" x1="0" y1="40" x2="0" y2="188" gradientUnits="userSpaceOnUse">
             <Stop offset="0"   stopColor="#6D28D9" stopOpacity="1" />
             <Stop offset="0.5" stopColor="#A855F7" stopOpacity="1" />
             <Stop offset="1"   stopColor="#EC4899" stopOpacity="1" />
@@ -131,20 +168,20 @@ export default function WaterBottle({ filledPercent, size = 150 }: WaterBottlePr
         {/* ── Empty bottle background ── */}
         <Path d={BOTTLE_BODY_PATH} fill="#EDE9FE" />
 
-        {/* ── Animated water fill ── */}
+        {/* ── Animated water fill (dual wave layers with dynamic path data) ── */}
         <G clipPath="url(#bottleClip)">
-          <AnimatedRect
-            x={FILL_X - 2}
-            width={VB_W - (FILL_X - 2) * 2}
+          {/* Back Wave */}
+          <AnimatedPath
             fill="url(#waterGrad)"
-            animatedProps={animatedProps}
+            opacity={0.4}
+            animatedProps={backWaveProps}
           />
           
-          {/* Ripple Effect */}
-          <AnimatedCircle
-            cx={VB_W / 2}
-            fill="rgba(255,255,255,0.4)"
-            animatedProps={rippleProps}
+          {/* Front Wave */}
+          <AnimatedPath
+            fill="url(#waterGrad)"
+            opacity={0.85}
+            animatedProps={frontWaveProps}
           />
         </G>
 
@@ -191,20 +228,6 @@ export default function WaterBottle({ filledPercent, size = 150 }: WaterBottlePr
           strokeLinecap="round"
         />
       </Svg>
-
-      {/* ── Percentage text overlay ── */}
-      <View
-        style={[
-          styles.percentOverlay,
-          { bottom: svgHeight * 0.30 },
-        ]}
-      >
-        <AnimatedNumber
-          value={target}
-          suffix="%"
-          style={styles.percentText}
-        />
-      </View>
     </AnimatedView>
   );
 }
@@ -213,19 +236,5 @@ const styles = StyleSheet.create({
   container: {
     position: 'relative',
     alignItems: 'center',
-  },
-  percentOverlay: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-  },
-  percentText: {
-    fontFamily: 'Poppins-Bold',
-    fontSize: 18,
-    color: colors.textPrimary,
-    textShadowColor: 'rgba(255,255,255,0.95)',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 8,
   },
 });
