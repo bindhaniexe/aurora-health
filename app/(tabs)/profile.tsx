@@ -6,6 +6,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@/constants/colors';
 import { gradients } from '@/constants/gradients';
 import { radius } from '@/constants/radius';
+import { images } from '@/constants/images';
+import { Image } from 'expo-image';
 import { useProfileStore } from '@/stores/profileStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useRouter } from 'expo-router';
@@ -22,6 +24,10 @@ export default function ProfileScreen() {
   const { profile, updateProfile } = useProfileStore();
   const { signOut } = useAuthStore();
   const router = useRouter();
+
+  // Resolve avatar image source
+  const avatarKey = profile?.avatar_url || 'avatar1';
+  const avatarSource = images[avatarKey as keyof typeof images] || images.avatarPlaceholder;
 
   const [waterGoal, setWaterGoal] = useState(profile?.water_goal_ml?.toString() || '2500');
   const [sleepGoal, setSleepGoal] = useState(profile?.sleep_goal_hrs?.toString() || '8');
@@ -119,7 +125,7 @@ export default function ProfileScreen() {
             style={styles.avatarRing}
           >
             <View style={styles.avatarContainer}>
-              <Ionicons name="person" size={40} color={colors.textSecondary} />
+              <Image source={avatarSource} style={styles.avatarImage} />
             </View>
           </LinearGradient>
           <Text style={styles.userName}>{profile?.name || 'Guest User'}</Text>
@@ -245,6 +251,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bgAuth,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: radius.full,
   },
   userName: {
     fontFamily: 'Poppins-Bold',

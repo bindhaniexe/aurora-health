@@ -20,6 +20,8 @@ import { PressableScale } from '@/components/animated/PressableScale';
 import { colors } from '@/constants/colors';
 import { gradients } from '@/constants/gradients';
 import { radius } from '@/constants/radius';
+import { images } from '@/constants/images';
+import { Image } from 'expo-image';
 import { useProfileStore } from '@/stores/profileStore';
 import HydrationCard from '@/components/HydrationCard';
 import SleepCard from '@/components/SleepCard';
@@ -76,6 +78,10 @@ export default function DashboardScreen() {
     ? profile.name[0].toUpperCase()
     : 'A';
 
+  // Resolve avatar image source
+  const avatarKey = profile?.avatar_url || 'avatar1';
+  const avatarSource = images[avatarKey as keyof typeof images] || images.avatarPlaceholder;
+
   // Dynamic greeting
   const hour = new Date().getHours();
   let timeOfDay = 'evening';
@@ -130,7 +136,7 @@ export default function DashboardScreen() {
                   end={{ x: 1, y: 1 }}
                   style={styles.avatar}
                 >
-                  <Text style={styles.avatarText}>{initials}</Text>
+                  <Image source={avatarSource} style={styles.avatarImage} />
                 </LinearGradient>
               </PressableScale>
             </View>
@@ -256,6 +262,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Bold',
     fontSize: 15,
     color: colors.textOnGradient,
+  },
+  avatarImage: {
+    width: 38,
+    height: 38,
+    borderRadius: radius.full,
+    backgroundColor: colors.bgAuth,
   },
 
 
