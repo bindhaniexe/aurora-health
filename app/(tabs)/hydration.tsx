@@ -232,6 +232,7 @@ export default function HydrationScreen() {
               value={todayTotal}
               formatter="hydration"
               style={styles.volumeTotal}
+              duration={1200}
             />
             <Text style={styles.volumeSeparator}> of </Text>
             <Text style={styles.volumeGoal}>

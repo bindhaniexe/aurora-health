@@ -37,11 +37,14 @@ import { ScreenTransition } from '@/components/animated/ScreenTransition';
 // ── Constants ──────────────────────────────────────────────────────────────────
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const QUALITY_OPTIONS: SleepLog['quality'][] = ['poor', 'fair', 'good', 'great'];
-const QUALITY_META: Record<string, { label: string; emoji: string; color: string }> = {
-  poor:  { label: 'Poor',  emoji: '😴', color: '#EF4444' },
-  fair:  { label: 'Fair',  emoji: '🌙', color: '#F59E0B' },
-  good:  { label: 'Good',  emoji: '✨', color: '#10B981' },
-  great: { label: 'Great', emoji: '⭐', color: '#7C3AED' },
+const QUALITY_META: Record<
+  string,
+  { label: string; icon: string; iconSelected: string; color: string }
+> = {
+  poor:  { label: 'Poor',  icon: 'sad-outline',      iconSelected: 'sad',      color: '#EF4444' },
+  fair:  { label: 'Fair',  icon: 'moon-outline',     iconSelected: 'moon',     color: '#F59E0B' },
+  good:  { label: 'Good',  icon: 'sparkles-outline', iconSelected: 'sparkles', color: '#10B981' },
+  great: { label: 'Great', icon: 'star-outline',     iconSelected: 'star',     color: '#7C3AED' },
 };
 
 const CHART_WIDTH  = 300; // inner width used for bar layout
@@ -57,14 +60,20 @@ function fmtHours(h: number): string {
   return `${whole}:${String(mins).padStart(2, '0')}`;
 }
 
-/** Build a 7-slot array aligned to Sun-Sat, with today filled from logs */
+/** Build a 7-slot array aligned to the current week starting on Monday, with logs filled in */
 function buildWeekSlots(logs: SleepLog[]): { day: string; hours: number | null }[] {
   const today = new Date();
+  const dayOfWeek = today.getDay(); // 0 is Sunday, 1 is Monday, ..., 6 is Saturday
+  const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - daysSinceMonday);
+
   const slots: { day: string; hours: number | null; dateStr: string }[] = [];
 
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(today.getDate() - i);
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
     const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     const log = logs.find((l) => l.sleep_date === dateStr);
     slots.push({ day: DAY_LABELS[d.getDay()], hours: log?.hours ?? null, dateStr });
@@ -245,7 +254,11 @@ function LogSleepModal({
                   ]}
                   activeOpacity={0.75}
                 >
-                  <Text style={styles.qualityEmoji}>{meta.emoji}</Text>
+                  <Ionicons
+                    name={(selected ? meta.iconSelected : meta.icon) as any}
+                    size={24}
+                    color={selected ? meta.color : colors.textSecondary}
+                  />
                   <Text
                     style={[
                       styles.qualityLabel,
@@ -336,8 +349,14 @@ export default function SleepScreen() {
               )}
               {qualityMeta && (
                 <View style={styles.qualityBadge}>
+                  <Ionicons
+                    name={qualityMeta.iconSelected as any}
+                    size={14}
+                    color="white"
+                    style={{ marginRight: 4 }}
+                  />
                   <Text style={styles.qualityBadgeText}>
-                    {qualityMeta.emoji} {qualityMeta.label}
+                    {qualityMeta.label}
                   </Text>
                 </View>
               )}
@@ -502,6 +521,8 @@ const styles = StyleSheet.create({
     lineHeight: 32,
   },
   qualityBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.15)',
     borderRadius: radius.pill,
     paddingHorizontal: 10,

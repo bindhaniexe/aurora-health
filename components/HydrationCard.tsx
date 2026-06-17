@@ -102,6 +102,7 @@ const HydrationCard = React.memo(({
         value={todayTotal}
         formatter="hydration"
         style={styles.value}
+        duration={1200}
       />
 
       {/* ── Label ── */}

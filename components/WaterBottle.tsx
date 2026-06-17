@@ -81,12 +81,10 @@ export default function WaterBottle({ filledPercent, size = 150 }: WaterBottlePr
   }, [frontWavePhase, backWavePhase]);
 
   useEffect(() => {
-    // Spring-based fill: damped, slight overshoot for a "liquid settling" feel
-    fillAnim.value = withSpring(target / 100, {
-      damping: 18,
-      stiffness: 90,
-      mass: 0.9,
-      overshootClamping: false,
+    // Smooth timing-based fill: slowly and smoothly filling up or draining
+    fillAnim.value = withTiming(target / 100, {
+      duration: 1200,
+      easing: Easing.inOut(Easing.ease),
     });
 
     if (target >= 100 && prevFilledPercent.current < 100) {
