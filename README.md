@@ -24,13 +24,17 @@
 
 | Dashboard | Hydration | Sleep | Habits |
 |:---------:|:---------:|:-----:|:------:|
-| ![Dashboard](<img width="1080" height="1920" alt="Home" src="https://github.com/user-attachments/assets/604d01a6-dbba-49c5-a91a-4080fa5d0b71" />
-) | ![Hydration](./docs/screenshots/hydration.png) | ![Sleep](<img width="1080" height="1920" alt="Sleep Tracker" src="https://github.com/user-attachments/assets/17316ef6-2d20-41e3-8a8e-d37123f6136a" />
-) | ![Habits](./docs/screenshots/habits.png) |
+| <img width="1080" height="1920" alt="Home" src="https://github.com/user-attachments/assets/ac3390f4-0143-4d9a-ac48-8818e493572b" />
+ | <img width="1080" height="1920" alt="Hydration" src="https://github.com/user-attachments/assets/88b493d3-83ce-4dd5-ba3a-8491d97c32ef" />
+ | <img width="1080" height="1920" alt="Sleep Tracker" src="https://github.com/user-attachments/assets/50b0d8f1-8b6b-4127-9f7d-f8d7bf7a7f36" />
+ | <img width="1080" height="1920" alt="Habbit" src="https://github.com/user-attachments/assets/a041da90-8042-46c1-a3f9-a49eaa3bf10c" />
+ |
 
 | AI Companion | Profile | Onboarding | Auth |
 |:------------:|:-------:|:----------:|:----:|
-| ![Companion](./docs/screenshots/companion.png) | ![Profile](./docs/screenshots/profile.png) | ![Onboarding](./docs/screenshots/onboarding.png) | ![Auth](./docs/screenshots/auth.png) |
+| <img width="1080" height="1920" alt="Companion" src="https://github.com/user-attachments/assets/9eaeb670-85b7-4a6b-aad3-965356d11828" />
+ | <img width="1080" height="1920" alt="Profile" src="https://github.com/user-attachments/assets/8a8f7c04-e769-460c-9e70-0b0af7af169b" />
+ | ![Onboarding](./docs/screenshots/onboarding.png) | ![Auth](./docs/screenshots/auth.png) |
 
 ---
 
