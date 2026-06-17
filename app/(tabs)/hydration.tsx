@@ -72,7 +72,9 @@ function LogItem({ log }: { log: HydrationLog }) {
         <Text style={styles.logTime}>{formatTime(log.logged_at)}</Text>
       </View>
       <View style={styles.logBadge}>
-        <Text style={styles.logBadgeText}>+{log.amount_ml}</Text>
+        <Text style={styles.logBadgeText}>
+          {log.amount_ml > 0 ? `+${log.amount_ml}` : log.amount_ml}
+        </Text>
       </View>
     </View>
   );
