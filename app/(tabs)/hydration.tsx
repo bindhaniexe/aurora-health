@@ -24,6 +24,7 @@ import { HydrationLog } from '@/types';
 import { useAuthStore } from '@/stores/authStore';
 import { ScreenTransition } from '@/components/animated/ScreenTransition';
 import { StaggerList } from '@/components/animated/StaggerList';
+import CelebrationOverlay from '@/components/animated/CelebrationOverlay';
 import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
@@ -36,9 +37,9 @@ import { AnimatedNumber } from '@/components/animated/AnimatedNumber';
 
 // ── Quick add presets ─────────────────────────────────────────────────────────
 const QUICK_ADD = [
-  { label: '+250ml', amount: 250 },
-  { label: '+500ml', amount: 500 },
-  { label: '+750ml', amount: 750 },
+  { label: '+250ml', amount: 250, icon: 'cafe-outline' },
+  { label: '+500ml', amount: 500, icon: 'pint-outline' },
+  { label: '+750ml', amount: 750, icon: 'water-outline' },
 ] as const;
 
 // ── Format logged_at timestamp to "h:mm AM/PM" ────────────────────────────────
@@ -166,6 +167,7 @@ export default function HydrationScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <CelebrationOverlay active={percentage >= 100} />
       <ScreenTransition>
         <Animated.ScrollView
           style={styles.scroll}
@@ -246,7 +248,7 @@ export default function HydrationScreen() {
           <Text style={styles.sectionTitle}>Quick Add</Text>
           <View style={styles.quickAddRow}>
             <StaggerList staggerDelay={60} childContainerStyle={{ flex: 1 }}>
-              {QUICK_ADD.map(({ label, amount }) => (
+              {QUICK_ADD.map(({ label, amount, icon }) => (
                 <PressableScale
                   key={amount}
                   onPress={() => handleAddWater(amount)}
@@ -258,7 +260,7 @@ export default function HydrationScreen() {
                     end={{ x: 1, y: 0 }}
                     style={styles.quickAddPill}
                   >
-                    <Ionicons name="add" size={16} color={colors.textOnGradient} />
+                    <Ionicons name={icon as any} size={16} color={colors.textOnGradient} />
                     <Text style={styles.quickAddText}>{label}</Text>
                   </LinearGradient>
                 </PressableScale>
@@ -270,7 +272,7 @@ export default function HydrationScreen() {
         {/* ── Goal met celebration ──────────────────────────────────── */}
         {percentage >= 100 && (
           <View style={styles.goalMetBanner}>
-            <Text style={styles.goalMetEmoji}>🎉</Text>
+            <Ionicons name="trophy" size={20} color={colors.accentGreen} />
             <Text style={styles.goalMetText}>Daily goal reached! Amazing work!</Text>
           </View>
         )}
