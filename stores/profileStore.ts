@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Profile } from '@/types';
 import { profileService } from '@/services/profileService';
 import { useAuthStore } from '@/stores/authStore';
@@ -21,20 +22,30 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   fetchProfile: async () => {
     const { guestMode } = useAuthStore.getState();
     if (guestMode) {
-      set({
-        profile: {
-          id: 'guest',
-          name: 'Guest User',
-          water_goal_ml: 2500,
-          sleep_goal_hrs: 8,
-          goals: ['Hydration', 'Better Sleep'],
-          onboarding_done: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        isLoading: false,
-        error: null,
-      });
+      set({ isLoading: true, error: null });
+      try {
+        const stored = await AsyncStorage.getItem('aurora_guest_profile');
+        if (stored) {
+          set({ profile: JSON.parse(stored), isLoading: false });
+        } else {
+          set({
+            profile: {
+              id: 'guest',
+              name: 'Guest User',
+              water_goal_ml: 2500,
+              sleep_goal_hrs: 8,
+              goals: ['Hydration', 'Better Sleep'],
+              onboarding_done: false, // default false to trigger user onboarding
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            },
+            isLoading: false,
+          });
+        }
+      } catch (err) {
+        console.error('[profileStore] Error reading guest profile:', err);
+        set({ isLoading: false, error: 'Failed to read guest profile' });
+      }
       return;
     }
 
@@ -59,7 +70,13 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     const { user, guestMode } = useAuthStore.getState();
     
     if (guestMode && profile) {
-      set({ profile: { ...profile, ...updates } });
+      const updated = { ...profile, ...updates };
+      set({ profile: updated });
+      try {
+        await AsyncStorage.setItem('aurora_guest_profile', JSON.stringify(updated));
+      } catch (err) {
+        console.error('[profileStore] Error saving guest profile:', err);
+      }
       return;
     }
 

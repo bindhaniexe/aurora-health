@@ -11,6 +11,12 @@ import { useAuthStore } from '@/stores/authStore';
 import { useRouter } from 'expo-router';
 import { ScreenTransition } from '@/components/animated/ScreenTransition';
 import { PressableScale } from '@/components/animated/PressableScale';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useHydrationStore } from '@/stores/hydrationStore';
+import { useSleepStore } from '@/stores/sleepStore';
+import { useHabitStore } from '@/stores/habitStore';
+import { useCompanionStore } from '@/stores/companionStore';
+import { useHealthStore } from '@/stores/healthStore';
 
 export default function ProfileScreen() {
   const { profile, updateProfile } = useProfileStore();
@@ -43,6 +49,61 @@ export default function ProfileScreen() {
     } catch (error) {
       Alert.alert('Error', 'Failed to sign out');
     }
+  };
+
+  const handleDevReset = async () => {
+    Alert.alert(
+      'Developer Reset',
+      'This will erase all local databases, reset your onboarding progress, and sign you out. Are you sure you want to completely reset?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Reset Everything',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // 1. Reset user onboarding flag in DB if they are signed in (not guest)
+              const { user } = useAuthStore.getState();
+              const currentProfile = useProfileStore.getState().profile;
+              if (user && currentProfile && currentProfile.id !== 'guest') {
+                try {
+                  await updateProfile({ onboarding_done: false });
+                } catch (dbErr) {
+                  console.warn('[DevReset] Failed to update onboarding_done in Supabase profile:', dbErr);
+                }
+              }
+
+              // 2. Clear AsyncStorage (guest profile, logged water, sleep logs, habits, onboarding_done flag)
+              await AsyncStorage.clear();
+
+              // 3. Sign out of Supabase
+              try {
+                await signOut();
+              } catch (authErr) {
+                console.warn('[DevReset] Failed to sign out from Supabase:', authErr);
+              }
+
+              // 4. Reset stores to initial states
+              useAuthStore.setState({ session: null, user: null, guestMode: false, isLoading: false });
+              useProfileStore.setState({ profile: null, isLoading: false, error: null });
+              useHydrationStore.setState({ todayLogs: [], todayTotal: 0, weeklyLogs: [], isLoading: false, error: null });
+              useSleepStore.setState({ logs: [], lastNight: null, isLoading: false, error: null });
+              useHabitStore.setState({ habits: [], todayCompletions: [], isLoading: false, streaks: {} });
+              useCompanionStore.setState({ connectionState: 'idle', mode: 'voice', transcript: [], errorMessage: null });
+              useHealthStore.setState({ todaySteps: 0, weeklySteps: null, isLoading: false, permissionsGranted: 'undetermined' });
+
+              // 5. Route to onboarding slides
+              router.replace('/(onboarding)' as any);
+              
+              Alert.alert('Success', 'Aurora has been fully reset.');
+            } catch (err) {
+              console.error('[DevReset] Error resetting app:', err);
+              Alert.alert('Error', 'Failed to fully reset the application.');
+            }
+          }
+        }
+      ]
+    );
   };
 
   return (
@@ -136,7 +197,6 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Section 3: App */}
         <Text style={styles.sectionTitle}>App</Text>
         <View style={styles.card}>
           <View style={styles.rowGroup}>
@@ -146,6 +206,12 @@ export default function ProfileScreen() {
           <View style={styles.divider} />
           <PressableScale style={styles.rowGroup} onPress={handleSignOut} scaleDown={0.96}>
             <Text style={[styles.label, { color: colors.error, fontFamily: 'Inter-Medium' }]}>Sign Out</Text>
+            <Ionicons name="log-out-outline" size={18} color={colors.error} />
+          </PressableScale>
+          <View style={styles.divider} />
+          <PressableScale style={styles.rowGroup} onPress={handleDevReset} scaleDown={0.96}>
+            <Text style={[styles.label, { color: colors.error, fontFamily: 'Inter-Medium' }]}>Dev Reset App & Data</Text>
+            <Ionicons name="trash-outline" size={18} color={colors.error} />
           </PressableScale>
         </View>
       </ScrollView>

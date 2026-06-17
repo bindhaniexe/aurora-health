@@ -22,6 +22,11 @@ export interface Profile {
   onboarding_done: boolean;
   created_at: string;
   updated_at: string;
+  gender?: 'male' | 'female' | 'other' | null;
+  age?: number | null;
+  height?: number | null;
+  weight?: number | null;
+  bmi?: number | null;
 }
 
 export interface HydrationLog {

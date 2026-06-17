@@ -14,6 +14,12 @@ const auroraMascot: ImageSourcePropType = require('@/assets/images/aurora_mascot
 const loginIllustration: ImageSourcePropType = require('@/assets/images/login_illustration.png');
 const signupIllustration: ImageSourcePropType = require('@/assets/images/signup_illustration.png');
 
+const avatar1: ImageSourcePropType = require('@/assets/images/avatar_1.png');
+const avatar2: ImageSourcePropType = require('@/assets/images/avatar_2.png');
+const avatar3: ImageSourcePropType = require('@/assets/images/avatar_3.png');
+const avatar4: ImageSourcePropType = require('@/assets/images/avatar_4.png');
+const avatar5: ImageSourcePropType = require('@/assets/images/avatar_5.png');
+
 // Fallback placeholders for assets that don't exist yet to prevent bundler errors
 const avatarPlaceholder: ImageSourcePropType = require('@/assets/images/icon.png');
 const fitnessHero: ImageSourcePropType = require('@/assets/images/onboarding-hero.png');
@@ -32,4 +38,9 @@ export const images = {
   auroraMascot,
   loginIllustration,
   signupIllustration,
+  avatar1,
+  avatar2,
+  avatar3,
+  avatar4,
+  avatar5,
 } as const;

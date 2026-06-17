@@ -74,23 +74,21 @@ export default function RootLayout() {
     hasRouted.current = true;
 
     const doInitialRoute = async () => {
-      // TEMPORARY BYPASS: Always route to onboarding for testing
-      router.replace('/(onboarding)' as any);
-      return;
-
-      /*
       if (session && profile) {
-        // Authenticated user: respect onboarding_done flag
         if (!profile.onboarding_done) {
-          router.replace('/(onboarding)' as any);
+          router.replace('/(onboarding)/info' as any);
         } else {
           router.replace('/(tabs)' as any);
         }
         return;
       }
 
-      if (guestMode) {
-        router.replace('/(tabs)' as any);
+      if (guestMode && profile) {
+        if (!profile.onboarding_done) {
+          router.replace('/(onboarding)/info' as any);
+        } else {
+          router.replace('/(tabs)' as any);
+        }
         return;
       }
 
@@ -101,7 +99,6 @@ export default function RootLayout() {
       } else {
         router.replace('/(onboarding)' as any);
       }
-      */
     };
 
     doInitialRoute();
@@ -116,17 +113,23 @@ export default function RootLayout() {
 
     const inAuth  = segments[0] === '(auth)';
     const inTabs  = segments[0] === '(tabs)';
+    const inOnboarding = segments[0] === '(onboarding)';
 
-    // TEMPORARY BYPASS: Disable reactive guard for onboarding testing
-    /*
-    if (session && profile?.onboarding_done && inAuth) {
-      // User just signed in while on the auth screen → advance to tabs
-      router.replace('/(tabs)' as any);
-    } else if (!session && !guestMode && inTabs) {
-      // Session expired or user signed out while in tabs → back to auth
+    const activeProfile = profile;
+    const isActive = session || guestMode;
+
+    if (isActive && activeProfile) {
+      if (!activeProfile.onboarding_done && !inOnboarding) {
+        // Enforce completing onboarding if logged in / guest mode active
+        router.replace('/(onboarding)/info' as any);
+      } else if (activeProfile.onboarding_done && (inAuth || inOnboarding)) {
+        // Once onboarding is completed, go to tabs
+        router.replace('/(tabs)' as any);
+      }
+    } else if (!isActive && inTabs) {
+      // Direct back to auth if session is lost
       router.replace('/(auth)' as any);
     }
-    */
   }, [session, profile, segments, guestMode, router]);
 
   // Keep the screen blank (splash still showing) until fonts are ready

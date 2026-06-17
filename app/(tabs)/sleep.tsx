@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { PressableScale } from '@/components/animated/PressableScale';
 import { AnimatedNumber } from '@/components/animated/AnimatedNumber';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, {
@@ -282,6 +282,7 @@ function LogSleepModal({
 
 // ── Sleep Screen ──────────────────────────────────────────────────────────────
 export default function SleepScreen() {
+  const insets = useSafeAreaInsets();
   const [modalVisible, setModalVisible] = useState(false);
   const { user, guestMode } = useAuthStore();
   const { lastNight, weeklyLogs, averageHours, goalHrs, isLoading, fetchLogs, logSleep } = useSleep();
@@ -411,7 +412,7 @@ export default function SleepScreen() {
       </ScrollView>
 
       {/* ── Log Sleep FAB ── */}
-      <View style={styles.fabContainer}>
+      <View style={[styles.fabContainer, { bottom: Math.max(insets.bottom, 16) + 76 + 16 }]}>
         <LinearGradient
           colors={gradients.primary}
           start={{ x: 0, y: 0 }}
@@ -646,7 +647,6 @@ const styles = StyleSheet.create({
   // FAB
   fabContainer: {
     position: 'absolute',
-    bottom: 24,
     left: 20,
     right: 20,
   },
