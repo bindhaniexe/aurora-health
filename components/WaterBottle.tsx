@@ -60,7 +60,7 @@ export default function WaterBottle({ filledPercent, size = 150 }: WaterBottlePr
 
   const target = Math.max(0, Math.min(100, filledPercent));
 
-  const fillAnim = useSharedValue(target / 100);
+  const fillAnim = useSharedValue(0);
   const frontWavePhase = useSharedValue(0);
   const backWavePhase = useSharedValue(0);
   const bottleScale = useSharedValue(1);
@@ -78,7 +78,7 @@ export default function WaterBottle({ filledPercent, size = 150 }: WaterBottlePr
       -1,
       false
     );
-  }, []);
+  }, [frontWavePhase, backWavePhase]);
 
   useEffect(() => {
     // Spring-based fill: damped, slight overshoot for a "liquid settling" feel
@@ -97,7 +97,7 @@ export default function WaterBottle({ filledPercent, size = 150 }: WaterBottlePr
     }
 
     prevFilledPercent.current = target;
-  }, [target]);
+  }, [target, fillAnim, bottleScale]);
 
   const yLevel = useDerivedValue(
     () => FILL_TOP + MAX_FILL_H - fillAnim.value * MAX_FILL_H
