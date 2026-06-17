@@ -1,7 +1,7 @@
 <div align="center">
 
 <!-- Replace with your actual banner/logo image -->
-![Aurora Banner](./assets/images/icon.png)
+<!-- ![Aurora Banner](./assets/images/icon.png) -->
 
 # ✨ Aurora
 
@@ -24,7 +24,9 @@
 
 | Dashboard | Hydration | Sleep | Habits |
 |:---------:|:---------:|:-----:|:------:|
-| ![Dashboard](./docs/screenshots/dashboard.png) | ![Hydration](./docs/screenshots/hydration.png) | ![Sleep](./docs/screenshots/sleep.png) | ![Habits](./docs/screenshots/habits.png) |
+| ![Dashboard](<img width="1080" height="1920" alt="Home" src="https://github.com/user-attachments/assets/604d01a6-dbba-49c5-a91a-4080fa5d0b71" />
+) | ![Hydration](./docs/screenshots/hydration.png) | ![Sleep](<img width="1080" height="1920" alt="Sleep Tracker" src="https://github.com/user-attachments/assets/17316ef6-2d20-41e3-8a8e-d37123f6136a" />
+) | ![Habits](./docs/screenshots/habits.png) |
 
 | AI Companion | Profile | Onboarding | Auth |
 |:------------:|:-------:|:----------:|:----:|
