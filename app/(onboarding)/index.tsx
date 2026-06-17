@@ -170,15 +170,8 @@ function SlideItem({ slide, index, scrollX }: SlideItemProps) {
 
   return (
     <View style={styles.slideContainer}>
-      {/* Illustration Card */}
-      <Animated.View style={[styles.illustrationCard, cardStyle]}>
-        {/* Soft gradient tint behind illustration */}
-        <LinearGradient
-          colors={['#EDE9FE', '#FAE8FF']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={StyleSheet.absoluteFillObject}
-        />
+      {/* Illustration Container */}
+      <Animated.View style={[styles.illustrationContainer, cardStyle]}>
         <Image
           source={slide.image}
           style={styles.illustrationImage}
@@ -426,24 +419,13 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
 
-  // Circular card housing the illustration
-  illustrationCard: {
+  // Transparent container housing the illustration
+  illustrationContainer: {
     width: SCREEN_WIDTH - 80,
     height: SCREEN_WIDTH - 80,
-    borderRadius: radius.full,
-    overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 8,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#9499A7',
-        shadowOpacity: 0.15,
-        shadowOffset: { width: 0, height: 8 },
-        shadowRadius: 24,
-      },
-      android: { elevation: 8 },
-    }),
   },
 
   illustrationImage: {
