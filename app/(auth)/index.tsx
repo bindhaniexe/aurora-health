@@ -32,9 +32,11 @@ import { radius } from '@/constants/radius';
 import { images } from '@/constants/images';
 import { useAuthStore } from '@/stores/authStore';
 import { PressableScale } from '@/components/animated/PressableScale';
-
+import * as WebBrowser from 'expo-web-browser';
 // Simple SVG-free icons using Unicode / Expo vector icons approach
 import { Ionicons } from '@expo/vector-icons';
+
+WebBrowser.maybeCompleteAuthSession();
 
 // Custom math easing worklet — avoids closure capture crashes on web
 const easeInOut = (t: number) => {
@@ -99,13 +101,18 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const { signInWithEmail, isLoading, error, clearError, setGuestMode } = useAuthStore();
+  const { signInWithEmail, signInWithGoogle, isLoading, error, clearError, setGuestMode } = useAuthStore();
 
   const handleSignIn = async () => {
     if (!email.trim() || !password.trim()) return;
     clearError();
     await signInWithEmail(email.trim(), password);
     // Navigation handled by root _layout once session is set
+  };
+
+  const handleGoogleSignIn = async () => {
+    clearError();
+    await signInWithGoogle();
   };
 
   return (
@@ -273,6 +280,24 @@ export default function LoginScreen() {
                   </LinearGradient>
                 </PressableScale>
               </View>
+
+              {/* Divider */}
+              <View style={styles.dividerRow}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>or continue with</Text>
+                <View style={styles.dividerLine} />
+              </View>
+
+              {/* Google Sign-In Button */}
+              <PressableScale
+                onPress={handleGoogleSignIn}
+                disabled={isLoading}
+                scaleDown={0.97}
+                style={styles.googleButton}
+              >
+                <Ionicons name="logo-google" size={18} color={colors.textPrimary} style={styles.googleIcon} />
+                <Text style={styles.googleButtonText}>Sign in with Google</Text>
+              </PressableScale>
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -430,5 +455,38 @@ const styles = StyleSheet.create({
     borderRadius: radius.full,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.borderHairline,
+  },
+  dividerText: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginHorizontal: 12,
+  },
+  googleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.bgInput,
+    borderRadius: radius.pill,
+    height: 48,
+    gap: 8,
+  },
+  googleIcon: {
+    marginRight: 4,
+  },
+  googleButtonText: {
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 14,
+    color: colors.textPrimary,
   },
 });

@@ -5,6 +5,9 @@
 
 import { create } from 'zustand';
 import { Session, User, AuthError } from '@supabase/supabase-js';
+import { Platform } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
 import { supabase } from '@/lib/supabase';
 
 interface AuthState {
@@ -22,6 +25,7 @@ interface AuthState {
   signOut: () => Promise<void>;
   clearError: () => void;
   setGuestMode: (value: boolean) => void;
+  signInWithGoogle: () => Promise<void>;
 }
 
 // Human-readable error messages for Supabase auth error codes
@@ -43,6 +47,29 @@ function parseAuthError(error: AuthError | Error): string {
     return 'Network error. Please check your connection and try again.';
   }
   return error.message || 'Something went wrong. Please try again.';
+}
+
+function extractParamsFromUrl(url: string): { access_token?: string; refresh_token?: string; error?: string; error_description?: string } {
+  const hashIndex = url.indexOf('#');
+  const queryIndex = url.indexOf('?');
+  let paramsString = '';
+  
+  if (hashIndex !== -1) {
+    paramsString = url.substring(hashIndex + 1);
+  } else if (queryIndex !== -1) {
+    paramsString = url.substring(queryIndex + 1);
+  } else {
+    return {};
+  }
+  
+  const params: Record<string, string> = {};
+  paramsString.split('&').forEach((part) => {
+    const [key, value] = part.split('=');
+    if (key && value) {
+      params[decodeURIComponent(key)] = decodeURIComponent(value);
+    }
+  });
+  return params;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -131,6 +158,69 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ session: null, user: null, isLoading: false, guestMode: false });
     } catch (err) {
       set({ isLoading: false, error: parseAuthError(err as AuthError) });
+    }
+  },
+
+  signInWithGoogle: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const redirectUrl = Linking.createURL('auth/callback');
+      
+      if (Platform.OS === 'web') {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: redirectUrl,
+          },
+        });
+        if (error) throw error;
+        return;
+      }
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: redirectUrl,
+          skipBrowserRedirect: true,
+        },
+      });
+      if (error) throw error;
+      if (!data.url) throw new Error('No URL returned from Supabase OAuth sign-in.');
+
+      const res = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl);
+      
+      if (res.type === 'success' && res.url) {
+        const params = extractParamsFromUrl(res.url);
+        
+        if (params.error_description || params.error) {
+          throw new Error(params.error_description || params.error);
+        }
+        
+        const { access_token, refresh_token } = params;
+        if (access_token && refresh_token) {
+          const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+            access_token,
+            refresh_token,
+          });
+          if (sessionError) throw sessionError;
+          set({
+            session: sessionData.session,
+            user: sessionData.user,
+            isLoading: false,
+          });
+        } else {
+          throw new Error('Authentication tokens were not found in the callback URL.');
+        }
+      } else {
+        // User cancelled or closed browser
+        set({ isLoading: false });
+      }
+    } catch (err) {
+      console.error('[AuthStore] Google Sign-in error:', err);
+      set({
+        isLoading: false,
+        error: err instanceof Error ? err.message : 'Google sign-in failed. Please try again.',
+      });
     }
   },
 }));
