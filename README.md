@@ -266,25 +266,6 @@ eas build --profile production --platform ios
 
 ---
 
-## 📁 Project Codegraph
-
-> **Add your Codegraph visualization here.**
-
-<!-- 
-  Replace this placeholder with your actual Codegraph image:
-  
-  ![Aurora Codegraph](./docs/codegraph.png)
-  
-  Or embed an interactive Codegraph URL if available.
--->
-
-```
-[ 📊 Codegraph visualization placeholder ]
-[ Drop your codegraph.png into docs/ and uncomment the line above ]
-```
-
----
-
 ## 🤝 Contributing
 
 This project was built as a hackathon MVP. Contributions, bug reports, and feature suggestions are welcome!
