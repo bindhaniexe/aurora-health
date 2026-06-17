@@ -20,6 +20,8 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
+  withSequence,
+  withTiming,
 } from 'react-native-reanimated';
 
 import { colors } from '@/constants/colors';
@@ -79,7 +81,7 @@ function GenderSelector({ selected, onSelect }: GenderSelectorProps) {
           colors={gradients.ctaButton}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
-          style={StyleSheet.absoluteFillObject}
+          style={[StyleSheet.absoluteFillObject, { borderRadius: radius.pill }]}
         />
       </Animated.View>
 
@@ -212,8 +214,8 @@ export default function UserOnboardingScreen() {
   const { profile, updateProfile } = useProfileStore();
 
   const [page, setPage] = useState(1);
-  const [name, setName] = useState(profile?.name || '');
-  const [selectedAvatarIndex, setSelectedAvatarIndex] = useState(0);
+  const [name, setName] = useState(profile?.name && profile.name !== 'Guest User' ? profile.name : '');
+  const [selectedAvatarIndex, setSelectedAvatarIndex] = useState<number | null>(null);
   const [gender, setGender] = useState<Gender>('male');
 
   const [age, setAge] = useState(24);
@@ -225,10 +227,15 @@ export default function UserOnboardingScreen() {
   const [sleepGoal, setSleepGoal] = useState(8);
 
   const avatarScrollRef = useRef<ScrollView>(null);
+  const avatarShakeX = useSharedValue(0);
+
+  const shakeStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: avatarShakeX.value }],
+  }));
 
   // Pre-populate profile name when loaded
   useEffect(() => {
-    if (profile?.name && !name) {
+    if (profile?.name && profile.name !== 'Guest User' && !name) {
       setName(profile.name);
     }
   }, [profile, name]);
@@ -258,24 +265,23 @@ export default function UserOnboardingScreen() {
     setSleepGoal(calculatedSleep);
   }, [height, weight]);
 
-  // Snapping logic for Sliding Avatar selector
-  const handleAvatarScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const offsetX = event.nativeEvent.contentOffset.x;
-    const index = Math.round(offsetX / 104); // 80 size + 24 margin offset
-    const clampedIndex = Math.max(0, Math.min(AVATARS.length - 1, index));
-    if (clampedIndex !== selectedAvatarIndex) {
-      setSelectedAvatarIndex(clampedIndex);
-    }
-  };
-
   const handleAvatarSelect = (index: number) => {
     setSelectedAvatarIndex(index);
-    avatarScrollRef.current?.scrollTo({ x: index * 104, animated: true });
+    avatarScrollRef.current?.scrollTo({ x: index * 100, animated: true });
   };
 
   const handleNext = () => {
     if (page === 1) {
-      if (!name.trim()) return;
+      if (selectedAvatarIndex === null) {
+        avatarShakeX.value = withSequence(
+          withTiming(-10, { duration: 60 }),
+          withTiming(10, { duration: 60 }),
+          withTiming(-10, { duration: 60 }),
+          withTiming(10, { duration: 60 }),
+          withTiming(0, { duration: 60 })
+        );
+        return;
+      }
       setPage(2);
     } else if (page === 2) {
       setPage(3);
@@ -291,11 +297,11 @@ export default function UserOnboardingScreen() {
   };
 
   const handleComplete = async () => {
-    const avatarUrl = `avatar${selectedAvatarIndex + 1}`; // e.g., 'avatar1', 'avatar2'
+    const avatarUrl = selectedAvatarIndex !== null ? `avatar${selectedAvatarIndex + 1}` : 'avatar1';
     
     // Save to profile state/Supabase
     await updateProfile({
-      name: name.trim(),
+      name: name.trim() || 'Guest',
       avatar_url: avatarUrl,
       gender,
       age,
@@ -402,7 +408,7 @@ export default function UserOnboardingScreen() {
                         style={styles.nameInput}
                         value={name}
                         onChangeText={setName}
-                        placeholder="Enter your name"
+                        placeholder="eg. Subham"
                         placeholderTextColor={colors.textMuted}
                         autoCapitalize="words"
                       />
@@ -410,16 +416,14 @@ export default function UserOnboardingScreen() {
                   </View>
 
                   {/* Sliding Avatar Picker */}
-                  <View style={styles.avatarSection}>
+                  <Animated.View style={[styles.avatarSection, shakeStyle]}>
                     <Text style={styles.sectionLabel}>CHOOSE YOUR AVATAR</Text>
                     <ScrollView
                       ref={avatarScrollRef}
                       horizontal
                       showsHorizontalScrollIndicator={false}
-                      snapToInterval={104}
+                      snapToInterval={100}
                       decelerationRate="fast"
-                      onScroll={handleAvatarScroll}
-                      scrollEventThrottle={16}
                       contentContainerStyle={styles.avatarScrollContent}
                     >
                       {AVATARS.map((avatar, idx) => {
@@ -447,7 +451,7 @@ export default function UserOnboardingScreen() {
                         );
                       })}
                     </ScrollView>
-                  </View>
+                  </Animated.View>
 
                   {/* Sliding Gender Selector */}
                   <View style={styles.genderSection}>
@@ -466,17 +470,34 @@ export default function UserOnboardingScreen() {
                     These values determine your dynamic metabolism parameters.
                   </Text>
 
-                  {/* Age Ruler */}
+                  {/* Age Selection with - and + */}
                   <View style={styles.rulerRow}>
                     <Text style={styles.sectionLabel}>AGE</Text>
-                    <RulerPicker
-                      min={12}
-                      max={100}
-                      step={1}
-                      value={age}
-                      onChange={setAge}
-                      unit="yrs"
-                    />
+                    <View style={styles.goalCard}>
+                      <View style={styles.goalInfo}>
+                        <View style={styles.goalIconContainer}>
+                          <Ionicons name="calendar-outline" size={24} color={colors.accentPurple} />
+                        </View>
+                        <View>
+                          <Text style={styles.goalTitle}>Age (Years)</Text>
+                          <Text style={styles.goalValText}>{age} yrs</Text>
+                        </View>
+                      </View>
+                      <View style={styles.adjusterRow}>
+                        <TouchableOpacity
+                          style={styles.adjustButton}
+                          onPress={() => setAge((a) => Math.max(12, a - 1))}
+                        >
+                          <Ionicons name="remove" size={20} color={colors.textPrimary} />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.adjustButton}
+                          onPress={() => setAge((a) => Math.min(100, a + 1))}
+                        >
+                          <Ionicons name="add" size={20} color={colors.textPrimary} />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
                   </View>
 
                   {/* Height Ruler */}
@@ -613,7 +634,6 @@ export default function UserOnboardingScreen() {
               <View style={styles.actionSection}>
                 <PressableScale
                   onPress={handleNext}
-                  disabled={page === 1 && !name.trim()}
                   scaleDown={0.96}
                   style={{ width: '100%' }}
                 >
@@ -621,10 +641,7 @@ export default function UserOnboardingScreen() {
                     colors={gradients.primary}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
-                    style={[
-                      styles.ctaButton,
-                      page === 1 && !name.trim() && { opacity: 0.6 },
-                    ]}
+                    style={styles.ctaButton}
                   >
                     <Text style={styles.ctaText}>
                       {page === 3 ? 'Start Wellness Journey' : 'Continue'}
