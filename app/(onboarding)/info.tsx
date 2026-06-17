@@ -408,7 +408,7 @@ export default function UserOnboardingScreen() {
                         style={styles.nameInput}
                         value={name}
                         onChangeText={setName}
-                        placeholder="eg. Subham"
+                        placeholder="Please Enter Your Name"
                         placeholderTextColor={colors.textMuted}
                         autoCapitalize="words"
                       />

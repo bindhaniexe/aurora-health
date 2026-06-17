@@ -304,7 +304,7 @@ export default function SleepScreen() {
   const qualityMeta = lastNight?.quality ? QUALITY_META[lastNight.quality] : null;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScreenTransition>
         <ScrollView
           style={styles.scroll}
