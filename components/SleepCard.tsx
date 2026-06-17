@@ -30,11 +30,11 @@ function formatHours(h: number): string {
   return `${whole}:${String(mins).padStart(2, '0')} Hrs`;
 }
 
-const QUALITY_LABELS: Record<string, string> = {
-  poor: '😴 Poor',
-  fair: '🌙 Fair',
-  good: '✨ Good',
-  great: '⭐ Great',
+const QUALITY_META: Record<string, { label: string; icon: string }> = {
+  poor:  { label: 'Poor',  icon: 'sad' },
+  fair:  { label: 'Fair',  icon: 'moon' },
+  good:  { label: 'Good',  icon: 'sparkles' },
+  great: { label: 'Great', icon: 'star' },
 };
 
 const SleepCard = React.memo(({ lastNight, goalHrs, isLoading, onPress }: SleepCardProps) => {
@@ -70,9 +70,17 @@ const SleepCard = React.memo(({ lastNight, goalHrs, isLoading, onPress }: SleepC
             <Ionicons name="moon" size={20} color="#E9D5FF" />
           </View>
           {hasData && lastNight!.quality ? (
-            <Text style={styles.badge}>
-              {QUALITY_LABELS[lastNight!.quality!] ?? lastNight!.quality}
-            </Text>
+            <View style={styles.badge}>
+              <Ionicons
+                name={(QUALITY_META[lastNight!.quality!]?.icon ?? 'star') as any}
+                size={11}
+                color="#E9D5FF"
+                style={{ marginRight: 4 }}
+              />
+              <Text style={styles.badgeText}>
+                {QUALITY_META[lastNight!.quality!]?.label ?? lastNight!.quality}
+              </Text>
+            </View>
           ) : null}
         </View>
 
@@ -137,14 +145,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   badge: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 10,
-    color: '#E9D5FF',
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.15)',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: radius.pill,
-    overflow: 'hidden',
+  },
+  badgeText: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 10,
+    color: '#E9D5FF',
   },
   value: {
     fontFamily: 'Poppins-Bold',
