@@ -167,7 +167,6 @@ export default function HydrationScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <CelebrationOverlay active={percentage >= 100} />
       <ScreenTransition>
         <Animated.ScrollView
           style={styles.scroll}
@@ -299,6 +298,7 @@ export default function HydrationScreen() {
         </View>
         </Animated.ScrollView>
       </ScreenTransition>
+      <CelebrationOverlay active={percentage >= 100} />
     </SafeAreaView>
   );
 }

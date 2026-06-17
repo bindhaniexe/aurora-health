@@ -138,7 +138,7 @@ export default function CelebrationOverlay({ active }: CelebrationOverlayProps) 
   });
 
   return (
-    <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
+    <View style={[StyleSheet.absoluteFillObject, { zIndex: 999, elevation: 999 }]} pointerEvents="none">
       {particles.map((p) => (
         <FallingParticle
           key={p.id}
