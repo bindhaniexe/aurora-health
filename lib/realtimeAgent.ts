@@ -23,7 +23,7 @@ function concatBase64(chunks: string[]): string {
     }).join('');
     return btoa(binaryString);
   } catch (e) {
-    console.error('[RealtimeAgent] Error concatenating base64 chunks:', e);
+    console.warn('[RealtimeAgent] Error concatenating base64 chunks:', e);
     return chunks.join('');
   }
 }
@@ -191,15 +191,15 @@ class RealtimeAgent {
         await this.sound.unloadAsync();
         this.sound = null;
       } catch (err) {
-        console.error('[RealtimeAgent] Error stopping playing sound:', err);
+        console.warn('[RealtimeAgent] Error stopping playing sound:', err);
       }
     }
 
     try {
       const permission = await Audio.requestPermissionsAsync();
       if (permission.status !== 'granted') {
-        useCompanionStore.getState().setErrorMessage('Microphone permission is required to talk to Aurora.');
-        useCompanionStore.getState().setConnectionState('error');
+        console.warn('[RealtimeAgent] Microphone permission not granted. Not showing error in app.');
+        useCompanionStore.getState().setConnectionState('idle');
         return;
       }
 
@@ -241,9 +241,8 @@ class RealtimeAgent {
       useCompanionStore.getState().setConnectionState('listening');
       useCompanionStore.getState().setErrorMessage(null);
     } catch (err) {
-      console.error('[RealtimeAgent] Failed to start recording:', err);
-      useCompanionStore.getState().setErrorMessage('Failed to access microphone or start recording.');
-      useCompanionStore.getState().setConnectionState('error');
+      console.warn('[RealtimeAgent] Failed to start recording (possibly due to mic permission):', err);
+      useCompanionStore.getState().setConnectionState('idle');
     }
   }
 
@@ -270,7 +269,7 @@ class RealtimeAgent {
           const rawPcmBinary = binaryString.slice(44);
           base64 = btoa(rawPcmBinary);
         } catch (sliceErr) {
-          console.error('[RealtimeAgent] Error slicing WAV header:', sliceErr);
+          console.warn('[RealtimeAgent] Error slicing WAV header:', sliceErr);
         }
       }
 
@@ -286,9 +285,8 @@ class RealtimeAgent {
       this.audioChunks = [];
       this.currentResponseText = '';
     } catch (err) {
-      console.error('[RealtimeAgent] Failed to send recording:', err);
-      useCompanionStore.getState().setErrorMessage('Failed to compile or transmit audio recording.');
-      useCompanionStore.getState().setConnectionState('error');
+      console.warn('[RealtimeAgent] Failed to send recording:', err);
+      useCompanionStore.getState().setConnectionState('idle');
     }
   }
 
@@ -398,7 +396,7 @@ class RealtimeAgent {
         break;
       }
       case 'error': {
-        console.error('[RealtimeAgent] ElevenLabs agent error:', event.error);
+        console.warn('[RealtimeAgent] ElevenLabs agent error:', event.error);
         useCompanionStore.getState().setErrorMessage(event.error?.message || 'Server error occurred.');
         useCompanionStore.getState().setConnectionState('error');
         break;
@@ -451,7 +449,7 @@ class RealtimeAgent {
       
       this.audioChunks = [];
     } catch (err) {
-      console.error('[RealtimeAgent] Audio playback error:', err);
+      console.warn('[RealtimeAgent] Audio playback error:', err);
       useCompanionStore.getState().setConnectionState('idle');
     }
   }
@@ -495,7 +493,7 @@ class RealtimeAgent {
         }, 1000);
       }, 1200);
     } catch (err) {
-      console.error('[RealtimeAgent] Mock recording error:', err);
+      console.warn('[RealtimeAgent] Mock recording error:', err);
       useCompanionStore.getState().setConnectionState('idle');
     }
   }
