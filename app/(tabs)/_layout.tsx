@@ -1,6 +1,6 @@
 import React, { useEffect, Component } from 'react';
 import { Tabs } from 'expo-router';
-import { View, Text, StyleSheet, Platform, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, StyleSheet, Platform, TouchableWithoutFeedback, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -237,6 +237,33 @@ class ErrorBoundary extends Component<{ children: React.ReactNode }> {
   }
 }
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+const slideTransition = {
+  sceneStyleInterpolator: ({ current: { progress } }: any) => {
+    const translateX = progress.interpolate({
+      inputRange: [-1, 0, 1],
+      outputRange: [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
+    });
+    return {
+      sceneStyle: {
+        transform: [{ translateX }],
+      },
+    };
+  },
+  transitionSpec: {
+    animation: 'spring',
+    config: {
+      stiffness: 180,
+      damping: 25,
+      mass: 1,
+      overshootClamping: true,
+      restDisplacementThreshold: 0.01,
+      restSpeedThreshold: 0.01,
+    },
+  } as const,
+};
+
 export default function TabsLayout() {
   return (
     <ErrorBoundary>
@@ -244,7 +271,7 @@ export default function TabsLayout() {
         tabBar={(props) => <FloatingTabBar {...props} />}
         screenOptions={{ 
           headerShown: false,
-          animation: 'fade', // Smooth cross-fade tab screen transition to avoid slide shadow artifacts
+          ...slideTransition,
         }}
       >
         <Tabs.Screen name="index" />
