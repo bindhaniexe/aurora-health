@@ -19,22 +19,8 @@
 ---
 
 ## 📸 Screenshots
+<img width="1920" height="1080" alt="Mock up" src="https://github.com/user-attachments/assets/d1695d0f-97ac-4dee-9c32-a7bbc94b0294" />
 
-> **Tip:** Drop your screenshots here once you have them!
-
-| Dashboard | Hydration | Sleep | Habits |
-|:---------:|:---------:|:-----:|:------:|
-| <img width="1080" height="1920" alt="Home" src="https://github.com/user-attachments/assets/ac3390f4-0143-4d9a-ac48-8818e493572b" />
- | <img width="1080" height="1920" alt="Hydration" src="https://github.com/user-attachments/assets/88b493d3-83ce-4dd5-ba3a-8491d97c32ef" />
- | <img width="1080" height="1920" alt="Sleep Tracker" src="https://github.com/user-attachments/assets/50b0d8f1-8b6b-4127-9f7d-f8d7bf7a7f36" />
- | <img width="1080" height="1920" alt="Habbit" src="https://github.com/user-attachments/assets/a041da90-8042-46c1-a3f9-a49eaa3bf10c" />
- |
-
-| AI Companion | Profile | Onboarding | Auth |
-|:------------:|:-------:|:----------:|:----:|
-| <img width="1080" height="1920" alt="Companion" src="https://github.com/user-attachments/assets/9eaeb670-85b7-4a6b-aad3-965356d11828" />
- | <img width="1080" height="1920" alt="Profile" src="https://github.com/user-attachments/assets/8a8f7c04-e769-460c-9e70-0b0af7af169b" />
- | ![Onboarding](./docs/screenshots/onboarding.png) | ![Auth](./docs/screenshots/auth.png) |
 
 ---
 
