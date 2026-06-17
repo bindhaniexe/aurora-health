@@ -286,7 +286,7 @@ export default function HydrationScreen() {
             </View>
           ) : logs.length === 0 ? (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyEmoji}>💧</Text>
+              <Ionicons name="water" size={48} color={colors.accentPurple} style={{ marginBottom: 16 }} />
               <Text style={styles.emptyTitle}>Start your day with a glass of water</Text>
               <Text style={styles.emptySubtitle}>
                 Use the quick add buttons above to log your first drink.
