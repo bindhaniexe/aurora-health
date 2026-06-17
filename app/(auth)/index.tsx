@@ -34,6 +34,7 @@ import { gradients } from '@/constants/gradients';
 import { radius } from '@/constants/radius';
 import { images } from '@/constants/images';
 import { useAuthStore } from '@/stores/authStore';
+import { useProfileStore } from '@/stores/profileStore';
 import { PressableScale } from '@/components/animated/PressableScale';
 import * as WebBrowser from 'expo-web-browser';
 // Simple SVG-free icons using Unicode / Expo vector icons approach
@@ -104,7 +105,11 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const { signInWithEmail, signInWithGoogle, isLoading, error, clearError, setGuestMode } = useAuthStore();
+  const { signInWithEmail, signInWithGoogle, isLoading, error, clearError, setGuestMode, guestMode } = useAuthStore();
+  const { isLoading: profileLoading } = useProfileStore();
+
+  const isGuestLoading = guestMode && profileLoading;
+  const isActionLoading = isLoading || isGuestLoading;
 
   const handleSignIn = async () => {
     if (!email.trim() || !password.trim()) return;
@@ -145,12 +150,17 @@ export default function LoginScreen() {
               <PressableScale
                 style={styles.skipBtn}
                 onPress={() => {
+                  if (isActionLoading) return;
                   setGuestMode(true);
-                  router.replace('/(tabs)' as any);
                 }}
+                disabled={isActionLoading}
                 scaleDown={0.96}
               >
-                <Text style={styles.skipText}>Skip</Text>
+                {isGuestLoading ? (
+                  <ActivityIndicator size="small" color={colors.accentPurple} />
+                ) : (
+                  <Text style={styles.skipText}>Skip</Text>
+                )}
               </PressableScale>
 
               <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}>
@@ -214,7 +224,7 @@ export default function LoginScreen() {
                   autoCapitalize="none"
                   autoCorrect={false}
                   returnKeyType="next"
-                  editable={!isLoading}
+                  editable={!isActionLoading}
                 />
               </View>
 
@@ -235,7 +245,7 @@ export default function LoginScreen() {
                   secureTextEntry={!showPassword}
                   returnKeyType="done"
                   onSubmitEditing={handleSignIn}
-                  editable={!isLoading}
+                  editable={!isActionLoading}
                 />
                 <TouchableOpacity
                   onPress={() => setShowPassword((v) => !v)}
@@ -259,7 +269,11 @@ export default function LoginScreen() {
                 <View style={styles.ctaLeft}>
                   <Text style={styles.ctaLabel}>Sign In</Text>
                   <PressableScale
-                    onPress={() => router.push('/(auth)/signup')}
+                    onPress={() => {
+                      if (isActionLoading) return;
+                      router.push('/(auth)/signup');
+                    }}
+                    disabled={isActionLoading}
                     scaleDown={0.96}
                   >
                     <Text style={styles.createAccount}>Create account</Text>
@@ -269,7 +283,7 @@ export default function LoginScreen() {
                 {/* Circular gradient CTA button */}
                 <PressableScale
                   onPress={handleSignIn}
-                  disabled={isLoading}
+                  disabled={isActionLoading}
                   scaleDown={0.92}
                 >
                   <LinearGradient
@@ -297,7 +311,7 @@ export default function LoginScreen() {
               {/* Google Sign-In Button */}
               <PressableScale
                 onPress={handleGoogleSignIn}
-                disabled={isLoading}
+                disabled={isActionLoading}
                 scaleDown={0.97}
                 style={styles.googleButton}
               >
