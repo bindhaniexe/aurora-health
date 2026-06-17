@@ -28,6 +28,9 @@ export const gradients = {
   // Auth & onboarding background wash (top → bottom)
   authBg:       ['#F7F5FF', '#EDE9FE', '#DDD6FE'] as const,
 
+  // Hydration elements (blue to cyan)
+  hydration:    ['#3B82F6', '#06B6D4'] as const,
+
 } as const;
 
 export type GradientToken = keyof typeof gradients;

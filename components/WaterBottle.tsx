@@ -1,10 +1,11 @@
 // components/WaterBottle.tsx
 // Aurora — Animated SVG water bottle
 // Fill level animates smoothly as user logs water.
-// Uses react-native-svg + Reanimated v3 for smooth cross-platform animations.
+// Uses react-native-svg + Reanimated v4 for smooth cross-platform animations.
 
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
+import { gradients } from '@/constants/gradients';
 import Svg, {
   Path,
   Defs,
@@ -16,12 +17,13 @@ import Svg, {
 import Animated, {
   useSharedValue,
   withTiming,
+  withSpring,
   Easing,
   useAnimatedStyle,
   withSequence,
-  withSpring,
   withRepeat,
   useAnimatedProps,
+  useDerivedValue,
 } from 'react-native-reanimated';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
@@ -34,150 +36,130 @@ interface WaterBottleProps {
   size?: number;
 }
 
-// ViewBox constants (all in SVG units)
 const VB_W = 100;
 const VB_H = 200;
 
-// The fill clip region (inside bottle body)
-const FILL_TOP = 42;       // top of fillable area in SVG units
-const FILL_BOTTOM = 178;   // bottom of fillable area in SVG units
-const MAX_FILL_H = FILL_BOTTOM - FILL_TOP; // 136
+const FILL_TOP = 42;
+const FILL_BOTTOM = 178;
+const MAX_FILL_H = FILL_BOTTOM - FILL_TOP;
 
 const BOTTLE_BODY_PATH =
   'M18,40 Q10,44 10,54 L10,172 Q10,188 26,188 L74,188 Q90,188 90,172 L90,54 Q90,44 82,40 Z';
+
+const N = 28;
+const START_X = 10;
+const END_X = 90;
+const WAVE_WIDTH = END_X - START_X;
+const FRONT_FREQ = (2 * Math.PI) / 60;
+const BACK_FREQ = (2 * Math.PI) / 75;
+const FRONT_AMP = 4.5;
+const BACK_AMP = 2.8;
 
 export default function WaterBottle({ filledPercent, size = 150 }: WaterBottleProps) {
   const svgHeight = (size / VB_W) * VB_H;
 
   const target = Math.max(0, Math.min(100, filledPercent));
-  
-  const fillAnim = useSharedValue(0);
+
+  const fillAnim = useSharedValue(target / 100);
   const frontWavePhase = useSharedValue(0);
   const backWavePhase = useSharedValue(0);
   const bottleScale = useSharedValue(1);
-  
-  const prevFilledPercent = useRef(0);
+
+  const prevFilledPercent = useRef(target);
 
   useEffect(() => {
-    // Start continuous horizontal wave phase animations (0 to 2*PI radians represents a full wavelength)
-    frontWavePhase.value = 0;
     frontWavePhase.value = withRepeat(
-      withTiming(2 * Math.PI, {
-        duration: 2000,
-        easing: Easing.linear,
-      }),
-      -1, // infinite loop
-      false // do not reverse, continuous forward flow
+      withTiming(Math.PI * 2, { duration: 2200, easing: Easing.linear }),
+      -1,
+      false
     );
-
-    backWavePhase.value = 0;
     backWavePhase.value = withRepeat(
-      withTiming(-2 * Math.PI, {
-        duration: 3500,
-        easing: Easing.linear,
-      }),
-      -1, // infinite loop
-      false // do not reverse, continuous backward flow
+      withTiming(-Math.PI * 2, { duration: 3400, easing: Easing.linear }),
+      -1,
+      false
     );
   }, []);
 
   useEffect(() => {
-    // Fill level animation (1000ms duration for extra smooth rise and fall)
-    fillAnim.value = withTiming(target / 100, {
-      duration: 1000,
-      easing: Easing.out(Easing.cubic),
+    // Spring-based fill: damped, slight overshoot for a "liquid settling" feel
+    fillAnim.value = withSpring(target / 100, {
+      damping: 18,
+      stiffness: 90,
+      mass: 0.9,
+      overshootClamping: false,
     });
 
-    // Bounce on completion celebration
     if (target >= 100 && prevFilledPercent.current < 100) {
       bottleScale.value = withSequence(
-        withTiming(1.05, { duration: 150 }),
-        withTiming(0.98, { duration: 150 }),
-        withSpring(1, { damping: 10, stiffness: 100 })
+        withSpring(1.06, { damping: 8, stiffness: 220 }),
+        withSpring(1, { damping: 12, stiffness: 180 })
       );
     }
-    
+
     prevFilledPercent.current = target;
-  }, [target, fillAnim, bottleScale]);
+  }, [target]);
 
-  // Dynamically generate the wave path on the UI thread inside useAnimatedProps
+  const yLevel = useDerivedValue(
+    () => FILL_TOP + MAX_FILL_H - fillAnim.value * MAX_FILL_H
+  );
+
   const frontWaveProps = useAnimatedProps(() => {
-    const y_level = FILL_TOP + MAX_FILL_H - fillAnim.value * MAX_FILL_H;
+    'worklet';
+    const yLevelVal = yLevel.value;
     const phase = frontWavePhase.value;
-    
-    const N = 20; // number of segments to draw the wave
-    const width = 80; // bottle internal width
-    const startX = 10;
-    const endX = 90;
-    const freq = (2 * Math.PI) / 60; // wavelength of 60 units
-    const amp = 4.5; // wave amplitude (height)
 
-    let d = `M ${startX} ${y_level + amp * Math.sin(startX * freq + phase)}`;
+    let d = `M ${START_X} ${(yLevelVal + FRONT_AMP * Math.sin(START_X * FRONT_FREQ + phase)).toFixed(2)}`;
     for (let i = 1; i <= N; i++) {
-      const x = startX + i * (width / N);
-      const y = y_level + amp * Math.sin(x * freq + phase);
-      d += ` L ${x} ${y}`;
+      const x = START_X + (i * WAVE_WIDTH) / N;
+      const y = yLevelVal + FRONT_AMP * Math.sin(x * FRONT_FREQ + phase);
+      d += ` L ${x.toFixed(2)} ${y.toFixed(2)}`;
     }
-    d += ` L ${endX} 220 L ${startX} 220 Z`;
+    d += ` L ${END_X} 200 L ${START_X} 200 Z`;
 
     return { d };
   });
 
   const backWaveProps = useAnimatedProps(() => {
-    const y_level = FILL_TOP + MAX_FILL_H - fillAnim.value * MAX_FILL_H;
+    'worklet';
+    const yLevelVal = yLevel.value;
     const phase = backWavePhase.value;
-    
-    const N = 20;
-    const width = 80;
-    const startX = 10;
-    const endX = 90;
-    const freq = (2 * Math.PI) / 75; // slightly different wavelength
-    const amp = 2.8; // shallower back wave
 
-    let d = `M ${startX} ${y_level + amp * Math.sin(startX * freq + phase)}`;
+    let d = `M ${START_X} ${(yLevelVal + BACK_AMP * Math.sin(START_X * BACK_FREQ + phase)).toFixed(2)}`;
     for (let i = 1; i <= N; i++) {
-      const x = startX + i * (width / N);
-      const y = y_level + amp * Math.sin(x * freq + phase);
-      d += ` L ${x} ${y}`;
+      const x = START_X + (i * WAVE_WIDTH) / N;
+      const y = yLevelVal + BACK_AMP * Math.sin(x * BACK_FREQ + phase);
+      d += ` L ${x.toFixed(2)} ${y.toFixed(2)}`;
     }
-    d += ` L ${endX} 220 L ${startX} 220 Z`;
+    d += ` L ${END_X} 200 L ${START_X} 200 Z`;
 
     return { d };
   });
 
   const bottleAnimStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: bottleScale.value }]
+    transform: [{ scale: bottleScale.value }],
   }));
 
   return (
     <AnimatedView style={[styles.container, { width: size, height: svgHeight }, bottleAnimStyle]}>
       <Svg width={size} height={svgHeight} viewBox={`0 0 ${VB_W} ${VB_H}`}>
         <Defs>
-          {/* Lock the gradient range to the bottle height for static color rendering */}
           <SvgLinearGradient id="waterGrad" x1="0" y1="40" x2="0" y2="188" gradientUnits="userSpaceOnUse">
-            <Stop offset="0"   stopColor="#6D28D9" stopOpacity="1" />
-            <Stop offset="0.5" stopColor="#A855F7" stopOpacity="1" />
-            <Stop offset="1"   stopColor="#EC4899" stopOpacity="1" />
+            <Stop offset="0" stopColor={gradients.hydration[0]} stopOpacity="1" />
+            <Stop offset="1" stopColor={gradients.hydration[1]} stopOpacity="1" />
           </SvgLinearGradient>
-
           <ClipPath id="bottleClip">
             <Path d={BOTTLE_BODY_PATH} />
           </ClipPath>
         </Defs>
 
-        {/* ── Empty bottle background ── */}
         <Path d={BOTTLE_BODY_PATH} fill="#EDE9FE" />
 
-        {/* ── Animated water fill (dual wave layers with dynamic path data) ── */}
         <G clipPath="url(#bottleClip)">
-          {/* Back Wave */}
           <AnimatedPath
             fill="url(#waterGrad)"
             opacity={0.4}
             animatedProps={backWaveProps}
           />
-          
-          {/* Front Wave */}
           <AnimatedPath
             fill="url(#waterGrad)"
             opacity={0.85}
@@ -185,15 +167,12 @@ export default function WaterBottle({ filledPercent, size = 150 }: WaterBottlePr
           />
         </G>
 
-        {/* ── Bottle body outline ── */}
         <Path
           d={BOTTLE_BODY_PATH}
           fill="none"
           stroke="#C4B5FD"
           strokeWidth="2"
         />
-
-        {/* ── Neck ── */}
         <Path
           d="M38,32 L38,4 Q38,2 40,2 L60,2 Q62,2 62,4 L62,32"
           fill="#EDE9FE"
@@ -201,8 +180,6 @@ export default function WaterBottle({ filledPercent, size = 150 }: WaterBottlePr
           strokeWidth="2"
           strokeLinejoin="round"
         />
-
-        {/* ── Shoulder (neck → body transition) ── */}
         <Path
           d="M38,32 Q20,36 18,40 L82,40 Q80,36 62,32 Z"
           fill="#EDE9FE"
@@ -210,16 +187,12 @@ export default function WaterBottle({ filledPercent, size = 150 }: WaterBottlePr
           strokeWidth="2"
           strokeLinejoin="round"
         />
-
-        {/* ── Cap (top of neck) ── */}
         <Path
           d="M35,4 L65,4 Q68,4 68,8 L68,14 Q68,18 65,18 L35,18 Q32,18 32,14 L32,8 Q32,4 35,4 Z"
           fill="#C4B5FD"
           stroke="#A78BFA"
           strokeWidth="1.5"
         />
-
-        {/* ── Highlight shine ── */}
         <Path
           d="M20,60 Q18,95 19,128"
           fill="none"

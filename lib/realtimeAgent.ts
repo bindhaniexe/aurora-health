@@ -170,7 +170,7 @@ class RealtimeAgent {
   private activateMockMode(errorMsg: string | null = null) {
     this.isMockMode = true;
     useCompanionStore.getState().setConnectionState('idle');
-    useCompanionStore.getState().setErrorMessage(errorMsg);
+    useCompanionStore.getState().setErrorMessage(null);
     console.log('[RealtimeAgent] Mock Agent Mode activated.', errorMsg ? `Error: ${errorMsg}` : '');
   }
 

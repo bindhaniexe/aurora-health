@@ -40,7 +40,9 @@ export const habitService = {
 
     if (!user) {
       const existing = await AsyncStorage.getItem(LOCAL_HABITS_KEY);
-      return existing ? JSON.parse(existing) : [];
+      if (!existing) return [];
+      const allHabits: Habit[] = JSON.parse(existing);
+      return allHabits.filter(h => h.is_active);
     }
 
     try {

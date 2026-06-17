@@ -3,6 +3,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { useHabitStore } from '@/stores/habitStore';
+import { useAuthStore } from '@/stores/authStore';
 import { Habit } from '@/types';
 
 export interface HabitWithStatus extends Habit {
@@ -21,10 +22,18 @@ export function useHabits() {
     completeHabit,
     deleteHabit
   } = useHabitStore();
+  const { user, guestMode, isLoading: authLoading } = useAuthStore();
 
   useEffect(() => {
-    fetchHabits();
-  }, [fetchHabits]);
+    if (!authLoading) {
+      if (user || guestMode) {
+        fetchHabits();
+      } else {
+        // Clear habits state when not authenticated/guest
+        useHabitStore.setState({ habits: [], todayCompletions: [], streaks: {} });
+      }
+    }
+  }, [fetchHabits, user, guestMode, authLoading]);
 
   const mappedHabits = useMemo<HabitWithStatus[]>(() => {
     return habits.map(habit => {

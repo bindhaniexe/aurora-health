@@ -9,6 +9,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -110,6 +111,24 @@ export default function HydrationScreen() {
     [user, guestMode, addWater]
   );
 
+  const handleIncreaseWater = useCallback(async () => {
+    if (!user && !guestMode) {
+      Alert.alert('Sign in required', 'Please sign in to track hydration.');
+      return;
+    }
+    await addWater(250);
+  }, [user, guestMode, addWater]);
+
+  const handleReduceWater = useCallback(async () => {
+    if (!user && !guestMode) {
+      Alert.alert('Sign in required', 'Please sign in to track hydration.');
+      return;
+    }
+    if (todayTotal <= 0) return;
+    const amountToReduce = Math.min(250, todayTotal);
+    await addWater(-amountToReduce);
+  }, [user, guestMode, addWater, todayTotal]);
+
   const handleReset = useCallback(() => {
     Alert.alert(
       'Reset Today',
@@ -182,7 +201,28 @@ export default function HydrationScreen() {
             style={styles.bottleGlow}
           />
 
-          <WaterBottle filledPercent={percentage} size={150} />
+          <View style={styles.bottleControlRow}>
+            <PressableScale
+              style={styles.adjustBtn}
+              onPress={handleReduceWater}
+              disabled={todayTotal <= 0}
+            >
+              <Ionicons
+                name="remove"
+                size={24}
+                color={todayTotal <= 0 ? colors.textMuted : colors.accentPurple}
+              />
+            </PressableScale>
+
+            <WaterBottle filledPercent={percentage} size={150} />
+
+            <PressableScale
+              style={styles.adjustBtn}
+              onPress={handleIncreaseWater}
+            >
+              <Ionicons name="add" size={24} color={colors.accentPurple} />
+            </PressableScale>
+          </View>
 
           {/* ── Volume label ── */}
           <View style={styles.volumeRow}>
@@ -196,20 +236,6 @@ export default function HydrationScreen() {
               {goalMl >= 1000 ? `${goalMl / 1000} L` : `${goalMl} ml`}
             </Text>
           </View>
-
-          {/* ── Progress bar ── */}
-          <View style={styles.progressTrack}>
-            <LinearGradient
-              colors={gradients.progressBar}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={[
-                styles.progressFill,
-                { width: `${Math.min(100, percentage)}%` },
-              ]}
-            />
-          </View>
-          <Text style={styles.progressLabel}>{percentage}% of daily goal</Text>
         </View>
 
         {/* ── Quick add buttons ─────────────────────────────────────── */}
@@ -224,7 +250,7 @@ export default function HydrationScreen() {
                   style={styles.quickAddWrapper}
                 >
                   <LinearGradient
-                    colors={gradients.primary}
+                    colors={gradients.hydration}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={styles.quickAddPill}
@@ -340,6 +366,33 @@ const styles = StyleSheet.create({
     marginBottom: 32,
     position: 'relative',
   },
+  bottleControlRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 24,
+    width: '100%',
+    zIndex: 10,
+  },
+  adjustBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: radius.full,
+    backgroundColor: colors.bgInput,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#9499A7',
+        shadowOpacity: 0.15,
+        shadowOffset: { width: 0, height: 4 },
+        shadowRadius: 10,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
+  },
   bottleGlow: {
     position: 'absolute',
     width: 240,
@@ -368,23 +421,6 @@ const styles = StyleSheet.create({
   volumeGoal: {
     fontFamily: 'Poppins-Bold',
     fontSize: 16,
-    color: colors.textSecondary,
-  },
-  progressTrack: {
-    width: '100%',
-    height: 8,
-    backgroundColor: colors.bgInput,
-    borderRadius: radius.full,
-    overflow: 'hidden',
-    marginBottom: 6,
-  },
-  progressFill: {
-    height: 8,
-    borderRadius: radius.full,
-  },
-  progressLabel: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 12,
     color: colors.textSecondary,
   },
 

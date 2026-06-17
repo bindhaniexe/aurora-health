@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   Platform,
-  TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -47,10 +46,10 @@ export default function DashboardScreen() {
   const { user, guestMode } = useAuthStore();
   const { todayTotal, goalMl, percentage, fetchTodayLogs, isLoading: isHydrationLoading } = useHydration();
   const { lastNight, goalHrs, fetchLogs: fetchSleepLogs, isLoading: isSleepLoading } = useSleep();
-  const { habits, todayCompletions, fetchHabits, isLoading: isHabitsLoading } = useHabits();
+  const { habits, todayCompletions, isLoading: isHabitsLoading } = useHabits();
   const summary = useHealthSummary();
   const { todaySteps, isLoading: isStepsLoading, isGranted: isStepsGranted } = useSteps();
-  const { initializeHealth } = useHealth(); // triggers init if undetermined
+  useHealth(); // triggers init if undetermined
   const [insight, setInsight] = useState<string | null>(null);
   const [insightLoading, setInsightLoading] = useState(true);
 
@@ -59,9 +58,8 @@ export default function DashboardScreen() {
     if (user || guestMode) {
       fetchTodayLogs();
       fetchSleepLogs();
-      fetchHabits();
     }
-  }, [user, guestMode]);
+  }, [user, guestMode, fetchTodayLogs, fetchSleepLogs]);
 
   useEffect(() => {
     if (!profile) return;
