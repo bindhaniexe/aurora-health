@@ -13,8 +13,11 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   ActivityIndicator,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useState, useEffect } from 'react';
@@ -148,44 +151,47 @@ export default function SignupScreen() {
         style={StyleSheet.absoluteFillObject}
       />
 
-      <SafeAreaView style={styles.safe}>
+      <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.kav}
         >
-          {/* ── Top illustration (smaller to give more room to taller form) ── */}
-          <View style={styles.illustrationWrapper}>
-            <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}>
-              {/* Central glowing orb behind mascot */}
-              <View style={{
-                position: 'absolute',
-                width: 200,
-                height: 200,
-                borderRadius: 100,
-                backgroundColor: 'rgba(196, 181, 253, 0.25)',
-                transform: [{ scale: 1.2 }],
-              }} />
-              
-              <FloatingElement size={32} color={colors.accentPurple} top="25%" left="15%" duration={3500} translateY={10} delay={0} />
-              <FloatingElement size={18} color={colors.accentPink} top="65%" left="12%" duration={4200} translateY={-12} delay={500} />
-              <FloatingElement size={50} color="rgba(196, 181, 253, 0.4)" top="22%" right="10%" duration={5000} translateY={15} delay={200} />
-              <FloatingElement size={16} color={colors.accentPurple} top="70%" right="18%" duration={3000} translateY={-8} delay={800} />
-              <FloatingElement size={24} color={colors.accentPink} top="48%" left="78%" duration={4800} translateY={12} delay={100} />
-            </View>
-
-            <Image
-              source={images.signupIllustration}
-              style={styles.illustration}
-              resizeMode="contain"
-            />
-          </View>
-
-          {/* ── White card form ── */}
           <ScrollView
+            style={styles.scrollView}
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
+            {/* ── Top illustration (smaller to give more room to taller form) ── */}
+            <View style={styles.illustrationWrapper}>
+              <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}>
+                {/* Central glowing orb behind mascot */}
+                <View style={{
+                  position: 'absolute',
+                  width: 200,
+                  height: 200,
+                  borderRadius: 100,
+                  backgroundColor: 'rgba(196, 181, 253, 0.25)',
+                  transform: [{ scale: 1.2 }],
+                }} />
+                
+                <FloatingElement size={32} color={colors.accentPurple} top="25%" left="15%" duration={3500} translateY={10} delay={0} />
+                <FloatingElement size={18} color={colors.accentPink} top="65%" left="12%" duration={4200} translateY={-12} delay={500} />
+                <FloatingElement size={50} color="rgba(196, 181, 253, 0.4)" top="22%" right="10%" duration={5000} translateY={15} delay={200} />
+                <FloatingElement size={16} color={colors.accentPurple} top="70%" right="18%" duration={3000} translateY={-8} delay={800} />
+                <FloatingElement size={24} color={colors.accentPink} top="48%" left="78%" duration={4800} translateY={12} delay={100} />
+              </View>
+
+              <Image
+                source={images.signupIllustration}
+                style={styles.illustration}
+                resizeMode="contain"
+              />
+            </View>
+
+            {/* Dynamic spacer to push card to bottom if there is room */}
+            <View style={styles.spacer} />
+
             <View style={styles.card}>
               <Text style={styles.heading}>Create Account</Text>
               <Text style={styles.subheading}>
@@ -365,10 +371,15 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   safe: { flex: 1 },
   kav: { flex: 1 },
+  scrollView: { flex: 1 },
+  spacer: {
+    flex: 1,
+    minHeight: 16,
+  },
 
   illustrationWrapper: {
     flex: 0,
-    height: '42%',   // Slightly shorter than login to fit 4-field form
+    height: SCREEN_HEIGHT * 0.28,   // Slightly shorter than login to fit 4-field form
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 24,
@@ -381,13 +392,12 @@ const styles = StyleSheet.create({
 
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'flex-end',
   },
   card: {
     backgroundColor: colors.bgCard,
     borderRadius: radius.xl,
     marginHorizontal: 16,
-    marginBottom: 16,
+    marginBottom: 28,
     padding: 24,
     ...Platform.select({
       ios: {

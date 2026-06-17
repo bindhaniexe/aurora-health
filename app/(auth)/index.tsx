@@ -14,8 +14,11 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   ActivityIndicator,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useState, useEffect } from 'react';
@@ -125,56 +128,59 @@ export default function LoginScreen() {
         style={StyleSheet.absoluteFillObject}
       />
 
-      <SafeAreaView style={styles.safe}>
+      <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.kav}
         >
-          {/* ── Top 55%: fitness illustration + skip link ── */}
-          <View style={styles.illustrationWrapper}>
-            {/* Skip link — top-right corner */}
-            <PressableScale
-              style={styles.skipBtn}
-              onPress={() => {
-                setGuestMode(true);
-                router.replace('/(tabs)' as any);
-              }}
-              scaleDown={0.96}
-            >
-              <Text style={styles.skipText}>Skip</Text>
-            </PressableScale>
-
-            <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}>
-              {/* Central glowing orb behind mascot */}
-              <View style={{
-                position: 'absolute',
-                width: 250,
-                height: 250,
-                borderRadius: 125,
-                backgroundColor: 'rgba(196, 181, 253, 0.25)',
-                transform: [{ scale: 1.2 }],
-              }} />
-              
-              <FloatingElement size={40} color={colors.accentPurple} top="20%" left="15%" duration={3500} translateY={12} delay={0} />
-              <FloatingElement size={24} color={colors.accentPink} top="65%" left="10%" duration={4200} translateY={-15} delay={500} />
-              <FloatingElement size={70} color="rgba(196, 181, 253, 0.4)" top="18%" right="8%" duration={5000} translateY={18} delay={200} />
-              <FloatingElement size={18} color={colors.accentPurple} top="75%" right="15%" duration={3000} translateY={-10} delay={800} />
-              <FloatingElement size={32} color={colors.accentPink} top="45%" left="78%" duration={4800} translateY={15} delay={100} />
-            </View>
-
-            <Image
-              source={images.loginIllustration}
-              style={styles.illustration}
-              resizeMode="contain"
-            />
-          </View>
-
-          {/* ── Bottom card rising from bottom ── */}
           <ScrollView
+            style={styles.scrollView}
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
+            {/* ── Top 45%: fitness illustration + skip link ── */}
+            <View style={styles.illustrationWrapper}>
+              {/* Skip link — top-right corner */}
+              <PressableScale
+                style={styles.skipBtn}
+                onPress={() => {
+                  setGuestMode(true);
+                  router.replace('/(tabs)' as any);
+                }}
+                scaleDown={0.96}
+              >
+                <Text style={styles.skipText}>Skip</Text>
+              </PressableScale>
+
+              <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}>
+                {/* Central glowing orb behind mascot */}
+                <View style={{
+                  position: 'absolute',
+                  width: 250,
+                  height: 250,
+                  borderRadius: 125,
+                  backgroundColor: 'rgba(196, 181, 253, 0.25)',
+                  transform: [{ scale: 1.2 }],
+                }} />
+                
+                <FloatingElement size={40} color={colors.accentPurple} top="20%" left="15%" duration={3500} translateY={12} delay={0} />
+                <FloatingElement size={24} color={colors.accentPink} top="65%" left="10%" duration={4200} translateY={-15} delay={500} />
+                <FloatingElement size={70} color="rgba(196, 181, 253, 0.4)" top="18%" right="8%" duration={5000} translateY={18} delay={200} />
+                <FloatingElement size={18} color={colors.accentPurple} top="75%" right="15%" duration={3000} translateY={-10} delay={800} />
+                <FloatingElement size={32} color={colors.accentPink} top="45%" left="78%" duration={4800} translateY={15} delay={100} />
+              </View>
+
+              <Image
+                source={images.loginIllustration}
+                style={styles.illustration}
+                resizeMode="contain"
+              />
+            </View>
+
+            {/* Dynamic spacer to push card to bottom if there is room */}
+            <View style={styles.spacer} />
+
             <View style={styles.card}>
               {/* Heading */}
               <Text style={styles.heading}>Please Login</Text>
@@ -316,11 +322,18 @@ const styles = StyleSheet.create({
   kav: {
     flex: 1,
   },
+  scrollView: {
+    flex: 1,
+  },
+  spacer: {
+    flex: 1,
+    minHeight: 16,
+  },
 
   // ── Illustration ──────────────────────────────────────────────────────────
   illustrationWrapper: {
     flex: 0,
-    height: '55%',
+    height: SCREEN_HEIGHT * 0.35,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 24,
@@ -334,14 +347,13 @@ const styles = StyleSheet.create({
   // ── Card ──────────────────────────────────────────────────────────────────
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'flex-end',
   },
   card: {
     backgroundColor: colors.bgCard,
     borderRadius: radius.xl,         // 24px per spec
     padding: 24,
     marginHorizontal: 16,
-    marginBottom: 16,
+    marginBottom: 28,
     ...Platform.select({
       ios: {
         shadowColor: '#9499A7',
