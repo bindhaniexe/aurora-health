@@ -200,7 +200,7 @@ Aurora uses a curated design system with tokens defined in `constants/`:
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/aurora.git
+git clone https://github.com/bindhaniexe/aurora.git
 cd aurora
 npm install
 ```
