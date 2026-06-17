@@ -1,11 +1,7 @@
-import { Platform } from 'react-native';
 import { HealthProvider } from './types';
-import { healthKitProvider } from './healthKitProvider';
-import { healthConnectProvider } from './healthConnectProvider';
 
 export * from './types';
 
-// Set this to false when you build the EAS Custom Dev Client
 export const USE_MOCK_HEALTH_DATA = true;
 
 const mockProvider: HealthProvider = {
@@ -48,14 +44,8 @@ const mockProvider: HealthProvider = {
   },
 };
 
-// Export the platform-specific provider or mock
-export const healthProvider: HealthProvider = USE_MOCK_HEALTH_DATA
-  ? mockProvider
-  : Platform.select({
-      ios: healthKitProvider,
-      android: healthConnectProvider,
-      default: mockProvider, // Fallback for web
-    });
+// Export the mock provider directly
+export const healthProvider: HealthProvider = mockProvider;
 
 // Helper functions for easy access
 export const getTodaySteps = () => healthProvider.getTodaySteps();
