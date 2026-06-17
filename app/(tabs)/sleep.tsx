@@ -415,7 +415,7 @@ export default function SleepScreen() {
           {[
             { icon: 'sunny-outline', text: 'Wake up at the same time every day' },
             { icon: 'phone-portrait-outline', text: 'Avoid screens 1 hour before bed' },
-            { icon: 'thermometer-outline', text: 'Keep your room cool (65–68°F)' },
+            { icon: 'thermometer-outline', text: 'Keep your room cool (18–24°C)' },
           ].map((tip) => (
             <View key={tip.text} style={styles.tipRow}>
               <View style={styles.tipIcon}>

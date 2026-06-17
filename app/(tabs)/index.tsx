@@ -41,6 +41,8 @@ import { ScreenTransition } from '@/components/animated/ScreenTransition';
 import { StaggerList } from '@/components/animated/StaggerList';
 import { FloatingOrbs } from '@/components/animated/FloatingOrbs';
 import { SkeletonCard } from '@/components/animated/SkeletonCard';
+import { CalorieGoalCard } from '@/components/CalorieGoalCard';
+import { MealsToday } from '@/components/MealsToday';
 
 // ── Dashboard Screen ──────────────────────────────────────────────────────────
 export default function DashboardScreen() {
@@ -146,8 +148,17 @@ export default function DashboardScreen() {
 
 
 
-          {/* ── 2×2 Activity Card Grid ────────────────────────────────── */}
+          {/* ── Daily Insights ────────────────────────────────────────── */}
           <InsightBanner insight={insight} isLoading={insightLoading} />
+
+          {/* ── Calorie Goals ────────────────────────────────────────── */}
+          <CalorieGoalCard todaySteps={todaySteps} />
+
+          {/* ── Meals Today ──────────────────────────────────────────── */}
+          <MealsToday />
+
+          {/* ── 2×2 Activity Card Grid ────────────────────────────────── */}
+          <Text style={styles.sectionTitle}>Activity & Health</Text>
           <View style={styles.cardGrid}>
             <StaggerList staggerDelay={80} childContainerStyle={{ width: '47%' }}>
               {/* Steps card — live data */}
@@ -317,5 +328,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     fontSize: 12,
     color: colors.textMuted,
+  },
+  sectionTitle: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: 16,
+    color: colors.textPrimary,
+    marginBottom: 12,
+    marginTop: 20,
   },
 });

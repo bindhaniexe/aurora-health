@@ -67,3 +67,41 @@ export function streakCount(completions: { completed_date: string }[]): number {
 
   return streak;
 }
+
+/**
+ * Calculates BMR using Mifflin-St Jeor equation.
+ */
+export function calculateBMR(
+  weightKg: number | null | undefined,
+  heightCm: number | null | undefined,
+  gender: 'male' | 'female' | 'other' | null | undefined,
+  age: number = 25
+): number {
+  const w = weightKg || 70; // fallback
+  const h = heightCm || 170; // fallback
+  const g = gender || 'male';
+
+  let bmr = 10 * w + 6.25 * h - 5 * age;
+  if (g === 'male') {
+    bmr += 5;
+  } else if (g === 'female') {
+    bmr -= 161;
+  } else {
+    bmr -= 78; // average of +5 and -161
+  }
+  return bmr;
+}
+
+/**
+ * Calculates daily calorie goal using BMR and activity multiplier (1.375 for light-moderate).
+ */
+export function calculateCalorieGoal(
+  weightKg: number | null | undefined,
+  heightCm: number | null | undefined,
+  gender: 'male' | 'female' | 'other' | null | undefined,
+  age: number = 25
+): number {
+  const bmr = calculateBMR(weightKg, heightCm, gender, age);
+  return Math.round(bmr * 1.375);
+}
+

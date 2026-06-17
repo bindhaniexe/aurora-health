@@ -30,6 +30,7 @@ import {
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons, Feather } from '@expo/vector-icons';
 import { useAuthStore } from '@/stores/authStore';
 import { useProfileStore } from '@/stores/profileStore';
 import Animated, {
@@ -59,6 +60,9 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 interface Slide {
   id: string;
   badge: string;
+  iconName?: string;
+  iconType?: 'ionicons' | 'feather';
+  iconText?: string;
   title: string;
   titleAccent: string; // highlighted word(s) in title
   description: string;
@@ -68,7 +72,8 @@ interface Slide {
 const SLIDES: Slide[] = [
   {
     id: 'meet-aurora',
-    badge: '✦  AI Companion',
+    badge: 'AI Companion',
+    iconText: '✦',
     title: 'Your Personal',
     titleAccent: 'Health Coach',
     description:
@@ -77,7 +82,9 @@ const SLIDES: Slide[] = [
   },
   {
     id: 'track-everything',
-    badge: '💧  Smart Tracking',
+    badge: 'Smart Tracking',
+    iconName: 'water',
+    iconType: 'ionicons',
     title: 'Track',
     titleAccent: 'Everything',
     description:
@@ -86,7 +93,9 @@ const SLIDES: Slide[] = [
   },
   {
     id: 'voice-first',
-    badge: '🎙️  Voice First',
+    badge: 'Voice First',
+    iconName: 'mic',
+    iconType: 'feather',
     title: 'Just',
     titleAccent: 'Talk to Me',
     description:
@@ -183,6 +192,15 @@ function SlideItem({ slide, index, scrollX }: SlideItemProps) {
       <Animated.View style={[styles.textContent, textStyle]}>
         {/* Badge pill */}
         <View style={styles.badge}>
+          {slide.iconType === 'ionicons' && slide.iconName && (
+            <Ionicons name={slide.iconName as any} size={14} color={colors.accentPurple} />
+          )}
+          {slide.iconType === 'feather' && slide.iconName && (
+            <Feather name={slide.iconName as any} size={14} color={colors.accentPurple} />
+          )}
+          {slide.iconText && (
+            <Text style={styles.badgeIconText}>{slide.iconText}</Text>
+          )}
           <Text style={styles.badgeText}>{slide.badge}</Text>
         </View>
 
@@ -443,12 +461,21 @@ const styles = StyleSheet.create({
 
   // Badge chip
   badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
     backgroundColor: 'rgba(124, 58, 237, 0.10)',
     paddingHorizontal: 16,
     paddingVertical: 7,
     borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: 'rgba(124, 58, 237, 0.18)',
+  },
+  badgeIconText: {
+    color: colors.accentPurple,
+    fontSize: 12,
+    fontFamily: 'Inter-SemiBold',
   },
   badgeText: {
     color: colors.accentPurple,

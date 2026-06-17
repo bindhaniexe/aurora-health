@@ -1,24 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, ScrollView, Platform, TouchableOpacity, Switch, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { PressableScale } from '@/components/animated/PressableScale';
+import { ScreenTransition } from '@/components/animated/ScreenTransition';
 import { colors } from '@/constants/colors';
 import { gradients } from '@/constants/gradients';
-import { radius } from '@/constants/radius';
 import { images } from '@/constants/images';
-import { Image } from 'expo-image';
-import { useProfileStore } from '@/stores/profileStore';
+import { radius } from '@/constants/radius';
 import { useAuthStore } from '@/stores/authStore';
-import { useRouter } from 'expo-router';
-import { ScreenTransition } from '@/components/animated/ScreenTransition';
-import { PressableScale } from '@/components/animated/PressableScale';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useHydrationStore } from '@/stores/hydrationStore';
-import { useSleepStore } from '@/stores/sleepStore';
-import { useHabitStore } from '@/stores/habitStore';
 import { useCompanionStore } from '@/stores/companionStore';
+import { useHabitStore } from '@/stores/habitStore';
 import { useHealthStore } from '@/stores/healthStore';
+import { useHydrationStore } from '@/stores/hydrationStore';
+import { useNutritionStore } from '@/stores/nutritionStore';
+import { useProfileStore } from '@/stores/profileStore';
+import { useSleepStore } from '@/stores/sleepStore';
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { Alert, Platform, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const AVATAR_OPTIONS = ['avatar1', 'avatar2', 'avatar3', 'avatar4', 'avatar5'] as const;
 
@@ -131,7 +132,7 @@ export default function ProfileScreen() {
 
   const handleDevReset = async () => {
     Alert.alert(
-      'Developer Reset',
+      'Reset',
       'This will erase all local databases, reset your onboarding progress, and sign you out. Are you sure you want to completely reset?',
       [
         { text: 'Cancel', style: 'cancel' },
@@ -169,10 +170,11 @@ export default function ProfileScreen() {
               useHabitStore.setState({ habits: [], todayCompletions: [], isLoading: false, streaks: {} });
               useCompanionStore.setState({ connectionState: 'idle', mode: 'voice', transcript: [], errorMessage: null });
               useHealthStore.setState({ todaySteps: 0, weeklySteps: null, isLoading: false, permissionsGranted: 'undetermined' });
+              useNutritionStore.getState().resetMeals();
 
               // 5. Route to onboarding slides
               router.replace('/(onboarding)' as any);
-              
+
               Alert.alert('Success', 'Aurora has been fully reset.');
             } catch (err) {
               console.error('[DevReset] Error resetting app:', err);
@@ -188,7 +190,7 @@ export default function ProfileScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bgPrimary, position: 'relative', overflow: 'hidden' }} edges={['top']}>
       <ScreenTransition>
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          
+
           {/* Section: Profile Details Card */}
           <View style={styles.profileCard}>
             {!isEditing ? (
@@ -268,9 +270,9 @@ export default function ProfileScreen() {
                       style={styles.avatarRingInner}
                     >
                       <View style={styles.avatarContainer}>
-                        <Image 
-                          source={images[editAvatar as keyof typeof images] || images.avatarPlaceholder} 
-                          style={styles.avatarImage} 
+                        <Image
+                          source={images[editAvatar as keyof typeof images] || images.avatarPlaceholder}
+                          style={styles.avatarImage}
                         />
                         <View style={styles.avatarEditOverlay}>
                           <Ionicons name="camera" size={20} color="#FFF" />
@@ -280,9 +282,9 @@ export default function ProfileScreen() {
                   </View>
 
                   <Text style={styles.editAvatarLabel}>CHOOSE YOUR AVATAR</Text>
-                  
-                  <ScrollView 
-                    horizontal 
+
+                  <ScrollView
+                    horizontal
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.avatarPickerScroll}
                   >
@@ -379,8 +381,8 @@ export default function ProfileScreen() {
 
                 {/* Edit Mode Buttons */}
                 <View style={styles.editActionsRow}>
-                  <TouchableOpacity 
-                    style={[styles.editActionButton, styles.cancelButton]} 
+                  <TouchableOpacity
+                    style={[styles.editActionButton, styles.cancelButton]}
                     onPress={() => setIsEditing(false)}
                   >
                     <Text style={styles.cancelButtonText}>Cancel</Text>
@@ -476,7 +478,7 @@ export default function ProfileScreen() {
             </PressableScale>
             <View style={styles.divider} />
             <PressableScale style={styles.rowGroup} onPress={handleDevReset} scaleDown={0.96}>
-              <Text style={[styles.label, { color: colors.error, fontFamily: 'Inter-Medium' }]}>Dev Reset App & Data</Text>
+              <Text style={[styles.label, { color: colors.error, fontFamily: 'Inter-Medium' }]}>Reset App & Data</Text>
               <Ionicons name="trash-outline" size={18} color={colors.error} />
             </PressableScale>
           </View>
@@ -675,7 +677,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: colors.textOnGradient,
   },
-  
+
   // Edit mode styles
   editAvatarSection: {
     alignItems: 'center',
