@@ -156,7 +156,7 @@ export default function LoginScreen() {
             </View>
 
             <Image
-              source={images.auroraMascot}
+              source={images.loginIllustration}
               style={styles.illustration}
               resizeMode="contain"
             />

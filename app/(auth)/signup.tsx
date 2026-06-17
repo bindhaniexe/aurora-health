@@ -17,7 +17,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withTiming,
+  withSequence,
+} from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@/constants/colors';
 import { gradients } from '@/constants/gradients';
@@ -25,6 +32,64 @@ import { radius } from '@/constants/radius';
 import { images } from '@/constants/images';
 import { useAuthStore } from '@/stores/authStore';
 import { PressableScale } from '@/components/animated/PressableScale';
+
+// Custom math easing worklet — avoids closure capture crashes on web
+const easeInOut = (t: number) => {
+  'worklet';
+  return (1 - Math.cos(t * Math.PI)) / 2;
+};
+
+function FloatingElement({
+  size,
+  color,
+  top,
+  left,
+  right,
+  bottom,
+  delay = 0,
+  duration = 4000,
+  translateY = 15,
+}: any) {
+  const offset = useSharedValue(0);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      offset.value = withRepeat(
+        withSequence(
+          withTiming(translateY, { duration, easing: easeInOut }),
+          withTiming(0, { duration, easing: easeInOut })
+        ),
+        -1,
+        true
+      );
+    }, delay);
+    return () => clearTimeout(timer);
+  }, [duration, translateY, delay]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: offset.value }],
+  }));
+
+  return (
+    <Animated.View
+      style={[
+        {
+          position: 'absolute',
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          backgroundColor: color,
+          top,
+          left,
+          right,
+          bottom,
+          opacity: 0.6,
+        },
+        animatedStyle,
+      ]}
+    />
+  );
+}
 
 export default function SignupScreen() {
   const [name, setName] = useState('');
@@ -81,8 +146,26 @@ export default function SignupScreen() {
         >
           {/* ── Top illustration (smaller to give more room to taller form) ── */}
           <View style={styles.illustrationWrapper}>
+            <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}>
+              {/* Central glowing orb behind mascot */}
+              <View style={{
+                position: 'absolute',
+                width: 200,
+                height: 200,
+                borderRadius: 100,
+                backgroundColor: 'rgba(196, 181, 253, 0.25)',
+                transform: [{ scale: 1.2 }],
+              }} />
+              
+              <FloatingElement size={32} color={colors.accentPurple} top="25%" left="15%" duration={3500} translateY={10} delay={0} />
+              <FloatingElement size={18} color={colors.accentPink} top="65%" left="12%" duration={4200} translateY={-12} delay={500} />
+              <FloatingElement size={50} color="rgba(196, 181, 253, 0.4)" top="22%" right="10%" duration={5000} translateY={15} delay={200} />
+              <FloatingElement size={16} color={colors.accentPurple} top="70%" right="18%" duration={3000} translateY={-8} delay={800} />
+              <FloatingElement size={24} color={colors.accentPink} top="48%" left="78%" duration={4800} translateY={12} delay={100} />
+            </View>
+
             <Image
-              source={images.fitnessHero}
+              source={images.signupIllustration}
               style={styles.illustration}
               resizeMode="contain"
             />

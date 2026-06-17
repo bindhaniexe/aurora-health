@@ -11,6 +11,8 @@ const onboardingHero: ImageSourcePropType = require('@/assets/images/onboarding-
 const onboardingTracking: ImageSourcePropType = require('@/assets/images/onboarding-tracking.png');
 const onboardingVoice: ImageSourcePropType = require('@/assets/images/onboarding-voice.png');
 const auroraMascot: ImageSourcePropType = require('@/assets/images/aurora_mascot.png');
+const loginIllustration: ImageSourcePropType = require('@/assets/images/login_illustration.png');
+const signupIllustration: ImageSourcePropType = require('@/assets/images/signup_illustration.png');
 
 // Fallback placeholders for assets that don't exist yet to prevent bundler errors
 const avatarPlaceholder: ImageSourcePropType = require('@/assets/images/icon.png');
@@ -28,4 +30,6 @@ export const images = {
   fitnessHero,
   runnerIllustration,
   auroraMascot,
+  loginIllustration,
+  signupIllustration,
 } as const;

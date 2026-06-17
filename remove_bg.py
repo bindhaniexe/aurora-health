@@ -16,4 +16,5 @@ def make_white_transparent(image_path, output_path):
     img.putdata(newData)
     img.save(output_path, "PNG")
 
-make_white_transparent(r"C:\Users\subha\.gemini\antigravity-ide\brain\734ad561-0d11-4947-93ca-78efe99260fd\aurora_mascot_1781479277123.png", r"assets\images\aurora_mascot.png")
+make_white_transparent(r"assets\images\login_illustration.png", r"assets\images\login_illustration.png")
+make_white_transparent(r"assets\images\signup_illustration.png", r"assets\images\signup_illustration.png")
