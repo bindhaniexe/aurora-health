@@ -2,11 +2,14 @@ import AppleHealthKit, { HealthInputOptions, HealthKitPermissions } from 'react-
 import { DailyStepData, HealthProvider, WeeklyStepData } from './types';
 import { Platform, NativeEventEmitter, NativeModules } from 'react-native';
 
-const permissions: HealthKitPermissions = {
-  permissions: {
-    read: [AppleHealthKit.Constants.Permissions.StepCount],
-    write: [],
-  },
+const getPermissions = (): HealthKitPermissions => {
+  const stepCountPermission = AppleHealthKit?.Constants?.Permissions?.StepCount;
+  return {
+    permissions: {
+      read: stepCountPermission ? [stepCountPermission] : [],
+      write: [],
+    },
+  };
 };
 
 export const healthKitProvider: HealthProvider = {
@@ -25,8 +28,9 @@ export const healthKitProvider: HealthProvider = {
   },
 
   async requestPermissions(): Promise<boolean> {
+    if (Platform.OS !== 'ios') return false;
     return new Promise((resolve) => {
-      AppleHealthKit.initHealthKit(permissions, (err: string) => {
+      AppleHealthKit.initHealthKit(getPermissions(), (err: string) => {
         if (err) {
           console.error('[HealthKit] Init error:', err);
           resolve(false);
