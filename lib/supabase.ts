@@ -47,7 +47,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Supabase URL or Anon Key is missing. Check your env files.');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+// Fallback to placeholder values to prevent createClient from throwing a fatal error on module load/startup
+const safeUrl = supabaseUrl || 'https://placeholder-url-for-build-safety.supabase.co';
+const safeKey = supabaseAnonKey || 'placeholder-anon-key';
+
+export const supabase = createClient(safeUrl, safeKey, {
   auth: {
     storage: ExpoSecureStoreAdapter,
     autoRefreshToken: true,

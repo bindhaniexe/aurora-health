@@ -28,12 +28,12 @@ const STROKE_WIDTH = 5;
 const R = (RING_SIZE - STROKE_WIDTH) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * R;
 
-const HabitsCard = React.memo(({
+const HabitsCard = React.memo(function HabitsCard({
   completed,
   total,
   isLoading,
   onPress,
-}: HabitsCardProps) => {
+}: HabitsCardProps) {
   if (isLoading) {
     return (
       <View style={styles.card}>

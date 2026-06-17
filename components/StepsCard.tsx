@@ -29,7 +29,7 @@ const STROKE_WIDTH = 5;
 const R = (RING_SIZE - STROKE_WIDTH) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * R;
 
-const StepsCard = React.memo(({ todayTotal, goalSteps, isLoading, isGranted, onPress }: StepsCardProps) => {
+const StepsCard = React.memo(function StepsCard({ todayTotal, goalSteps, isLoading, isGranted, onPress }: StepsCardProps) {
   if (isLoading) {
     return (
       <View style={styles.card}>

@@ -30,13 +30,13 @@ const STROKE_WIDTH = 5;
 const R = (RING_SIZE - STROKE_WIDTH) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * R;
 
-const HydrationCard = React.memo(({
+const HydrationCard = React.memo(function HydrationCard({
   todayTotal,
   goalMl,
   percentage,
   isLoading,
   onPress,
-}: HydrationCardProps) => {
+}: HydrationCardProps) {
   if (isLoading) {
     return (
       <View style={styles.card}>

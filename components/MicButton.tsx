@@ -122,16 +122,40 @@ export function MicButton({ state, onPress }: MicButtonProps) {
     transform: [{ rotate: `${spinRotation.value}deg` }],
   }));
 
-  const getRingStyle = (scale: SharedValue<number>, opac: SharedValue<number>) => 
-    useAnimatedStyle(() => ({
-      transform: [{ scale: scale.value }],
-      opacity: opac.value,
-    }));
+  const ring1Style = useAnimatedStyle(() => ({
+    transform: [{ scale: ring1Scale.value }],
+    opacity: ring1Opac.value,
+  }));
 
-  const getBarStyle = (height: SharedValue<number>) => 
-    useAnimatedStyle(() => ({
-      height: height.value,
-    }));
+  const ring2Style = useAnimatedStyle(() => ({
+    transform: [{ scale: ring2Scale.value }],
+    opacity: ring2Opac.value,
+  }));
+
+  const ring3Style = useAnimatedStyle(() => ({
+    transform: [{ scale: ring3Scale.value }],
+    opacity: ring3Opac.value,
+  }));
+
+  const bar1Style = useAnimatedStyle(() => ({
+    height: bar1H.value,
+  }));
+
+  const bar2Style = useAnimatedStyle(() => ({
+    height: bar2H.value,
+  }));
+
+  const bar3Style = useAnimatedStyle(() => ({
+    height: bar3H.value,
+  }));
+
+  const bar4Style = useAnimatedStyle(() => ({
+    height: bar4H.value,
+  }));
+
+  const bar5Style = useAnimatedStyle(() => ({
+    height: bar5H.value,
+  }));
 
   const getGradientColors = () => {
     switch (state) {
@@ -155,9 +179,9 @@ export function MicButton({ state, onPress }: MicButtonProps) {
   return (
     <View style={styles.container}>
       {/* Listening Rings */}
-      <Animated.View style={[styles.pulseRing, getRingStyle(ring1Scale, ring1Opac)]} />
-      <Animated.View style={[styles.pulseRing, getRingStyle(ring2Scale, ring2Opac)]} />
-      <Animated.View style={[styles.pulseRing, getRingStyle(ring3Scale, ring3Opac)]} />
+      <Animated.View style={[styles.pulseRing, ring1Style]} />
+      <Animated.View style={[styles.pulseRing, ring2Style]} />
+      <Animated.View style={[styles.pulseRing, ring3Style]} />
 
       <PressableScale onPress={onPress} scaleDown={0.92} style={styles.buttonWrapper}>
         <Animated.View style={state === 'processing' ? spinStyle : undefined}>
@@ -169,11 +193,11 @@ export function MicButton({ state, onPress }: MicButtonProps) {
           >
             {state === 'speaking' ? (
               <View style={styles.waveform}>
-                <Animated.View style={[styles.bar, getBarStyle(bar1H), { backgroundColor: '#E9D5FF' }]} />
-                <Animated.View style={[styles.bar, getBarStyle(bar2H), { backgroundColor: '#D8B4FE' }]} />
-                <Animated.View style={[styles.bar, getBarStyle(bar3H), { backgroundColor: '#C084FC' }]} />
-                <Animated.View style={[styles.bar, getBarStyle(bar4H), { backgroundColor: '#A855F7' }]} />
-                <Animated.View style={[styles.bar, getBarStyle(bar5H), { backgroundColor: '#9333EA' }]} />
+                <Animated.View style={[styles.bar, bar1Style, { backgroundColor: '#E9D5FF' }]} />
+                <Animated.View style={[styles.bar, bar2Style, { backgroundColor: '#D8B4FE' }]} />
+                <Animated.View style={[styles.bar, bar3Style, { backgroundColor: '#C084FC' }]} />
+                <Animated.View style={[styles.bar, bar4Style, { backgroundColor: '#A855F7' }]} />
+                <Animated.View style={[styles.bar, bar5Style, { backgroundColor: '#9333EA' }]} />
               </View>
             ) : (
               <Feather name={getIcon()} size={28} color="#FFFFFF" />

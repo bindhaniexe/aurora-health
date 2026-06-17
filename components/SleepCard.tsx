@@ -37,7 +37,7 @@ const QUALITY_META: Record<string, { label: string; icon: string }> = {
   great: { label: 'Great', icon: 'star' },
 };
 
-const SleepCard = React.memo(({ lastNight, goalHrs, isLoading, onPress }: SleepCardProps) => {
+const SleepCard = React.memo(function SleepCard({ lastNight, goalHrs, isLoading, onPress }: SleepCardProps) {
   const hasData = lastNight !== null;
 
   if (isLoading) {

@@ -1,0 +1,36 @@
+{
+  "cli": {
+    "version": ">= 20.1.0"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "your-supabase-url",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "your-supabase-anon-key",
+        "EXPO_PUBLIC_GEMINI_API_KEY": "your-gemini-api-key",
+        "EXPO_PUBLIC_ELEVENLABS_API_KEY": "your-elevenlabs-api-key",
+        "EXPO_PUBLIC_ELEVENLABS_AGENT_ID": "your-elevenlabs-agent-id"
+      }
+    },
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "your-supabase-url",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "your-supabase-anon-key",
+        "EXPO_PUBLIC_GEMINI_API_KEY": "your-gemini-api-key",
+        "EXPO_PUBLIC_ELEVENLABS_API_KEY": "your-elevenlabs-api-key",
+        "EXPO_PUBLIC_ELEVENLABS_AGENT_ID": "your-elevenlabs-agent-id"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
