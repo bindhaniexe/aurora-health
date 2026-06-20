@@ -19,6 +19,8 @@
 ---
 
 ## 📸 Screenshots
+<img width="1920" height="1080" alt="454shots_so" src="https://github.com/user-attachments/assets/99ad5d40-8ed5-40bc-be69-b544f244a1c4" />
+
 <img width="1920" height="1080" alt="Mock up" src="https://github.com/user-attachments/assets/d1695d0f-97ac-4dee-9c32-a7bbc94b0294" />
 
 
