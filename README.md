@@ -270,7 +270,7 @@ eas build --profile production --platform ios
 
 ## 🤝 Contributing
 
-This project was built as a hackathon MVP. Contributions, bug reports, and feature suggestions are welcome!
+This project was built as a hackathon MVP. Contributions, bug reports, and feature suggestions are Welcome!
 
 1. Fork the repo
 2. Create a feature branch: `git checkout -b feature/my-feature`
